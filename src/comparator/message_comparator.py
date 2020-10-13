@@ -39,26 +39,26 @@ class DescriptorComparator:
 
         # 5. TODO(xiaozhenliu): check `google.api.resource` annotation.     
 
-    def _compareNestedFields(self, fieldsDict_original, fieldsDict_update):
-        fieldsUnique_original = list(set(fieldsDict_original.keys()) - set(fieldsDict_update.keys()))
-        fieldsUnique_update = list(set(fieldsDict_update.keys()) - set(fieldsDict_original.keys()))
-        fieldsIntersaction = list(set(fieldsDict_original.keys()) & set(fieldsDict_update.keys()))
+    def _compareNestedFields(self, fields_dict_original, fields_dict_update):
+        fields_unique_original = list(set(fields_dict_original.keys()) - set(fields_dict_update.keys()))
+        fields_unique_update = list(set(fields_dict_update.keys()) - set(fields_dict_original.keys()))
+        fieldsIntersaction = list(set(fields_dict_original.keys()) & set(fields_dict_update.keys()))
         
-        for fieldNumber in fieldsUnique_original:
-            FieldComparator(fieldsDict_original[fieldNumber], None).compare()
-        for fieldNumber in fieldsUnique_update:
-            FieldComparator(None, fieldsDict_update[fieldNumber]).compare()
+        for fieldNumber in fields_unique_original:
+            FieldComparator(fields_dict_original[fieldNumber], None).compare()
+        for fieldNumber in fields_unique_update:
+            FieldComparator(None, fields_dict_update[fieldNumber]).compare()
         for fieldNumber in fieldsIntersaction:
-            FieldComparator(fieldsDict_original[fieldNumber], fieldsDict_update[fieldNumber]).compare()
+            FieldComparator(fields_dict_original[fieldNumber], fields_dict_update[fieldNumber]).compare()
     
-    def _compareNestedMessages(self, nestedMsgDict_original, nestedMsgDict_update):
-        msgUnique_original = list(set(nestedMsgDict_original.keys()) - set(nestedMsgDict_update.keys()))
-        msgUnique_update = list(set(nestedMsgDict_update.keys()) - set(nestedMsgDict_original.keys()))
-        msgIntersaction = list(set(nestedMsgDict_original.keys()) & set(nestedMsgDict_update.keys()))
+    def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
+        msg_unique_original = list(set(nested_msg_dict_original.keys()) - set(nested_msg_dict_update.keys()))
+        msg_unique_update = list(set(nested_msg_dict_update.keys()) - set(nested_msg_dict_original.keys()))
+        msgIntersaction = list(set(nested_msg_dict_original.keys()) & set(nested_msg_dict_update.keys()))
 
-        for msgName in msgUnique_original:
-            self._compare(nestedMsgDict_original[msgName], None)
-        for msgName in msgUnique_update:
-            self._compare(None, nestedMsgDict_update[msgName])
+        for msgName in msg_unique_original:
+            self._compare(nested_msg_dict_original[msgName], None)
+        for msgName in msg_unique_update:
+            self._compare(None, nested_msg_dict_update[msgName])
         for msgName in msgIntersaction:
-            self._compare(nestedMsgDict_original[msgName], nestedMsgDict_update[msgName])
+            self._compare(nested_msg_dict_original[msgName], nested_msg_dict_update[msgName])
