@@ -30,8 +30,8 @@ class EnumComparator:
         # 4. If the EnumDescriptors have the same name, check the values of them stay the same.
         # Enum values are identified by number, not by name.
         else:
-            enum_values_dict_original = {x.number: x for x in self.enum_original.values}
-            enum_values_dict_update = {x.number: x for x in self.enum_update.values}
+            enum_values_dict_original = {x.number: x for x in self.enum_original.value}
+            enum_values_dict_update = {x.number: x for x in self.enum_update.value}
             # Compare Enum values that only exist in original version
             for number in list(set(enum_values_dict_original.keys()) - set(enum_values_dict_update.keys())):
                 EnumValueComparator(enum_values_dict_original[number], None).compare()
