@@ -43,21 +43,8 @@ class FieldComparator:
             type_update = FieldDescriptorProto().Type.Name(self.field_update.type)
             msg = 'Type of the Field is changed, the original is {}, but the updated is {}'.format(type_original, type_update)
             FindingContainer.addFinding(FindingCategory.FIELD_TYPE_CHANGE, "", msg, True)
-
-        # 6. Check the existing field is moved out of one-of or moved into one-of .
-        if self.field_original.containing_oneof != self.field_update.containing_oneof:
-            if self.field_original.containing_oneof != None:
-                msg = 'The Field {} is moved out of one-of'.format(self.field_original.name)
-                FindingContainer.addFinding(FindingCategory.FIELD_ONEOF_REMOVAL, "", msg, True)
-            else:
-                msg = 'The Field {} is moved into one-of'.format(self.field_update.name)
-                FindingContainer.addFinding(FindingCategory.FIELD_ONEOF_ADDITION, "", msg, True)
                 
-        # 7. Check `google.api.resource_reference` annotation.
+        # 6. Check `google.api.resource_reference` annotation.
         # TODO(xiaozhenliu): annotation is removed, but the using file-level resource is added to the message.
         # This should not be taken as breaking change.
-        # if (self.fieldDescriptor_original.options != None) and (self.fieldDescriptor_original.options['google.api.resource_reference'] != None):
-        #     print(pb2.DESCRIPTOR.message_types_by_name['ResourceReference'].fields[0])
-        #     print(FieldDescriptorProto.options.HasExtension)
-        #     print(descriptor_pb2.FieldOptions.DESCRIPTOR.message_types_by_name['ResourceReference'])
 

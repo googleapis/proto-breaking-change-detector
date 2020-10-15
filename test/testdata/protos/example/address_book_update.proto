@@ -1,11 +1,11 @@
-syntax = "proto2";
+syntax = "proto3";
 
 package tutorial;
 
 message Person {
-  required string name = 1;
-  required int32 id = 2;
-  optional string email = 3;
+  string name = 1;
+  string id = 2;
+  string email_address = 3;
 
   enum PhoneType {
     MOBILE = 0;
@@ -15,10 +15,14 @@ message Person {
   }
 
   message PhoneNumber {
-    required string number = 1;
+    string number = 1;
   }
 
-  repeated PhoneNumber phones = 4;
+  PhoneNumber phones = 4;
+
+  oneof address{
+    string email = 5;
+  }
 }
 
 message AddressBook {

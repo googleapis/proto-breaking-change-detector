@@ -37,7 +37,6 @@ class UnittestInvoker:
     def cleanup(self):
         # Remove the generated pb file once unit test is finished.
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
-        print(descriptor_set_output)
         process = subprocess.run(['rm', descriptor_set_output])
 
 class _ProtocInvokerException(Exception):
