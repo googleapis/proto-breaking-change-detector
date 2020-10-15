@@ -14,26 +14,26 @@ class EnumValueComparatorTest(unittest.TestCase):
     def tearDown(self):
         FindingContainer.reset()
 
-    def enumValueRemoval(self):
+    def test_enum_value_removal(self):
         EnumValueComparator(self.enumValue_mobile, None).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, 'An EnumValue MOBILE is removed')
         self.assertEqual(finding.category.name, 'ENUM_VALUE_REMOVAL')
 
 
-    def enumValueAddition(self):
+    def test_enum_value_addition(self):
         EnumValueComparator(None, self.enumValue_home).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, 'A new EnumValue HOME is added.')
         self.assertEqual(finding.category.name, 'ENUM_VALUE_ADDITION')
 
-    def enumValueNameChange(self):
+    def test_name_change(self):
         EnumValueComparator(self.enumValue_mobile, self.enumValue_home).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, 'Name of the EnumValue is changed, the original is MOBILE, but the updated is HOME')
         self.assertEqual(finding.category.name, 'ENUM_VALUE_NAME_CHANGE')
 
-    def noApiChange(self):
+    def test_no_api_change(self):
         EnumValueComparator(self.enumValue_mobile, self.enumValue_mobile).compare()
         self.assertEqual(len(FindingContainer.getAllFindings()), 0)
 
