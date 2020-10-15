@@ -38,7 +38,7 @@ class DescriptorComparator:
         # 4. Check breaking changes in nested message.
         # Descriptor.nested_types_by_name (dict str -> Descriptor) indexed by name.
         # Recursively call _compare for nested message type comparison.
-        if (message_original.nested_type or message_update.nested_type):
+        if message_original.nested_type or message_update.nested_type:
             self._compareNestedMessages(
                 {m.name: m for m in message_original.nested_type}, 
                 {m.name: m for m in message_update.nested_type})
