@@ -32,7 +32,7 @@ class EnumComparatorTest(unittest.TestCase):
         self.assertEqual(finding.message, 'Name of the Enum is changed, the original is PhoneType, but the updated is PhoneTypeUpdate')
         self.assertEqual(finding.category.name, 'ENUM_NAME_CHANGE')
             
-    def oApiChange(self):
+    def noApiChange(self):
         EnumComparator(self.enum_update, self.enum_update).compare()
         self.assertEqual(len(FindingContainer.getAllFindings()), 0)
 
