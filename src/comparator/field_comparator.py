@@ -1,7 +1,6 @@
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
-import google.api.resource_pb2 as pb2
 import google.protobuf.descriptor_pb2 as descriptor_pb2
 
 class FieldComparator:
