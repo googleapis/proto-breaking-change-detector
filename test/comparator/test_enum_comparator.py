@@ -22,7 +22,7 @@ class EnumComparatorTest(unittest.TestCase):
     def tearDown(self):
         FindingContainer.reset()
 
-    def test_enum_removal(self): 
+    def test_enum_removal(self):
         EnumComparator(self.enum_original, None).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, 'An Enum PhoneType is removed')
