@@ -19,6 +19,9 @@ message Person {
   }
 
   repeated PhoneNumber phones = 4;
+  oneof marriage{
+    bool single = 5;
+  }
 }
 
 message AddressBook {

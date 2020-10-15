@@ -41,7 +41,7 @@ class FieldComparator:
         if self.field_original.type != self.field_update.type:
             type_original = FieldDescriptorProto().Type.Name(self.field_original.type)
             type_update = FieldDescriptorProto().Type.Name(self.field_update.type)
-            msg = 'Type of the Field is changed, the original is {}, but the updated is {}'.format(type_original, type_update)
+            msg = 'Type of the field is changed, the original is {}, but the updated is {}'.format(type_original, type_update)
             FindingContainer.addFinding(FindingCategory.FIELD_TYPE_CHANGE, "", msg, True)
                 
         # 6. Check `google.api.resource_reference` annotation.

@@ -19,10 +19,7 @@ message Person {
   }
 
   PhoneNumber phones = 4;
-
-  oneof address{
-    string email = 5;
-  }
+  bool single = 5;
 }
 
 message AddressBook {
