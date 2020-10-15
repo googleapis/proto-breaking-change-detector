@@ -28,14 +28,20 @@ class DescriptorComparator:
 
         # 3. Check breaking changes in each fields. Note: Fields are identified by number, not by name.
         # Descriptor.fields_by_number (dict int -> FieldDescriptor) indexed by number.
-        if message_original.fields_by_number or message_update.fields_by_number:
-            self._compareNestedFields(message_original.fields_by_number, message_update.fields_by_number)
+        # TODO(xiaozhenliu): check existing fields that have been moved into/outof oneof.
+        # While the oneof_index of every field is 0, which cannot be distinguished.
+        if message_original.field or message_update.field:
+            self._compareNestedFields(
+                {f.number: f for f in message_original.field}, 
+                {f.number: f for f in message_update.field})
         
         # 4. Check breaking changes in nested message.
         # Descriptor.nested_types_by_name (dict str -> Descriptor) indexed by name.
         # Recursively call _compare for nested message type comparison.
-        if (message_original.nested_types_by_name or message_update.nested_types_by_name):
-            self._compareNestedMessages(message_original.nested_types_by_name, message_update.nested_types_by_name)
+        if message_original.nested_type or message_update.nested_type:
+            self._compareNestedMessages(
+                {m.name: m for m in message_original.nested_type}, 
+                {m.name: m for m in message_update.nested_type})
 
         # 5. TODO(xiaozhenliu): check `google.api.resource` annotation.     
 
