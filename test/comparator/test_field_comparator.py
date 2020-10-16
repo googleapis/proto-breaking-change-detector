@@ -2,14 +2,15 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.field_comparator import FieldComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+
 
 class FieldComparatorTest(unittest.TestCase):
     _PROTO_ORIGINAL = 'address_book.proto'
     _PROTO_UPDATE = 'address_book_update.proto'
     _DESCRIPTOR_SET_ORIGINAL = 'address_book_descriptor_set.pb'
     _DESCRIPTOR_SET_UPDATE = 'address_book_descriptor_set_update.pb'
-    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
+    _INVOKER_ORIGNAL = UnittestInvoker(
+        [_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
     _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
     _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
     _PB_UPDATE = _INVOKER_UPDATE.run()
@@ -36,7 +37,10 @@ class FieldComparatorTest(unittest.TestCase):
         field_id_update = self._PB_UPDATE.file[0].message_type[0].field[1]
         FieldComparator(field_id_original, field_id_update).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING')
+        self.assertEqual(
+            finding.message,
+            'Type of the field is changed, the original is TYPE_INT32,'
+            ' but the updated is TYPE_STRING')
         self.assertEqual(finding.category.name, 'FIELD_TYPE_CHANGE')
 
     def test_repeated_label_change(self):
@@ -44,21 +48,27 @@ class FieldComparatorTest(unittest.TestCase):
         field_phones_update = self._PB_UPDATE.file[0].message_type[0].field[3]
         FieldComparator(field_phones_original, field_phones_update).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL')
+        self.assertEqual(
+            finding.message, 'Repeated state of the Field is changed, the '
+            'original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL')
         self.assertEqual(finding.category.name, 'FIELD_REPEATED_CHANGE')
 
     def test_name_change(self):
-        field_email_original = self._PB_ORIGNAL.file[0].message_type[0].field[2]
+        field_email_original = \
+            self._PB_ORIGNAL.file[0].message_type[0].field[2]
         field_email_update = self._PB_UPDATE.file[0].message_type[0].field[2]
         FieldComparator(field_email_original, field_email_update).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'Name of the Field is changed, the original is email, but the updated is email_address')
+        self.assertEqual(finding.message, 'Name of the Field is changed, '
+                         'the original is email, but the updated is '
+                         'email_address')
         self.assertEqual(finding.category.name, 'FIELD_NAME_CHANGE')
 
     @classmethod
     def tearDownClass(cls):
         cls._INVOKER_ORIGNAL.cleanup()
         cls._INVOKER_UPDATE.cleanup()
+
 
 if __name__ == '__main__':
     unittest.main()
