@@ -39,10 +39,11 @@ service Echo {
   option (google.api.default_host) = "localhost:7469";
 
   // This method simply echoes the request. This method showcases unary RPCs.
+  // BREAKING CHANGE: http annotation method is changed from `post` to `get`.
+  // Http body is removed.
   rpc Echo(EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
-      post: "/v1beta1/echo:echo"
-      body: "*"
+      get: "/v1beta1/echo:echo"
     };
   }
 
@@ -87,18 +88,22 @@ service Echo {
   // This method will wait for the requested amount of time and then return.
   // This method showcases how a client handles a request timeout.
   // BREAKING CHANGE: request type of the rpc method is changed.
-  // BREAKING CHANGE: response type of the rpc method is changed.
-  rpc Wait(WaitUpdateRequest) returns (EchoResponse) {
+  // BREAKING CHANGE: response type of the operation_info annotation is changed.
+  rpc Wait(WaitUpdateRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
       post: "/v1beta1/echo:wait"
       body: "*"
     };
+    option (google.longrunning.operation_info) = {
+      response_type: "EchoResponse"
+      metadata_type: "WaitMetadata"
+    };
   }
-
   // This method will block (wait) for the requested amount of time 
   // and then return the response or error.
   // This method showcases how a client handles delays or retries.
-  // BREAKING CHANGE: name of the rpc method is changed.
+  // BREAKING CHANGE: name of the rpc method is changed. Renaming means one
+  // rpc method is removed and one rpc method is added.
   rpc BlockUpdate(BlockRequest) returns (BlockResponse) {
     option (google.api.http) = {
       post: "/v1beta1/echo:block"
@@ -164,6 +169,8 @@ message PagedExpandRequest {
 }
 
 // The response for the PagedExpand method.
+// BREAKING CHANGE: The repeated field is not number 1, which is not
+// identified as a response for paginated method.
 message PagedExpandResponse {
   // The words that were expanded.
   repeated EchoResponse responses = 2;
