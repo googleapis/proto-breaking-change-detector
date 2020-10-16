@@ -4,7 +4,6 @@ from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
 
 
-
 class DescriptorComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.message_comparator.DescriptorComparator class.
     # We use address_book.proto and address_book_update.proto to mimic the original and next
@@ -12,12 +11,11 @@ class DescriptorComparatorTest(unittest.TestCase):
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _PROTO_ORIGINAL = 'address_book.proto'
-    _PROTO_UPDATE = 'address_book_update.proto'
-    _DESCRIPTOR_SET_ORIGINAL = 'address_book_descriptor_set.pb'
-    _DESCRIPTOR_SET_UPDATE = 'address_book_descriptor_set_update.pb'
-    _INVOKER_ORIGNAL = UnittestInvoker(
-        [_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
+    _PROTO_ORIGINAL = "address_book.proto"
+    _PROTO_UPDATE = "address_book_update.proto"
+    _DESCRIPTOR_SET_ORIGINAL = "address_book_descriptor_set.pb"
+    _DESCRIPTOR_SET_UPDATE = "address_book_descriptor_set_update.pb"
+    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
     _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
     _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
     _PB_UPDATE = _INVOKER_UPDATE.run()
@@ -36,15 +34,14 @@ class DescriptorComparatorTest(unittest.TestCase):
     def test_message_removal(self):
         DescriptorComparator(self.person_msg, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'A message Person is removed')
-        self.assertEqual(finding.category.name, 'MESSAGE_REMOVAL')
+        self.assertEqual(finding.message, "A message Person is removed")
+        self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
 
     def test_message_addition(self):
         DescriptorComparator(None, self.addressBook_msg).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, 'A new message AddressBook is added.')
-        self.assertEqual(finding.category.name, 'MESSAGE_ADDITION')
+        self.assertEqual(finding.message, "A new message AddressBook is added.")
+        self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
 
     def test_field_change(self):
         # There is field change in message `Person`. Type of field `id`
@@ -52,15 +49,19 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING')
-        self.assertEqual(finding.category.name, 'FIELD_TYPE_CHANGE')
+            finding.message,
+            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING",
+        )
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
     def test_nested_message_change(self):
         # Field `type` in the nested message `PhoneNumber` is removed.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
         findingLength = len(FindingContainer.getAllFindings())
-        self.assertEqual(FindingContainer.getAllFindings()[
-                         findingLength - 1].category.name, 'FIELD_REMOVAL')
+        self.assertEqual(
+            FindingContainer.getAllFindings()[findingLength - 1].category.name,
+            "FIELD_REMOVAL",
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -68,5 +69,5 @@ class DescriptorComparatorTest(unittest.TestCase):
         cls._INVOKER_UPDATE.cleanup()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

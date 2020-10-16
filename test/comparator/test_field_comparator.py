@@ -4,7 +4,6 @@ from src.comparator.field_comparator import FieldComparator
 from src.findings.finding_container import FindingContainer
 
 
-
 class FieldComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.field_comparator.FieldComparator class.
     # We use address_book.proto and address_book_update.proto to mimic the original and next
@@ -12,12 +11,11 @@ class FieldComparatorTest(unittest.TestCase):
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _PROTO_ORIGINAL = 'address_book.proto'
-    _PROTO_UPDATE = 'address_book_update.proto'
-    _DESCRIPTOR_SET_ORIGINAL = 'address_book_descriptor_set.pb'
-    _DESCRIPTOR_SET_UPDATE = 'address_book_descriptor_set_update.pb'
-    _INVOKER_ORIGNAL = UnittestInvoker(
-        [_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
+    _PROTO_ORIGINAL = "address_book.proto"
+    _PROTO_UPDATE = "address_book_update.proto"
+    _DESCRIPTOR_SET_ORIGINAL = "address_book_descriptor_set.pb"
+    _DESCRIPTOR_SET_UPDATE = "address_book_descriptor_set_update.pb"
+    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
     _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
     _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
     _PB_UPDATE = _INVOKER_UPDATE.run()
@@ -29,15 +27,15 @@ class FieldComparatorTest(unittest.TestCase):
         name_field = self._PB_ORIGNAL.file[0].message_type[0].field[0]
         FieldComparator(name_field, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'A Field name is removed')
-        self.assertEqual(finding.category.name, 'FIELD_REMOVAL')
+        self.assertEqual(finding.message, "A Field name is removed")
+        self.assertEqual(finding.category.name, "FIELD_REMOVAL")
 
     def test_field_addition(self):
         name_field = self._PB_ORIGNAL.file[0].message_type[0].field[0]
         FieldComparator(None, name_field).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, 'A new Field name is added.')
-        self.assertEqual(finding.category.name, 'FIELD_ADDITION')
+        self.assertEqual(finding.message, "A new Field name is added.")
+        self.assertEqual(finding.category.name, "FIELD_ADDITION")
 
     def test_type_change(self):
         # Field `id` is `int32` type in `address_book.proto`,
@@ -47,8 +45,10 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_id_original, field_id_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING')
-        self.assertEqual(finding.category.name, 'FIELD_TYPE_CHANGE')
+            finding.message,
+            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING",
+        )
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
     def test_repeated_label_change(self):
         # Field `phones` in `address_book.proto` has `repeated` label,
@@ -58,8 +58,10 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_phones_original, field_phones_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL')
-        self.assertEqual(finding.category.name, 'FIELD_REPEATED_CHANGE')
+            finding.message,
+            "Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL",
+        )
+        self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
 
     def test_name_change(self):
         # Field `email = 3` in `address_book.proto` is renamed to
@@ -69,8 +71,10 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_email_original, field_email_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Name of the Field is changed, the original is email, but the updated is email_address')
-        self.assertEqual(finding.category.name, 'FIELD_NAME_CHANGE')
+            finding.message,
+            "Name of the Field is changed, the original is email, but the updated is email_address",
+        )
+        self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
 
     @classmethod
     def tearDownClass(cls):
@@ -78,5 +82,5 @@ class FieldComparatorTest(unittest.TestCase):
         cls._INVOKER_UPDATE.cleanup()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
