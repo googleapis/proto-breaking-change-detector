@@ -13,10 +13,11 @@ class FindingContainer:
         location: str,
         message: str,
         actionable: bool,
-        extra_info=None
+        extra_info=None,
     ):
         cls._finding_results.append(
-            Finding(category, location, message, actionable, extra_info))
+            Finding(category, location, message, actionable, extra_info)
+        )
 
     @classmethod
     def getAllFindings(cls):
