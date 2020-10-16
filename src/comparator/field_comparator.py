@@ -3,6 +3,7 @@ from src.findings.utils import FindingCategory
 from src.findings.finding_container import FindingContainer
 
 
+
 class FieldComparator:
     def __init__(
         self,
