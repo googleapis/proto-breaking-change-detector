@@ -13,7 +13,7 @@ class EnumValueComparator:
         self.enum_value_update = enum_value_update
 
     def compare(self):
-        # 1. Original EnumValue is None, then a new EnumValue is added.
+        # 1. If original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
             msg = 'A new EnumValue {} is added.'.format(
                 self.enum_value_update.name)
