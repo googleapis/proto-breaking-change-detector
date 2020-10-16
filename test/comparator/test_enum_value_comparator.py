@@ -4,7 +4,6 @@ from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
 
 
-
 class EnumValueComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.enum_valeu_comparator.EnumValueComparator
     # class. We take the two enum values (`MOBILE` and `HOME` in `PhoneType`)

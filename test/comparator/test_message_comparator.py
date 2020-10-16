@@ -4,7 +4,6 @@ from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
 
 
-
 class DescriptorComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.message_comparator.DescriptorComparator class.
     # We use address_book.proto and address_book_update.proto to mimic the original and next

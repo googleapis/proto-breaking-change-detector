@@ -4,7 +4,6 @@ from src.comparator.field_comparator import FieldComparator
 from src.findings.finding_container import FindingContainer
 
 
-
 class FieldComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.field_comparator.FieldComparator class.
     # We use address_book.proto and address_book_update.proto to mimic the original and next
@@ -60,7 +59,9 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_phones_original, field_phones_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL')
+            finding.message,
+            'Repeated state of the Field is changed, the original is LABEL_REPEATED,'
+            'but the updated is LABEL_OPTIONAL')
         self.assertEqual(finding.category.name, 'FIELD_REPEATED_CHANGE')
 
     def test_name_change(self):

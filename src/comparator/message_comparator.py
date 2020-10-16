@@ -68,10 +68,10 @@ class DescriptorComparator:
         message_name_original = nested_msg_dict_original.keys()
         message_name_update = nested_msg_dict_update.keys()
 
-        for msgName in set(message_name_original) - set (message_name_update):
+        for msgName in set(message_name_original) - set(message_name_update):
             self._compare(nested_msg_dict_original[msgName], None)
-        for msgName in set(message_name_update) - set (message_name_original):
+        for msgName in set(message_name_update) - set(message_name_original):
             self._compare(None, nested_msg_dict_update[msgName])
-        for msgName in set(message_name_update) & set (message_name_original):
+        for msgName in set(message_name_update) & set(message_name_original):
             self._compare(
                 nested_msg_dict_original[msgName], nested_msg_dict_update[msgName])
