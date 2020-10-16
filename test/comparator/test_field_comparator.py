@@ -2,7 +2,7 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.field_comparator import FieldComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+
 
 
 class FieldComparatorTest(unittest.TestCase):
@@ -47,7 +47,9 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_id_original, field_id_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message, 'Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING')
+            finding.message,
+            'Type of the field is changed, the original is TYPE_INT32,'
+            ' but the updated is TYPE_STRING')
         self.assertEqual(finding.category.name, 'FIELD_TYPE_CHANGE')
 
     def test_repeated_label_change(self):

@@ -5,12 +5,6 @@ from src.findings.finding_container import FindingContainer
 
 
 class EnumComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.enum_comparator.EnumComparator class.
-    # We use address_book.proto and address_book_update.proto to mimic the original and next
-    # versions of the API definition files (which has only one proto file in this case).
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
     _PROTO_ORIGINAL = 'address_book.proto'
     _PROTO_UPDATE = 'address_book_update.proto'
     _DESCRIPTOR_SET_ORIGINAL = 'address_book_descriptor_set.pb'

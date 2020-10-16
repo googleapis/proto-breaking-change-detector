@@ -2,7 +2,7 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+
 
 
 class DescriptorComparatorTest(unittest.TestCase):
@@ -42,8 +42,8 @@ class DescriptorComparatorTest(unittest.TestCase):
     def test_message_addition(self):
         DescriptorComparator(None, self.addressBook_msg).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, 'A new message AddressBook is added.')
+        self.assertEqual(finding.message,
+                         'A new message AddressBook is added.')
         self.assertEqual(finding.category.name, 'MESSAGE_ADDITION')
 
     def test_field_change(self):
@@ -51,16 +51,18 @@ class DescriptorComparatorTest(unittest.TestCase):
         # is changed from `int32` to `string`.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, 'Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING')
+        self.assertEqual(finding.message,
+                         'Type of the field is changed, the original is '
+                         'TYPE_INT32, but the updated is TYPE_STRING')
         self.assertEqual(finding.category.name, 'FIELD_TYPE_CHANGE')
 
     def test_nested_message_change(self):
-        # Field `type` in the nested message `PhoneNumber` is removed.
+        # Field `type` in nested message `PhoneNumber` is removed.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
         findingLength = len(FindingContainer.getAllFindings())
-        self.assertEqual(FindingContainer.getAllFindings()[
-                         findingLength - 1].category.name, 'FIELD_REMOVAL')
+        self.assertEqual(
+            FindingContainer.getAllFindings()[findingLength - 1].category.name,
+            'FIELD_REMOVAL')
 
     @classmethod
     def tearDownClass(cls):

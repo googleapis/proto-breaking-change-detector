@@ -13,14 +13,16 @@ class UnittestInvoker:
     _PROTOC = 'protoc'
 
     def __init__(
-            self,
-            proto_files: [],
-            descriptor_set_file: str,
-            api_common_protos=False):
+        self,
+        proto_files: [],
+        descriptor_set_file: str,
+        api_common_protos=False
+    ):
         self.proto_files = proto_files
         self.descriptor_set_file = descriptor_set_file
-        # This arg is not used right now, but later on if we need api-common-protos
-        # as dependency to run tests, we can enable this argument to include the protos.
+        # This arg is not used right now, but later on if we need
+        # api-common-protos as dependency to run tests, we can enable
+        # this argument to include the protos.
         self.api_common_protos = api_common_protos
 
     def run(self) -> desc.FileDescriptorSet:
