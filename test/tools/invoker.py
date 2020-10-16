@@ -49,7 +49,7 @@ class UnittestInvoker:
         descriptor_set_output = os.path.join(
             self._PROTOS_DIR, self.descriptor_set_file)
         if os.path.exists(descriptor_set_output):
-            subprocess.run(['rm', descriptor_set_output])
+            os.remove(descriptor_set_output)
 
 
 class _ProtocInvokerException(Exception):
