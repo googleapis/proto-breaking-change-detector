@@ -4,7 +4,14 @@ from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
 
 
+
 class DescriptorComparatorTest(unittest.TestCase):
+    # This is for tesing the behavior of src.comparator.message_comparator.DescriptorComparator class.
+    # We use address_book.proto and address_book_update.proto to mimic the original and next
+    # versions of the API definition files (which has only one proto file in this case).
+    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
+    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
+    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
     _PROTO_ORIGINAL = 'address_book.proto'
     _PROTO_UPDATE = 'address_book_update.proto'
     _DESCRIPTOR_SET_ORIGINAL = 'address_book_descriptor_set.pb'
@@ -16,6 +23,8 @@ class DescriptorComparatorTest(unittest.TestCase):
     _PB_UPDATE = _INVOKER_UPDATE.run()
 
     def setUp(self):
+        # Get `Person` and `AddressBook` DescriptoProto from the
+        # original and updated `*_descriptor_set.pb` files.
         self.person_msg = self._PB_ORIGNAL.file[0].message_type[0]
         self.person_msg_update = self._PB_UPDATE.file[0].message_type[0]
         self.addressBook_msg = self._PB_ORIGNAL.file[0].message_type[1]
@@ -38,6 +47,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, 'MESSAGE_ADDITION')
 
     def test_field_change(self):
+        # There is field change in message `Person`. Type of field `id`
+        # is changed from `int32` to `string`.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message,

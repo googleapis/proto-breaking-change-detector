@@ -36,20 +36,19 @@ class ServiceComparator:
     def _compareRpcMethods(self, service_original, service_update):
         methods_original = {x.name: x for x in service_original.method}
         methods_update = {x.name: x for x in service_update.method}
+        methods_original_keys = methods_original.keys()
+        methods_update_keys = methods_update.keys()
         # 6.1 An RPC method is removed.
-        for name in list(set(methods_original.keys()) -
-                         set(methods_update.keys())):
+        for name in set(methods_original_keys) - set(methods_update_keys):
             msg = 'An rpc method {} is removed'.format(name)
             FindingContainer.addFinding(
                 FindingCategory.METHOD_REMOVAL, "", msg, True)
         # 6.2 An RPC method is added.
-        for name in list(set(methods_original.keys()) -
-                         set(methods_update.keys())):
+        for name in set(methods_update_keys) - set(methods_original_keys):
             msg = 'An rpc method {} is added'.format(name)
             FindingContainer.addFinding(
                 FindingCategory.METHOD_ADDTION, "", msg, False)
-        for name in list(set(methods_original.keys()) &
-                         set(methods_update.keys())):
+        for name in set(methods_update_keys) & set(methods_original_keys):
             method_original = methods_original[name]
             method_update = methods_update[name]
             # 6.3 The request type of an RPC method is changed.
@@ -70,8 +69,7 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_RESPONSE_TYPE_CHANGE, "", msg, True)
             # 6.5 The request streaming state of an RPC method is changed.
-            if method_original.client_streaming != \
-               method_update.client_streaming:
+            if method_original.client_streaming != method_update.client_streaming:
                 msg = 'The request streaming type of method {} is changed'.format(
                     name)
                 FindingContainer.addFinding(
@@ -81,26 +79,17 @@ class ServiceComparator:
                 msg = 'The response streaming type of method {} is changed'.format(
                     name)
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
-                    "",
-                    msg,
-                    True
-                )
+                    FindingCategory.METHOD_SERVER_STREAMING_CHANGE, "", msg, True)
             # 6.7 The paginated response of an RPC method is changed.
             if self._isPaginatedResponse(method_original) != self._isPaginatedResponse(method_update):
                 msg = 'The paginated response of method {} is changed'.format(
                     name)
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
-                    "",
-                    msg,
-                    True
-                )
+                    FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True)
 
     def _isPaginatedResponse(
-        self,
-        method: MethodDescriptorProto
-    ) -> bool:
+            self,
+            method: MethodDescriptorProto) -> bool:
         # (AIP 158) The response must not be a streaming response.
         if method.server_streaming:
             return False

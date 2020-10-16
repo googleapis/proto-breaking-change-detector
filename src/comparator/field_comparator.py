@@ -32,9 +32,8 @@ class FieldComparator:
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
         if self.field_original.name != self.field_update.name:
-            msg = 'Name of the Field is changed, the original is{}, ' \
-                'but the updated is {}' \
-                .format(self.field_original.name, self.field_update.name)
+            msg = 'Name of the Field is changed, the original is {}, but the updated is {}'.format(
+                self.field_original.name, self.field_update.name)
             FindingContainer.addFinding(
                 FindingCategory.FIELD_NAME_CHANGE, "", msg, True)
             return
@@ -42,13 +41,10 @@ class FieldComparator:
         # 4. If the EnumDescriptors have the same name, check if the
         # repeated state of them stay the same.
         if self.field_original.label != self.field_update.label:
-            option_original = FieldDescriptorProto().Label.Name(
-                self.field_original.label)
-            option_update = FieldDescriptorProto().Label.Name(
-                self.field_update.label)
-            msg = 'Repeated state of the Field is changed, the original is' \
-                ' {}, but the updated is {}' \
-                .format(option_original, option_update)
+            option_original = FieldDescriptorProto().Label.Name(self.field_original.label)
+            option_update = FieldDescriptorProto().Label.Name(self.field_update.label)
+            msg = 'Repeated state of the Field is changed, the original is {}, but the updated is {}'.format(
+                option_original, option_update)
             FindingContainer.addFinding(
                 FindingCategory.FIELD_REPEATED_CHANGE, "", msg, True)
 
@@ -59,8 +55,7 @@ class FieldComparator:
                 self.field_original.type)
             type_update = FieldDescriptorProto().Type.Name(
                 self.field_update.type)
-            msg = 'Type of the field is changed, the original is {},' \
-                'but the updated is {}'.format(type_original, type_update)
+            msg = 'Type of the field is changed, the original is {}, but the updated is {}'.format(type_original, type_update)
             FindingContainer.addFinding(
                 FindingCategory.FIELD_TYPE_CHANGE, "", msg, True)
 

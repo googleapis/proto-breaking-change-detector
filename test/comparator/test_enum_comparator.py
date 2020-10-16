@@ -16,8 +16,9 @@ class EnumComparatorTest(unittest.TestCase):
     _PB_UPDATE = _INVOKER_UPDATE.run()
 
     def setUp(self):
-        self.enum_original = \
-            self._PB_ORIGNAL.file[0].message_type[0].enum_type[0]
+        # We take the enumDescriptorProto `phoneType` and `phoneTypeUpdate` from the original
+        # and updated `_descriptor_set.pb` files for comparison.
+        self.enum_original = self._PB_ORIGNAL.file[0].message_type[0].enum_type[0]
         self.enum_update = self._PB_UPDATE.file[0].message_type[0].enum_type[0]
 
     def tearDown(self):
