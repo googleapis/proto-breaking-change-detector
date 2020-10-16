@@ -36,8 +36,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with unittest
       run: |
-<<<<<<< HEAD
         python -m unittest discover test/comparator
-=======
-        python -m unittest discover test/comparator
->>>>>>> fdee438df6e440a74424831e22ffc1abbf7f65b3

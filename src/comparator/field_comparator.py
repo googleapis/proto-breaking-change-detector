@@ -51,10 +51,8 @@ class FieldComparator:
         # 5. If the EnumDescriptors have the same repeated state,
         # check if the type of them stay the same.
         if self.field_original.type != self.field_update.type:
-            type_original = FieldDescriptorProto().Type.Name(
-                self.field_original.type)
-            type_update = FieldDescriptorProto().Type.Name(
-                self.field_update.type)
+            type_original = FieldDescriptorProto().Type.Name(self.field_original.type)
+            type_update = FieldDescriptorProto().Type.Name(self.field_update.type)
             msg = 'Type of the field is changed, the original is {}, but the updated is {}'.format(type_original, type_update)
             FindingContainer.addFinding(
                 FindingCategory.FIELD_TYPE_CHANGE, "", msg, True)
