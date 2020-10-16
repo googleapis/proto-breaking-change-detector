@@ -4,6 +4,10 @@ from google.protobuf import descriptor_pb2 as desc
 
 
 class UnittestInvoker:
+    # This invoker is a wrapper of protoc command.
+    # It takes in protoc command arguments (e.g. proto files,
+    # descriptor_set_out and proto directories), executes the command
+    # and cleans up the generated descriptor_set file.
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, 'test/testdata/protos/example/')
     _PROTOC = 'protoc'
@@ -20,6 +24,7 @@ class UnittestInvoker:
         self.api_common_protos = api_common_protos
 
     def run(self) -> desc.FileDescriptorSet:
+        # Construct the protoc command with proper argument prefix.
         protoc_command = [self._PROTOC, f'--proto_path={self._PROTOS_DIR}']
         descriptor_set_output = os.path.join(
             self._PROTOS_DIR, self.descriptor_set_file)
@@ -27,7 +32,8 @@ class UnittestInvoker:
         protoc_command.extend(os.path.join(self._PROTOS_DIR, pf)
                               for pf in self.proto_files)
 
-        # Run protoc command to get file that contains serialized data of proto files.
+        # Run protoc command to get pb file that contains serialized data of
+        # the proto files.
         process = subprocess.run(protoc_command)
         if process.returncode != 0:
             raise _ProtocInvokerException(
