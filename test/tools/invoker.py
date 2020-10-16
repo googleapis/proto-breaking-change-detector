@@ -1,12 +1,12 @@
 import subprocess
 import os
+import platform
 from google.protobuf import descriptor_pb2 as desc
 
 
 class UnittestInvoker:
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, 'test/testdata/protos/example/')
-    _PROTOC = 'protoc'
 
     def __init__(
         self,
@@ -22,7 +22,8 @@ class UnittestInvoker:
         self.api_common_protos = api_common_protos
 
     def run(self) -> desc.FileDescriptorSet:
-        protoc_command = [self._PROTOC, f'--proto_path={self._PROTOS_DIR}']
+        protoc_command = [self._get_protoc_binary(),
+                          f'--proto_path={self._PROTOS_DIR}']
         descriptor_set_output = os.path.join(
             self._PROTOS_DIR, self.descriptor_set_file)
         protoc_command.append(f'-o{descriptor_set_output}')
@@ -48,6 +49,15 @@ class UnittestInvoker:
             self._PROTOS_DIR, self.descriptor_set_file)
         if os.path.exists(descriptor_set_output):
             subprocess.run(['rm', descriptor_set_output])
+
+    @classmethod
+    def _get_protoc_binary(cls) -> str:
+        if platform.system == 'Windows':
+            return os.path.join(cls._CURRENT_DIR, 'test/tools/protoc.exe')
+        elif platform.system == 'Linux':
+            return os.path.join(cls._CURRENT_DIR, 'test/tools/protoc')
+        else:
+            return os.path.join(cls._CURRENT_DIR, 'test/tools/osx-protoc')
 
 
 class _ProtocInvokerException(Exception):
