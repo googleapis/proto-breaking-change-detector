@@ -52,12 +52,16 @@ class UnittestInvoker:
 
     @classmethod
     def _get_protoc_binary(cls) -> str:
-        if platform.system == 'Windows':
-            return os.path.join(cls._CURRENT_DIR, 'test/tools/protoc.exe')
-        elif platform.system == 'Linux':
-            return os.path.join(cls._CURRENT_DIR, 'test/tools/protoc')
-        else:
-            return os.path.join(cls._CURRENT_DIR, 'test/tools/osx-protoc')
+        system_to_protoc_binary = {
+            "Windows": "protoc.exe",
+            "Linux": "protoc",
+            "Darwin": "osx-protoc",
+        }
+        name = system_to_protoc_binary.get(platform.system())
+        if not name:
+            raise Exception(
+                'System {name} is not supported for running unit tests.')
+        return os.path.join(cls._CURRENT_DIR, f'test/tools/{name}')
 
 
 class _ProtocInvokerException(Exception):
