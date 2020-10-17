@@ -84,12 +84,13 @@ then
   if [ $MODULE_INSTALLED != 0 ]
   then
     echo_status "Black module not found, installing it now."
-    pip install black
-  else
-    black . --check
-    FORMAT_STATUS=$?
-    if [ $FORMAT_STATUS != 0]
-      then
+    python3 -m pip install -r requirements.txt
+    pip3 install black
+  fi
+  python3 -m black . --check
+  FORMAT_STATUS=$?
+  if [ $FORMAT_STATUS != 0]
+  then
         echo_error "Linting failed." "Please run formatter to lint the code."
   fi
 fi
