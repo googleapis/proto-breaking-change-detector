@@ -61,7 +61,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(
             finding.message,
             "Repeated state of the Field is changed, the original is LABEL_REPEATED,"
-            "but the updated is LABEL_OPTIONAL",
+            " but the updated is LABEL_OPTIONAL",
         )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
 

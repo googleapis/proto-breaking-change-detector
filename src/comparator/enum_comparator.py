@@ -37,20 +37,16 @@ class EnumComparator:
         else:
             enum_values_dict_original = {x.number: x for x in self.enum_original.value}
             enum_values_dict_update = {x.number: x for x in self.enum_update.value}
+            enum_values_keys_set_original = set(enum_values_dict_original.keys())
+            enum_values_keys_set_update = set(enum_values_dict_update.keys())
             # Compare Enum values that only exist in original version
-            for number in set(enum_values_dict_original.keys()) - set(
-                enum_values_dict_update.keys()
-            ):
+            for number in enum_values_keys_set_original - enum_values_keys_set_update:
                 EnumValueComparator(enum_values_dict_original[number], None).compare()
             # Compare Enum values that only exist in update version
-            for number in set(enum_values_dict_update.keys()) - set(
-                enum_values_dict_original.keys()
-            ):
+            for number in enum_values_keys_set_update - enum_values_keys_set_original:
                 EnumValueComparator(None, enum_values_dict_update[number]).compare()
             # Compare Enum values that exist both in original and update versions
-            for number in set(enum_values_dict_update.keys()) & set(
-                enum_values_dict_original.keys()
-            ):
+            for number in enum_values_keys_set_original & enum_values_keys_set_update:
                 EnumValueComparator(
                     enum_values_dict_original[number], enum_values_dict_update[number]
                 ).compare()
