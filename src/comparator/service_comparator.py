@@ -14,8 +14,6 @@
 
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import MethodDescriptorProto
-from src.comparator.field_comparator import FieldComparator
-from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 
@@ -52,17 +50,17 @@ class ServiceComparator:
     def _compareRpcMethods(self, service_original, service_update):
         methods_original = {x.name: x for x in service_original.method}
         methods_update = {x.name: x for x in service_update.method}
-        methods_original_keys = methods_original.keys()
-        methods_update_keys = methods_update.keys()
+        methods_original_keys = set(methods_original.keys())
+        methods_update_keys = set(methods_update.keys())
         # 6.1 An RPC method is removed.
-        for name in set(methods_original_keys) - set(methods_update_keys):
+        for name in methods_original_keys - methods_update_keys:
             msg = "An rpc method {} is removed".format(name)
             FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
         # 6.2 An RPC method is added.
-        for name in set(methods_update_keys) - set(methods_original_keys):
+        for name in methods_update_keys - methods_original_keys:
             msg = "An rpc method {} is added".format(name)
             FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
-        for name in set(methods_update_keys) & set(methods_original_keys):
+        for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
             method_update = methods_update[name]
             # 6.3 The request type of an RPC method is changed.
@@ -114,8 +112,10 @@ class ServiceComparator:
             "next_page_token" not in responseMsg.fields_by_name
         ) or responseMsg.fields_by_name["next_page_token"].type != 9:
             return False
-        # The field containing pagination results should be the first field in the message and have a field number of 1.
-        # It should be a repeated field containing a list of resources constituting a single page of results.
+        # The field containing pagination results should be the first
+        # field in the message and have a field number of 1.
+        # It should be a repeated field containing a list of resources
+        # constituting a single page of results.
         if responseMsg.fields_by_number[1].label != 3:
             return False
         return True

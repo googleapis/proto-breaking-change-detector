@@ -16,7 +16,6 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
 
 
 class EnumValueComparatorTest(unittest.TestCase):
@@ -57,7 +56,8 @@ class EnumValueComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Name of the EnumValue is changed, the original is MOBILE, but the updated is HOME",
+            "Name of the EnumValue is changed, the original "
+            "is MOBILE, but the updated is HOME",
         )
         self.assertEqual(finding.category.name, "ENUM_VALUE_NAME_CHANGE")
 
