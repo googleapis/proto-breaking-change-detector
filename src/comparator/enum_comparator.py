@@ -24,8 +24,7 @@ class EnumComparator:
             msg = "An Enum {} is removed".format(self.enum_original.name)
             FindingContainer.addFinding(FindingCategory.ENUM_REMOVAL, "", msg, True)
 
-        # 3. If both EnumDescriptors are existing, check if the name
-        # is changed.
+        # 3. If both EnumDescriptors are existing, check if the name is changed.
         elif self.enum_original.name != self.enum_update.name:
             msg = "Name of the Enum is changed, the original is {}, but the updated is {}".format(
                 self.enum_original.name, self.enum_update.name

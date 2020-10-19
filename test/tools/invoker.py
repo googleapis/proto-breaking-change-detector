@@ -25,7 +25,7 @@ class UnittestInvoker:
 
     def run(self) -> desc.FileDescriptorSet:
         # Construct the protoc command with proper argument prefix.
-        protoc_command = [self._PROTOC, f"--proto_path={self._PROTOS_DIR}"]
+        protoc_command = [self._get_protoc_binary(), "--proto_path={}".format(self._PROTOS_DIR)]
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
         protoc_command.append(f"-o{descriptor_set_output}")
         protoc_command.extend(
@@ -50,6 +50,19 @@ class UnittestInvoker:
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
         if os.path.exists(descriptor_set_output):
             os.remove(descriptor_set_output)
+
+    @classmethod
+    def _get_protoc_binary(cls) -> str:
+        system_to_protoc_binary = {
+            "Windows": "protoc.exe",
+            "Linux": "protoc",
+            "Darwin": "osx-protoc",
+        }
+        name = system_to_protoc_binary.get(platform.system())
+        if not name:
+            raise Exception(
+                'System {name} is not supported for running unit tests.')
+        return os.path.join(cls._CURRENT_DIR, f'test/tools/{name}')
 
 
 class _ProtocInvokerException(Exception):
