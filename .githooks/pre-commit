@@ -76,12 +76,12 @@ then
   if [ $MODULE_INSTALLED != 0 ]
   then
     echo_status "Black module not found, installing it now."
-    python3 -m pip install -r requirements.txt
+    python3 -m pip install --upgrade
     pip3 install black
   fi
   python3 -m black . --check
   FORMAT_STATUS=$?
-  if [ $FORMAT_STATUS != 0]
+  if [ $FORMAT_STATUS != 0 ]
   then
         echo_error "Linting failed." "Please run formatter to lint the code."
   fi
@@ -91,7 +91,7 @@ fi
 if [ $NUM_PYTHON_FILES_CHANGED -gt 0 ]
 then
   echo_status "Checking tests..."
-  python -m unittest discover test/comparator
+  python3 -m unittest discover test/comparator
   TEST_STATUS=$?
   if [ $TEST_STATUS != 0 ]
   then
