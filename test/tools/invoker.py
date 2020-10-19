@@ -1,5 +1,6 @@
 import subprocess
 import os
+import platform
 from google.protobuf import descriptor_pb2 as desc
 
 
@@ -10,7 +11,7 @@ class UnittestInvoker:
     # and cleans up the generated descriptor_set file.
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
-    _PROTOC = "protoc"
+    _PROTOC = os.path.join(_CURRENT_DIR, f'test/tools/protoc')
 
     def __init__(
         self, proto_files: [], descriptor_set_file: str, api_common_protos=False
