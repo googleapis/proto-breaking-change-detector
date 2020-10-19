@@ -25,7 +25,7 @@ class UnittestInvoker:
 
     def run(self) -> desc.FileDescriptorSet:
         # Construct the protoc command with proper argument prefix.
-        protoc_command = [self._get_protoc_binary(), "--proto_path={}".format(self._PROTOS_DIR)]
+        protoc_command = [self._get_protoc_binary(), f"--proto_path={self._PROTOS_DIR}"]
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
         protoc_command.append(f"-o{descriptor_set_output}")
         protoc_command.extend(
@@ -54,7 +54,6 @@ class UnittestInvoker:
     @classmethod
     def _get_protoc_binary(cls) -> str:
         system_to_protoc_binary = {
-            "Windows": "protoc.exe",
             "Linux": "protoc",
             "Darwin": "osx-protoc",
         }
