@@ -1,6 +1,7 @@
-import enum 
+import enum
 
-class FindingCategory(enum.Enum): 
+
+class FindingCategory(enum.Enum):
     ENUM_VALUE_ADDITION = 1
     ENUM_VALUE_REMOVAL = 2
     ENUM_VALUE_NAME_CHANGE = 3
@@ -27,7 +28,6 @@ class FindingCategory(enum.Enum):
     METHOD_SERVER_STREAMING_CHANGE = 24
     METHOD_PAGINATED_RESPONSE_CHANGE = 25
 
-    
 
 class Finding:
     category: FindingCategory
@@ -39,10 +39,11 @@ class Finding:
 
     class _Location:
         path: str
+
         def __init__(self, path):
             self.path = path
 
-    def __init__(self, category, path, message, actionable, extra_info = None):
+    def __init__(self, category, path, message, actionable, extra_info=None):
         self.category = category
         self.location = self._Location(path)
         self.message = message
@@ -60,4 +61,3 @@ class Finding:
             "actionable": self.actionable,
             "extra_info": self.extra_info,
         }
-
