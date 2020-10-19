@@ -50,7 +50,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING",
+            "Type of the field is changed, the original is "
+            "TYPE_INT32, but the updated is TYPE_STRING",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 

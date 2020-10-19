@@ -53,27 +53,27 @@ class DescriptorComparator:
         # 5. TODO(xiaozhenliu): check `google.api.resource` annotation.
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
-        fields_number_original = fields_dict_original.keys()
-        fields_number_update = fields_dict_update.keys()
+        fields_number_original = set(fields_dict_original.keys())
+        fields_number_update = set(fields_dict_update.keys())
 
-        for fieldNumber in set(fields_number_original) - set(fields_number_update):
+        for fieldNumber in fields_number_original - fields_number_update:
             FieldComparator(fields_dict_original[fieldNumber], None).compare()
-        for fieldNumber in set(fields_number_update) - set(fields_number_original):
+        for fieldNumber in fields_number_update - fields_number_original:
             FieldComparator(None, fields_dict_update[fieldNumber]).compare()
-        for fieldNumber in set(fields_number_original) & set(fields_number_update):
+        for fieldNumber in fields_number_original & fields_number_update:
             FieldComparator(
                 fields_dict_original[fieldNumber], fields_dict_update[fieldNumber]
             ).compare()
 
     def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
-        message_name_original = nested_msg_dict_original.keys()
-        message_name_update = nested_msg_dict_update.keys()
+        message_name_original = set(nested_msg_dict_original.keys())
+        message_name_update = set(nested_msg_dict_update.keys())
 
-        for msgName in set(message_name_original) - set(message_name_update):
+        for msgName in message_name_original - message_name_update:
             self._compare(nested_msg_dict_original[msgName], None)
-        for msgName in set(message_name_update) - set(message_name_original):
+        for msgName in message_name_update - message_name_original:
             self._compare(None, nested_msg_dict_update[msgName])
-        for msgName in set(message_name_update) & set(message_name_original):
+        for msgName in message_name_update & message_name_original:
             self._compare(
                 nested_msg_dict_original[msgName], nested_msg_dict_update[msgName]
             )

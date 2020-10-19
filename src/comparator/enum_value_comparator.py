@@ -15,18 +15,17 @@ class EnumValueComparator:
     def compare(self):
         # 1. Original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
-            msg = f"A new EnumValue {self.enum_value_update.name} is added."
+            msg = "A new EnumValue {} is added.".format(self.enum_value_update.name)
             FindingContainer.addFinding(
                 FindingCategory.ENUM_VALUE_ADDITION, "", msg, False
             )
-        # 2. Updated EnumValue is None, then the original EnumValue is removed.
+        # 2. If updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
-            msg = f"An EnumValue {self.enum_value_original.name} is removed"
+            msg = "An EnumValue {} is removed".format(self.enum_value_original.name)
             FindingContainer.addFinding(
                 FindingCategory.ENUM_VALUE_REMOVAL, "", msg, True
             )
-        # 3. Both EnumValueDescriptors are existing, check if the name
-        # is changed.
+        # 3. If both EnumValueDescriptors are existing, check if the name is changed.
         elif self.enum_value_original.name != self.enum_value_update.name:
             msg = "Name of the EnumValue is changed, the original is {}, but the updated is {}".format(
                 self.enum_value_original.name, self.enum_value_update.name

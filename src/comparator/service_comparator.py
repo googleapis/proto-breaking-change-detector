@@ -36,17 +36,17 @@ class ServiceComparator:
     def _compareRpcMethods(self, service_original, service_update):
         methods_original = {x.name: x for x in service_original.method}
         methods_update = {x.name: x for x in service_update.method}
-        methods_original_keys = methods_original.keys()
-        methods_update_keys = methods_update.keys()
+        methods_original_keys = set(methods_original.keys())
+        methods_update_keys = set(methods_update.keys())
         # 6.1 An RPC method is removed.
-        for name in set(methods_original_keys) - set(methods_update_keys):
+        for name in methods_original_keys - methods_update_keys:
             msg = "An rpc method {} is removed".format(name)
             FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
         # 6.2 An RPC method is added.
-        for name in set(methods_update_keys) - set(methods_original_keys):
+        for name in methods_update_keys - methods_original_keys:
             msg = "An rpc method {} is added".format(name)
             FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
-        for name in set(methods_update_keys) & set(methods_original_keys):
+        for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
             method_update = methods_update[name]
             # 6.3 The request type of an RPC method is changed.
