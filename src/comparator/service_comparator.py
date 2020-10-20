@@ -79,6 +79,8 @@ class ServiceComparator:
                     FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
                 )
             # 6.4 The request type of an RPC method is changed.
+            # We use short message name `FooRequest` instead of `.example.v1.FooRequest`
+            # because the package name will always be updated e.g `.example.v1beta1.FooRequest`
             response_type_original = method_original.output_type.rsplit(".", 1)[-1]
             response_type_update = method_update.output_type.rsplit(".", 1)[-1]
             if response_type_original != response_type_update:
