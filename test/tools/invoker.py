@@ -1,5 +1,20 @@
+# Copyright 2019 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import subprocess
 import os
+import platform
 from google.protobuf import descriptor_pb2 as desc
 
 
@@ -10,7 +25,7 @@ class UnittestInvoker:
     # and cleans up the generated descriptor_set file.
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
-    _PROTOC = "protoc"
+    _PROTOC = os.path.join(_CURRENT_DIR, f'test/tools/protoc')
 
     def __init__(
         self, proto_files: [], descriptor_set_file: str, api_common_protos=False
