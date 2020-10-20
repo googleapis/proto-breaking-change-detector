@@ -26,9 +26,7 @@ class EnumComparator:
 
         # 3. If both EnumDescriptors are existing, check if the name is changed.
         elif self.enum_original.name != self.enum_update.name:
-            msg = "Name of the Enum is changed, the original is {}, but the updated is {}".format(
-                self.enum_original.name, self.enum_update.name
-            )
+            msg = f"Name of the Enum is changed, the original is {self.enum_original.name}, but the updated is {self.enum_update.name}"
             FindingContainer.addFinding(FindingCategory.ENUM_NAME_CHANGE, "", msg, True)
 
         # 4. If the EnumDescriptors have the same name, check the values
