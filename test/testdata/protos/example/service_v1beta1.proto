@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package example.v1beta1;
+
+service Example {
+
+  rpc Foo(FooRequestUpdate) returns (FooResponseUpdate) {}
+
+  rpc Bar(stream FooRequest) returns (stream FooResponse) {}
+}
+
+message FooRequest {}
+
+message FooResponse {}
+
+message FooRequestUpdate {}
+
+message FooResponseUpdate {}
