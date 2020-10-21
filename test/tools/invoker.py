@@ -14,7 +14,6 @@
 
 import subprocess
 import os
-import platform
 from google.protobuf import descriptor_pb2 as desc
 
 
