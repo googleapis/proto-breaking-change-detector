@@ -37,14 +37,14 @@ class ServiceComparator:
     def compare(self):
         # 1. If original service is None, then a new service is added.
         if self.service_original is None:
-            msg = "A new service {} is added.".format(self.service_update.name)
+            msg = f"A new service {self.service_update.name} is added."
             FindingContainer.addFinding(
                 FindingCategory.SERVICE_ADDITION, "", msg, False
             )
             return
         # 2. If updated service is None, then the original service is removed.
         if self.service_update is None:
-            msg = "A service {} is removed".format(self.service_original.name)
+            msg = f"A service {self.service_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
             return
 
@@ -72,11 +72,11 @@ class ServiceComparator:
         methods_update_keys = set(methods_update.keys())
         # 6.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
-            msg = "An rpc method {} is removed".format(name)
+            msg = f"An rpc method {name} is removed"
             FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
         # 6.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
-            msg = "An rpc method {} is added".format(name)
+            msg = f"An rpc method {name} is added"
             FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
@@ -85,11 +85,7 @@ class ServiceComparator:
             input_type_original = method_original.input_type.rsplit(".", 1)[-1]
             input_type_update = method_update.input_type.rsplit(".", 1)[-1]
             if input_type_original != input_type_update:
-                msg = "Input type of method {} is changed from {} to {}".format(
-                    name,
-                    input_type_original,
-                    input_type_update,
-                )
+                msg = f"Input type of method {name} is changed from {input_type_original} to {input_type_update}"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
                 )
@@ -99,23 +95,19 @@ class ServiceComparator:
             response_type_original = method_original.output_type.rsplit(".", 1)[-1]
             response_type_update = method_update.output_type.rsplit(".", 1)[-1]
             if response_type_original != response_type_update:
-                msg = "Output type of method {} is changed from {} to {}".format(
-                    name,
-                    response_type_original,
-                    response_type_update,
-                )
+                msg = f"Output type of method {name} is changed from {response_type_original} to {response_type_update}"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_RESPONSE_TYPE_CHANGE, "", msg, True
                 )
             # 6.5 The request streaming state of an RPC method is changed.
             if method_original.client_streaming != method_update.client_streaming:
-                msg = "The request streaming type of method {} is changed".format(name)
+                msg = f"The request streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_CLIENT_STREAMING_CHANGE, "", msg, True
                 )
             # 6.6 The response streaming state of an RPC method is changed.
             if method_original.server_streaming != method_update.server_streaming:
-                msg = "The response streaming type of method {} is changed".format(name)
+                msg = f"The response streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SERVER_STREAMING_CHANGE, "", msg, True
                 )
@@ -123,7 +115,7 @@ class ServiceComparator:
             if self._paged_result_field(
                 method_original, messages_map_original
             ) != self._paged_result_field(method_update, messages_map_update):
-                msg = "The paginated response of method {} is changed".format(name)
+                msg = f"The paginated response of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True
                 )
