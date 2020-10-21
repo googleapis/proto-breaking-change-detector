@@ -152,7 +152,7 @@ class ServiceComparator:
         # Return the first repeated field.
         # The field containing pagination results should be the first
         # field in the message and have a field number of 1.
-        for field in response_message.field.values():
+        for field in response_fields_map.values():
             if (
                 FieldDescriptorProto().Label.Name(field.label) == "LABEL_REPEATED"
                 and field.number == 1

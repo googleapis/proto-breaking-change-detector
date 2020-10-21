@@ -9,9 +9,20 @@ service Example {
   rpc Bar(FooRequest) returns (FooResponse) {}
 
   rpc shouldRemove(FooRequest) returns (FooResponse) {}
+
+  rpc paginatedMethod(BarRequest) returns (BarResponse) {}
 }
 
 message FooRequest {}
 
 message FooResponse {}
 
+message BarRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message BarResponse {
+  repeated string content = 1;
+  string next_page_token = 2;
+}
