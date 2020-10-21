@@ -37,12 +37,11 @@ class _FileSet:
         for fd in file_set.file:
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self.packaging_options_map = self._get_packaging_options_map(fd.options)
-            for service in fd.service:
-                self.services_map[service.name] = service
-            for message in fd.message_type:
-                self.messages_map[message.name] = message
-            for enum in fd.enum_type:
-                self.enums_map[enum.name] = enum
+            self.services_map.update((service.name, service) for service in fd.service)
+            self.messages_map.update(
+                (message.name, message) for message in fd.message_type
+            )
+            self.enums_map.update((enum.name, enum) for enum in fd.enum_type)
 
     def _get_packaging_options_map(self, file_options: FileOptions):
         pass
