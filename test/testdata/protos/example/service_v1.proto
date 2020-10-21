@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package example.v1;
+
+service Example {
+
+  rpc Foo(FooRequest) returns (FooResponse) {}
+
+  rpc Bar(FooRequest) returns (FooResponse) {}
+
+  rpc shouldRemove(FooRequest) returns (FooResponse) {}
+}
+
+message FooRequest {}
+
+message FooResponse {}
+
