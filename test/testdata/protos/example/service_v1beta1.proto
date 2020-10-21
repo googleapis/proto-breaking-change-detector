@@ -7,6 +7,8 @@ service Example {
   rpc Foo(FooRequestUpdate) returns (FooResponseUpdate) {}
 
   rpc Bar(stream FooRequest) returns (stream FooResponse) {}
+
+  rpc paginatedMethod(BarRequest) returns (BarResponse) {}
 }
 
 message FooRequest {}
@@ -16,3 +18,7 @@ message FooResponse {}
 message FooRequestUpdate {}
 
 message FooResponseUpdate {}
+
+message BarRequest {}
+
+message BarResponse {}

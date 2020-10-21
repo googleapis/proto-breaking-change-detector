@@ -93,6 +93,12 @@ class DescriptorComparatorTest(unittest.TestCase):
             ].category.name,
             "METHOD_SERVER_STREAMING_CHANGE",
         )
+        self.assertEqual(
+            findings_map[
+                "The paginated response of method paginatedMethod is changed"
+            ].category.name,
+            "METHOD_PAGINATED_RESPONSE_CHANGE",
+        )
 
     @classmethod
     def tearDownClass(cls):
