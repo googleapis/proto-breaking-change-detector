@@ -54,8 +54,6 @@ class FileSetComparator:
         file_set_original: FileDescriptorSet,
         file_set_update: FileDescriptorSet,
     ):
-        self.file_set_original = file_set_original
-        self.file_set_update = file_set_update
         self.fs_original = _FileSet(file_set_original)
         self.fs_update = _FileSet(file_set_update)
 
