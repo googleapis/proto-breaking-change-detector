@@ -25,9 +25,9 @@ from typing import Dict, Optional
 
 class _FileSet:
     # TODO(xiaozhenliu): check with One-platform about the version naming.
-    # We should allow version updates, then the packaging options like
+    # We should allow minor version updates, then the packaging options like
     # `java_package = "com.pubsub.v1"` will always be changed. But versions
-    # updates between two stable version (e.g. v1 to v2) iss not permitted.
+    # updates between two stable versions (e.g. v1 to v2) is not permitted.
 
     def __init__(self, file_set: FileDescriptorSet):
         self.packaging_options_map = {}
@@ -36,8 +36,7 @@ class _FileSet:
         self.enums_map: Dict[str, EnumDescriptorProto] = {}
         for fd in file_set.file:
             # Create packaging options map and duplicate the per-language rules for namespaces.
-            file_options = fd.options
-            self.packaging_options_map = self._get_packaging_options_map(file_options)
+            self.packaging_options_map = self._get_packaging_options_map(fd.options)
             for service in fd.service:
                 self.services_map[service.name] = service
             for message in fd.message_type:
