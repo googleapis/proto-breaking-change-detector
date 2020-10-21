@@ -18,6 +18,7 @@ from google.protobuf.descriptor_pb2 import DescriptorProto
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import EnumDescriptorProto
 from src.comparator.service_comparator import ServiceComparator
+from src.comparator.message_comparator import DescriptorComparator
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from typing import Dict, Optional
@@ -59,8 +60,10 @@ class FileSetComparator:
 
     def compare(self):
         # 1.TODO(xiaozhenliu) Compare the per-language packaging options.
-        # 2.Check the services map.
+        # 2. Check the services map.
         self._compare_services(self.fs_original, self.fs_update)
+        # 3. Check the messages map.
+        self._compare_messages(self.fs_original, self.fs_update)
 
     def _compare_services(self, fs_original, fs_update):
         keys_original = set(fs_original.services_map.keys())
@@ -79,4 +82,16 @@ class FileSetComparator:
                 fs_update.services_map.get(name),
                 fs_original.messages_map,
                 fs_update.messages_map,
+            ).compare()
+
+    def _compare_messages(self, fs_original, fs_update):
+        keys_original = set(fs_original.messages_map.keys())
+        keys_update = set(fs_update.messages_map.keys())
+        for name in keys_original - keys_update:
+            DescriptorComparator(fs_original.messages_map.get(name), None).compare()
+        for name in keys_update - keys_original:
+            DescriptorComparator(None, fs_update.messages_map.get(name)).compare()
+        for name in keys_update & keys_original:
+            DescriptorComparator(
+                fs_original.messages_map.get(name), fs_update.messages_map.get(name)
             ).compare()
