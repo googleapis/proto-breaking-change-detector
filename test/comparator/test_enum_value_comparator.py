@@ -21,17 +21,17 @@ from src.findings.finding_container import FindingContainer
 class EnumValueComparatorTest(unittest.TestCase):
     # This is for tesing the behavior of src.comparator.enum_valeu_comparator.EnumValueComparator
     # class. We take the two enum values (`MOBILE` and `HOME` in `PhoneType`)
-    # in address_book.proto as input to exercise different cases of enum values changes.
+    # in message_v1.proto as input to exercise different cases of enum values changes.
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in proto, and
     # create a FileDescriptorSet (_PB_ORIGNAL) out of it.
-    _PROTO_ORIGINAL = "address_book.proto"
-    _DESCRIPTOR_SET_ORIGINAL = "address_book_descriptor_set.pb"
+    _PROTO_ORIGINAL = "message_v1.proto"
+    _DESCRIPTOR_SET_ORIGINAL = "message_v1_descriptor_set.pb"
     _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
     _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
 
     def setUp(self):
-        # Get `MOBILE` and `HOME` enumValueDescriptorProto from `address_book_descriptor_set.pb`.
+        # Get `MOBILE` and `HOME` enumValueDescriptorProto from `message_v1_descriptor_set.pb`.
         enum_type_values = self._PB_ORIGNAL.file[0].message_type[0].enum_type[0].value
         self.enumValue_mobile = enum_type_values[0]
         self.enumValue_home = enum_type_values[1]
