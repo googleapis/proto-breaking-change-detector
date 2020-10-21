@@ -44,13 +44,6 @@ class FindingCategory(enum.Enum):
 
 
 class Finding:
-    category: FindingCategory
-    location: str
-    message: str
-    actionable: bool
-    extra_info: str = None
-    _path: str
-
     class _Location:
         path: str
 
