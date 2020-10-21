@@ -31,14 +31,14 @@ class DescriptorComparator:
     def _compare(self, message_original, message_update):
         # 1. If original message is None, then a new message is added.
         if self.message_original is None:
-            msg = "A new message {} is added.".format(self.message_update.name)
+            msg = f"A new message {self.message_update.name} is added."
             FindingContainer.addFinding(
                 FindingCategory.MESSAGE_ADDITION, "", msg, False
             )
             return
         # 2. If updated message is None, then the original message is removed.
         if self.message_update is None:
-            msg = "A message {} is removed".format(self.message_original.name)
+            msg = f"A message {self.message_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.MESSAGE_REMOVAL, "", msg, True)
             return
 

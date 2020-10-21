@@ -29,13 +29,13 @@ class EnumComparator:
         # 1. If original EnumDescriptor is None, then a new
         # EnumDescriptor is added.
         if self.enum_original is None:
-            msg = "A new Enum {} is added.".format(self.enum_update.name)
+            msg = f"A new Enum {self.enum_update.name} is added."
             FindingContainer.addFinding(FindingCategory.ENUM_ADDITION, "", msg, False)
 
         # 2. If updated EnumDescriptor is None, then the original
         # EnumDescriptor is removed.
         elif self.enum_update is None:
-            msg = "An Enum {} is removed".format(self.enum_original.name)
+            msg = f"An Enum {self.enum_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.ENUM_REMOVAL, "", msg, True)
 
         # 3. If both EnumDescriptors are existing, check if the name is changed.

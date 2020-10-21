@@ -28,23 +28,21 @@ class FieldComparator:
         # 1. If original FieldDescriptor is None, then a
         # new FieldDescriptor is added.
         if self.field_original is None:
-            msg = "A new Field {} is added.".format(self.field_update.name)
+            msg = f"A new Field {self.field_update.name} is added."
             FindingContainer.addFinding(FindingCategory.FIELD_ADDITION, "", msg, False)
             return
 
         # 2. If updated FieldDescriptor is None, then
         # the original FieldDescriptor is removed.
         if self.field_update is None:
-            msg = "A Field {} is removed".format(self.field_original.name)
+            msg = f"A Field {self.field_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.FIELD_REMOVAL, "", msg, True)
             return
 
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
         if self.field_original.name != self.field_update.name:
-            msg = "Name of the Field is changed, the original is {}, but the updated is {}".format(
-                self.field_original.name, self.field_update.name
-            )
+            msg = f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}"
             FindingContainer.addFinding(
                 FindingCategory.FIELD_NAME_CHANGE, "", msg, True
             )
@@ -57,9 +55,7 @@ class FieldComparator:
                 self.field_original.label
             )
             option_update = FieldDescriptorProto().Label.Name(self.field_update.label)
-            msg = "Repeated state of the Field is changed, the original is {}, but the updated is {}".format(
-                option_original, option_update
-            )
+            msg = f"Repeated state of the Field is changed, the original is {option_original}, but the updated is {option_update}"
             FindingContainer.addFinding(
                 FindingCategory.FIELD_REPEATED_CHANGE, "", msg, True
             )
@@ -69,9 +65,7 @@ class FieldComparator:
         if self.field_original.type != self.field_update.type:
             type_original = FieldDescriptorProto().Type.Name(self.field_original.type)
             type_update = FieldDescriptorProto().Type.Name(self.field_update.type)
-            msg = "Type of the field is changed, the original is {}, but the updated is {}".format(
-                type_original, type_update
-            )
+            msg = f"Type of the field is changed, the original is {type_original}, but the updated is {type_update}"
             FindingContainer.addFinding(
                 FindingCategory.FIELD_TYPE_CHANGE, "", msg, True
             )
