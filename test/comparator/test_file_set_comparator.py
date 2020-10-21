@@ -50,6 +50,22 @@ class FileSetComparatorTest(unittest.TestCase):
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 
+    def test_enum_change(self):
+        _INVOKER_ORIGNAL = UnittestInvoker(
+            ["enum_v1.proto"], "enum_v1_descriptor_set.pb"
+        )
+        _INVOKER_UPDATE = UnittestInvoker(
+            ["enum_v1beta1.proto"], "enum_v1beta1_descriptor_set.pb"
+        )
+        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        self.assertEqual(
+            findings_map["An Enum BookType is removed"].category.name,
+            "ENUM_REMOVAL",
+        )
+        _INVOKER_ORIGNAL.cleanup()
+        _INVOKER_UPDATE.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()
