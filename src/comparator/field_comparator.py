@@ -74,12 +74,12 @@ class FieldComparator:
         oneof_update = self.field_update.HasField("oneof_index")
         if oneof_original != oneof_update:
             if oneof_original:
-                msg = f"The existigng field {self.field_original.name} is moved out of One-of."
+                msg = f"The existing field {self.field_original.name} is moved out of One-of."
                 FindingContainer.addFinding(
                     FindingCategory.FIELD_ONEOF_REMOVAL, "", msg, True
                 )
             else:
-                msg = f"The existigng field {self.field_original.name} is moved into One-of."
+                msg = f"The existing field {self.field_original.name} is moved into One-of."
                 FindingContainer.addFinding(
                     FindingCategory.FIELD_ONEOF_ADDITION, "", msg, True
                 )

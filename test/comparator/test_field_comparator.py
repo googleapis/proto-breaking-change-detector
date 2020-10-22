@@ -100,7 +100,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "The existigng field single is moved out of One-of.",
+            "The existing field single is moved out of One-of.",
         )
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
 
