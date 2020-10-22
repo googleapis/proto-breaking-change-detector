@@ -48,7 +48,7 @@ class FieldComparator:
             )
             return
 
-        # 4. If the EnumDescriptors have the same name, check if the
+        # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
         if self.field_original.label != self.field_update.label:
             option_original = FieldDescriptorProto().Label.Name(
@@ -60,7 +60,7 @@ class FieldComparator:
                 FindingCategory.FIELD_REPEATED_CHANGE, "", msg, True
             )
 
-        # 5. If the EnumDescriptors have the same repeated state,
+        # 5. If the FieldDescriptors have the same repeated state,
         # check if the type of them stay the same.
         if self.field_original.type != self.field_update.type:
             type_original = FieldDescriptorProto().Type.Name(self.field_original.type)
@@ -69,6 +69,20 @@ class FieldComparator:
             FindingContainer.addFinding(
                 FindingCategory.FIELD_TYPE_CHANGE, "", msg, True
             )
+        # 6. Check the oneof_index of the field.
+        oneof_original = self.field_original.HasField("oneof_index")
+        oneof_update = self.field_update.HasField("oneof_index")
+        if oneof_original != oneof_update:
+            if oneof_original:
+                msg = f"The existigng field {self.field_original.name} is moved out of One-of."
+                FindingContainer.addFinding(
+                    FindingCategory.FIELD_ONEOF_REMOVAL, "", msg, True
+                )
+            else:
+                msg = f"The existigng field {self.field_original.name} is moved into One-of."
+                FindingContainer.addFinding(
+                    FindingCategory.FIELD_ONEOF_ADDITION, "", msg, True
+                )
 
         # 6. Check `google.api.resource_reference` annotation.
         # TODO(xiaozhenliu): annotation is removed, but the using

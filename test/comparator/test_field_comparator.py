@@ -92,6 +92,18 @@ class FieldComparatorTest(unittest.TestCase):
         )
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
 
+    def test_oneof_change(self):
+        # Field `single = 5` in `message_v1.proto` is moved out of One-of.
+        field_single_original = self._PB_ORIGNAL.file[0].message_type[0].field[4]
+        field_single_update = self._PB_UPDATE.file[0].message_type[0].field[4]
+        FieldComparator(field_single_original, field_single_update).compare()
+        finding = FindingContainer.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "The existigng field single is moved out of One-of.",
+        )
+        self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
+
     @classmethod
     def tearDownClass(cls):
         cls._INVOKER_ORIGNAL.cleanup()
