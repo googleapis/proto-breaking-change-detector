@@ -32,6 +32,24 @@ class FileSetComparatorTest(unittest.TestCase):
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 
+    def test_message_change(self):
+        _INVOKER_ORIGNAL = UnittestInvoker(
+            ["message_v1.proto"], "message_v1_descriptor_set.pb"
+        )
+        _INVOKER_UPDATE = UnittestInvoker(
+            ["message_v1beta1.proto"], "message_v1beta1_descriptor_set.pb"
+        )
+        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        self.assertEqual(
+            findings_map[
+                "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
+            ].category.name,
+            "FIELD_TYPE_CHANGE",
+        )
+        _INVOKER_ORIGNAL.cleanup()
+        _INVOKER_UPDATE.cleanup()
+
 
 if __name__ == "__main__":
     unittest.main()
