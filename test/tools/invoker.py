@@ -24,6 +24,8 @@ class UnittestInvoker:
     # and cleans up the generated descriptor_set file.
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
+    _COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
+    _PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
     _PROTOC = os.path.join(_CURRENT_DIR, "test/tools/protoc")
 
     def __init__(
@@ -39,6 +41,9 @@ class UnittestInvoker:
     def run(self) -> desc.FileDescriptorSet:
         # Construct the protoc command with proper argument prefix.
         protoc_command = [self._PROTOC, f"--proto_path={self._PROTOS_DIR}"]
+        if self.api_common_protos:
+            protoc_command.append(f"--proto_path={self._COMMON_PROTOS_DIR}")
+            protoc_command.append(f"--proto_path={self._PROTOBUF_PROTOS_DIR}")
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
         protoc_command.append(f"-o{descriptor_set_output}")
         protoc_command.extend(
