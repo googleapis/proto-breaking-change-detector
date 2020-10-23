@@ -16,9 +16,10 @@ from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from google.protobuf.descriptor_pb2 import DescriptorProto
 from google.protobuf.descriptor_pb2 import MethodDescriptorProto
+from google.api import client_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
-from typing import Dict, Optional
+from typing import Dict, Optional, Iterable
 
 
 class ServiceComparator:
@@ -118,6 +119,46 @@ class ServiceComparator:
                 msg = f"The paginated response of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True
+                )
+            # 6.8 The method_signature annotation is changed.
+            signatures_original = self._get_signatures(method_original)
+            signatures_update = self._get_signatures(method_update)
+            self._compare_method_signatures(signatures_original, signatures_update)
+
+    def _get_signatures(self, method: MethodDescriptorProto):
+        """Return the signature defined for this method."""
+        return method.options.Extensions[client_pb2.method_signature]
+
+    def _compare_method_signatures(self, signatures_original, signatures_update):
+        def _filter_fields(signatures: [str]) -> [str]:
+            fields = []
+            for sig in signatures:
+                for f in sig.split(','):
+                    if not f:
+                        # Special case for an empty signature
+                        continue
+                    name = f.strip()
+                    fields.append(name)
+            return fields
+        # Flatten the method_signatures fields. 
+        # For example: ['content, error'] to ['content', 'error']
+        fields_original = _filter_fields(signatures_original)
+        fields_update = _filter_fields(signatures_update)
+        
+        for num, f in enumerate(fields_original):
+            if num >= len(fields_update):
+                FindingContainer.addFinding(
+                    FindingCategory.METHOD_SIGNATURE_CHANGE,
+                    "",
+                    f"The existing method_signature {f} is removed.",
+                    True,
+                )
+            if fields_update[num] != f:
+                FindingContainer.addFinding(
+                    FindingCategory.METHOD_SIGNATURE_CHANGE,
+                    "",
+                    f"The existing method_signature {f} is changed to {fields_update[num]}.",
+                    True,
                 )
 
     def _paged_result_field(
