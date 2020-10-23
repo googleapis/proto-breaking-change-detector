@@ -17,6 +17,7 @@ from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from google.protobuf.descriptor_pb2 import DescriptorProto
 from google.protobuf.descriptor_pb2 import MethodDescriptorProto
 from google.api import client_pb2
+from google.longrunning import operations_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from typing import Dict, Optional
@@ -49,8 +50,6 @@ class ServiceComparator:
             FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
             return
 
-        # 3. TODO(xiaozhenliu): method_signature annotation
-        # 4. TODO(xiaozhenliu): LRO operation_info annotation
         # 5. TODO(xiaozhenliu): google.api.http annotation
         # 6. Check the methods list
         self._compareRpcMethods(
@@ -90,7 +89,7 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
                 )
-            # 6.4 The request type of an RPC method is changed.
+            # 6.4 The response type of an RPC method is changed.
             # We use short message name `FooRequest` instead of `.example.v1.FooRequest`
             # because the package name will always be updated e.g `.example.v1beta1.FooRequest`
             response_type_original = method_original.output_type.rsplit(".", 1)[-1]
@@ -125,6 +124,42 @@ class ServiceComparator:
             signatures_update = self._get_signatures(method_update)
             self._compare_method_signatures(signatures_original, signatures_update)
 
+            # 6.9 The LRO operation_info annotation is changed.
+            lro_original = self._get_lro(method_original)
+            lro_update = self._get_lro(method_update)
+            self._compare_lro_annotations(lro_original, lro_update)
+
+    def _get_lro(self, method: MethodDescriptorProto):
+        """Return the LRO operation_info annotation defined for this method."""
+        if not method.output_type.endswith("google.longrunning.Operation"):
+            return None
+        op = method.options.Extensions(operations_pb2.operation_info)
+        if not op.response_type or not op.metadata_type:
+            raise TypeError(
+                f"rpc {method.name} returns a google.longrunning."
+                "Operation, but is missing a response type or "
+                "metadata type.",
+            )
+        return [op.response_type, op.metadata_type]
+
+    def _compare_lro_annotations(self, lro_original, lro_update):
+        if not lro_original or not lro_update:
+            return
+        if lro_original[0] != lro_update[0]:
+            FindingContainer.addFinding(
+                FindingCategory.LRO_RESPONSE_CHANGE,
+                "",
+                f"The resposne_type of LRO operation_info annotation is changed from {lro_original[0]} to {lro_update[0]}",
+                True,
+            )
+        if lro_original[1] != lro_update[1]:
+            FindingContainer.addFinding(
+                FindingCategory.LRO_RESPONSE_CHANGE,
+                "",
+                f"The metadata_type of LRO operation_info annotation is changed from {lro_original[1]} to {lro_update[1]}",
+                True,
+            )
+
     def _get_signatures(self, method: MethodDescriptorProto):
         """Return the signature defined for this method."""
         return method.options.Extensions[client_pb2.method_signature]
@@ -133,18 +168,19 @@ class ServiceComparator:
         def _filter_fields(signatures: [str]) -> [str]:
             fields = []
             for sig in signatures:
-                for f in sig.split(','):
+                for f in sig.split(","):
                     if not f:
                         # Special case for an empty signature
                         continue
                     name = f.strip()
                     fields.append(name)
             return fields
-        # Flatten the method_signatures fields. 
+
+        # Flatten the method_signatures fields.
         # For example: ['content, error'] to ['content', 'error']
         fields_original = _filter_fields(signatures_original)
         fields_update = _filter_fields(signatures_update)
-        
+
         for num, f in enumerate(fields_original):
             if num >= len(fields_update):
                 FindingContainer.addFinding(
