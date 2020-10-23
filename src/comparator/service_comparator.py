@@ -19,7 +19,7 @@ from google.protobuf.descriptor_pb2 import MethodDescriptorProto
 from google.api import client_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
-from typing import Dict, Optional, Iterable
+from typing import Dict, Optional
 
 
 class ServiceComparator:
