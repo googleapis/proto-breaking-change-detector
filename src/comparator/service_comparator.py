@@ -49,7 +49,6 @@ class ServiceComparator:
             FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
             return
 
-        # 3. TODO(xiaozhenliu): method_signature annotation
         # 4. TODO(xiaozhenliu): LRO operation_info annotation
         # 5. TODO(xiaozhenliu): google.api.http annotation
         # 6. Check the methods list
