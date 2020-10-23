@@ -17,6 +17,17 @@ service Example {
     option (google.api.method_signature) = "error, content, id";
   }
 
+  rpc Bar(FooRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1/example:bar"
+      body: "*"
+    };
+    option (google.longrunning.operation_info) = {
+      response_type: "FooResponse"
+      metadata_type: "FooMetadataUpdate"
+    };
+  }
+
 }
 
 message FooRequest {
@@ -26,3 +37,5 @@ message FooRequest {
 }
 
 message FooResponse {}
+
+message FooMetadataUpdate {}
