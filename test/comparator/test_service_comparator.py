@@ -135,6 +135,21 @@ class DescriptorComparatorTest(unittest.TestCase):
         )
         self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
 
+    def test_lro_annotation_change(self):
+        ServiceComparator(
+            self.service_annotation_original,
+            self.service_annotation_update,
+            self.annotation_messages_map_original,
+            self.annotation_messages_map_update,
+        ).compare()
+        finding = FindingContainer.getAllFindings()[0]
+        print(FindingContainer.toJson())
+        self.assertEqual(
+            finding.message,
+            "The existing method_signature content is changed to error.",
+        )
+        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
+
     @classmethod
     def tearDownClass(cls):
         cls._INVOKER_SERVICE_ORIGNAL.cleanup()
