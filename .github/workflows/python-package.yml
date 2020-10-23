@@ -26,12 +26,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install black
+        pip install black googleapis-common-protos protobuf
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with Black
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        python -m black . --check
+        python -m black . --check --exclude /protobuf/ --exclude /api-common-protos/
     - name: Test with unittest
       run: |
         python -m unittest discover test/comparator
