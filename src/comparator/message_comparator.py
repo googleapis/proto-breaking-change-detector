@@ -45,9 +45,6 @@ class DescriptorComparator:
         # 3. Check breaking changes in each fields. Note: Fields are
         # identified by number, not by name. Descriptor.fields_by_number
         # (dict int -> FieldDescriptor) indexed by number.
-        # TODO(xiaozhenliu): check existing fields that have been moved
-        # into/outof oneof. While the oneof_index of every field is 0,
-        # which cannot be distinguished.
         if message_original.field or message_update.field:
             self._compareNestedFields(
                 {f.number: f for f in message_original.field},

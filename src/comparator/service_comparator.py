@@ -166,14 +166,9 @@ class ServiceComparator:
 
     def _compare_method_signatures(self, signatures_original, signatures_update):
         def _filter_fields(signatures: [str]) -> [str]:
-            fields = []
-            for sig in signatures:
-                for f in sig.split(","):
-                    if not f:
-                        # Special case for an empty signature
-                        continue
-                    name = f.strip()
-                    fields.append(name)
+            fields = [
+                field.strip() for sig in signatures for field in sig.split(",") if field
+            ]
             return fields
 
         # Flatten the method_signatures fields.
