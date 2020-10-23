@@ -28,7 +28,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install black
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        git clone
+        git submodule init
+        git submodule update
     - name: Lint with Black
       run: |
         # stop the build if there are Python syntax errors or undefined names
