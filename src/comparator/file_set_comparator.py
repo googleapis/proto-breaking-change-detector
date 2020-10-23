@@ -19,6 +19,7 @@ from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import EnumDescriptorProto
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
+from src.comparator.enum_comparator import EnumComparator
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from typing import Dict, Optional
@@ -63,6 +64,8 @@ class FileSetComparator:
         self._compare_services(self.fs_original, self.fs_update)
         # 3. Check the messages map.
         self._compare_messages(self.fs_original, self.fs_update)
+        # 4. Check the enums map.
+        self._compare_enums(self.fs_original, self.fs_update)
 
     def _compare_services(self, fs_original, fs_update):
         keys_original = set(fs_original.services_map.keys())
@@ -93,4 +96,16 @@ class FileSetComparator:
         for name in keys_update & keys_original:
             DescriptorComparator(
                 fs_original.messages_map.get(name), fs_update.messages_map.get(name)
+            ).compare()
+
+    def _compare_enums(self, fs_original, fs_update):
+        keys_original = set(fs_original.enums_map.keys())
+        keys_update = set(fs_update.enums_map.keys())
+        for name in keys_original - keys_update:
+            EnumComparator(fs_original.enums_map.get(name), None).compare()
+        for name in keys_update - keys_original:
+            EnumComparator(None, fs_update.enums_map.get(name)).compare()
+        for name in keys_update & keys_original:
+            EnumComparator(
+                fs_original.enums_map.get(name), fs_update.enums_map.get(name)
             ).compare()
