@@ -28,12 +28,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install black
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        git clone https://github.com/protocolbuffers/protobuf.git
-        git clone https://github.com/googleapis/api-common-protos.git
+        git clone
     - name: Lint with Black
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        python -m black . --check --exclude /protobuf/ --exclude /api-common-protos/
+        python -m black . --check
     - name: Test with unittest
       run: |
         python -m unittest discover test/comparator
