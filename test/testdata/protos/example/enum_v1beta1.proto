@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package example.v1beta1;
+
+enum System {
+  MAC = 0;
+  LINUX = 1;
+  WINDOWS = 2;
+}
