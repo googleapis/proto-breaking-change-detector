@@ -25,7 +25,7 @@ class UnittestInvoker:
     _CURRENT_DIR = os.getcwd()
     _PROTOS_DIR = os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
     _COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
-    _PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "test/tools/protos/")
+    _PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
     _PROTOC = os.path.join(_CURRENT_DIR, "test/tools/protoc")
 
     def __init__(
