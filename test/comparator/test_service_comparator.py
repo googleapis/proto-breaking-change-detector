@@ -142,13 +142,13 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.annotation_messages_map_original,
             self.annotation_messages_map_update,
         ).compare()
-        finding = FindingContainer.getAllFindings()[0]
-        print(FindingContainer.toJson())
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
-            finding.message,
-            "The existing method_signature content is changed to error.",
+            findings_map.get(
+                "The metadata_type of LRO operation_info annotation is changed from FooMetadata to FooMetadataUpdate"
+            ).category.name,
+            "LRO_METADATA_CHANGE",
         )
-        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
 
     @classmethod
     def tearDownClass(cls):

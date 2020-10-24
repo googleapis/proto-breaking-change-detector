@@ -133,7 +133,7 @@ class ServiceComparator:
         """Return the LRO operation_info annotation defined for this method."""
         if not method.output_type.endswith("google.longrunning.Operation"):
             return None
-        op = method.options.Extensions(operations_pb2.operation_info)
+        op = method.options.Extensions[operations_pb2.operation_info]
         if not op.response_type or not op.metadata_type:
             raise TypeError(
                 f"rpc {method.name} returns a google.longrunning."
@@ -154,7 +154,7 @@ class ServiceComparator:
             )
         if lro_original[1] != lro_update[1]:
             FindingContainer.addFinding(
-                FindingCategory.LRO_RESPONSE_CHANGE,
+                FindingCategory.LRO_METADATA_CHANGE,
                 "",
                 f"The metadata_type of LRO operation_info annotation is changed from {lro_original[1]} to {lro_update[1]}",
                 True,
@@ -198,6 +198,9 @@ class ServiceComparator:
         """Return the response pagination field if the method is paginated."""
         # (AIP 158) The response must not be a streaming response for a paginated method.
         if method.server_streaming:
+            return None
+        # If the output type is `google.longrunning.Operation`, the method is not paginated.
+        if method.output_type.endswith("google.longrunning.Operation"):
             return None
         # API should provide a `string next_page_token` field in response messsage.
         # API should provide `int page_size` and `string page_token` fields in request message.
