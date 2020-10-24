@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from google.protobuf.descriptor_pb2 import DescriptorProto
 from google.protobuf.descriptor_pb2 import MethodDescriptorProto
 from google.api import client_pb2
+from google.api import annotations_pb2
 from google.longrunning import operations_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
-from typing import Dict, Optional
+from typing import Dict, Optional, Sequence
 
 
 class ServiceComparator:
@@ -128,6 +130,67 @@ class ServiceComparator:
             lro_original = self._get_lro(method_original)
             lro_update = self._get_lro(method_update)
             self._compare_lro_annotations(lro_original, lro_update)
+
+            # 6.10 The google.api.http annotation is changed.
+            http_annotation_original = self._get_http_annotation(method_original)
+            http_annotation_update = self._get_http_annotation(method_update)
+            self._compare_http_annotation(
+                http_annotation_original, http_annotation_update
+            )
+
+    def _get_http_annotation(self, method: MethodDescriptorProto):
+        # Return the http annotation defined for this method.
+        # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'body': '*'}
+        http = method.options.Extensions[annotations_pb2.http]
+        potential_verbs = {
+            "get": http.get,
+            "put": http.put,
+            "post": http.post,
+            "delete": http.delete,
+            "patch": http.patch,
+            "custom": http.custom.path,
+        }
+        return next(
+            (
+                {"http_method": verb, "http_uri": value, "body": http.body}
+                for verb, value in potential_verbs.items()
+                if value
+            ),
+            {},
+        )
+
+    def _compare_http_annotation(
+        self, http_annotation_original, http_annotation_update
+    ):
+        if http_annotation_original.get(
+            "http_method", "None"
+        ) != http_annotation_update.get("http_method", "None"):
+            FindingContainer.addFinding(
+                FindingCategory.HTTP_ANNOTATION_CHANGE,
+                "",
+                "An existing http method is changed.",
+                True,
+            )
+        # TODO (xiaozhenliu): this should allow version updates. For example,
+        # from `v1/example:foo` to `v1beta1/example:foo` is not breaking change.
+        if http_annotation_original.get(
+            "http_uri", "None"
+        ) != http_annotation_update.get("http_uri", "None"):
+            FindingContainer.addFinding(
+                FindingCategory.HTTP_ANNOTATION_CHANGE,
+                "",
+                "An existing http method URI is changed.",
+                True,
+            )
+        if http_annotation_original.get("body", "None") != http_annotation_update.get(
+            "body", "None"
+        ):
+            FindingContainer.addFinding(
+                FindingCategory.HTTP_ANNOTATION_CHANGE,
+                "",
+                "An existing http method body is changed.",
+                True,
+            )
 
     def _get_lro(self, method: MethodDescriptorProto):
         """Return the LRO operation_info annotation defined for this method."""

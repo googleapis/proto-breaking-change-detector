@@ -152,6 +152,19 @@ class DescriptorComparatorTest(unittest.TestCase):
             "LRO_METADATA_CHANGE",
         )
 
+    def test_http_annotation_change(self):
+        ServiceComparator(
+            self.service_annotation_original,
+            self.service_annotation_update,
+            self.annotation_messages_map_original,
+            self.annotation_messages_map_update,
+        ).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        self.assertEqual(
+            findings_map.get("An existing http method URI is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
+
     @classmethod
     def tearDownClass(cls):
         cls._INVOKER_SERVICE_ORIGNAL.cleanup()
