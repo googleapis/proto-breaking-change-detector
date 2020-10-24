@@ -128,12 +128,14 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.annotation_messages_map_original,
             self.annotation_messages_map_update,
         ).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        print()
         self.assertEqual(
-            finding.message,
-            "The existing method_signature content is changed to error.",
+            findings_map.get(
+                "The existing method_signature content is changed to error."
+            ).category.name,
+            "METHOD_SIGNATURE_CHANGE",
         )
-        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
 
     def test_lro_annotation_change(self):
         ServiceComparator(
