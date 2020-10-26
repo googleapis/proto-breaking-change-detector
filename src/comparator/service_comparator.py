@@ -210,6 +210,20 @@ class ServiceComparator:
 
     def _compare_lro_annotations(self, lro_original, lro_update):
         if not lro_original or not lro_update:
+            if not lro_original and lro_update:
+                FindingContainer.addFinding(
+                    FindingCategory.LRO_ANNOTATION_ADDITION,
+                    "",
+                    "A LRO operation_info annotation is added.",
+                    True,
+                )
+            if lro_original and not lro_update:
+                FindingContainer.addFinding(
+                    FindingCategory.LRO_ANNOTATION_REMOVAL,
+                    "",
+                    "A LRO operation_info annotation is removed.",
+                    True,
+                )
             return
         if lro_original[0] != lro_update[0]:
             FindingContainer.addFinding(
