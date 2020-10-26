@@ -50,9 +50,7 @@ class ServiceComparator:
             msg = f"A service {self.service_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
             return
-
-        # 5. TODO(xiaozhenliu): google.api.http annotation
-        # 6. Check the methods list
+        # 3. Check the methods list
         self._compareRpcMethods(
             self.service_original,
             self.service_update,
@@ -71,18 +69,18 @@ class ServiceComparator:
         methods_update = {x.name: x for x in service_update.method}
         methods_original_keys = set(methods_original.keys())
         methods_update_keys = set(methods_update.keys())
-        # 6.1 An RPC method is removed.
+        # 3.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
             msg = f"An rpc method {name} is removed"
             FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
-        # 6.2 An RPC method is added.
+        # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
             msg = f"An rpc method {name} is added"
             FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
             method_update = methods_update[name]
-            # 6.3 The request type of an RPC method is changed.
+            # 3.3 The request type of an RPC method is changed.
             input_type_original = method_original.input_type.rsplit(".", 1)[-1]
             input_type_update = method_update.input_type.rsplit(".", 1)[-1]
             if input_type_original != input_type_update:
@@ -90,7 +88,7 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
                 )
-            # 6.4 The response type of an RPC method is changed.
+            # 3.4 The response type of an RPC method is changed.
             # We use short message name `FooRequest` instead of `.example.v1.FooRequest`
             # because the package name will always be updated e.g `.example.v1beta1.FooRequest`
             response_type_original = method_original.output_type.rsplit(".", 1)[-1]
@@ -100,19 +98,19 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_RESPONSE_TYPE_CHANGE, "", msg, True
                 )
-            # 6.5 The request streaming state of an RPC method is changed.
+            # 3.5 The request streaming state of an RPC method is changed.
             if method_original.client_streaming != method_update.client_streaming:
                 msg = f"The request streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_CLIENT_STREAMING_CHANGE, "", msg, True
                 )
-            # 6.6 The response streaming state of an RPC method is changed.
+            # 3.6 The response streaming state of an RPC method is changed.
             if method_original.server_streaming != method_update.server_streaming:
                 msg = f"The response streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SERVER_STREAMING_CHANGE, "", msg, True
                 )
-            # 6.7 The paginated response of an RPC method is changed.
+            # 3.7 The paginated response of an RPC method is changed.
             if self._paged_result_field(
                 method_original, messages_map_original
             ) != self._paged_result_field(method_update, messages_map_update):
@@ -120,17 +118,17 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True
                 )
-            # 6.8 The method_signature annotation is changed.
+            # 3.8 The method_signature annotation is changed.
             signatures_original = self._get_signatures(method_original)
             signatures_update = self._get_signatures(method_update)
             self._compare_method_signatures(signatures_original, signatures_update)
 
-            # 6.9 The LRO operation_info annotation is changed.
+            # 3.9 The LRO operation_info annotation is changed.
             lro_original = self._get_lro(method_original)
             lro_update = self._get_lro(method_update)
             self._compare_lro_annotations(lro_original, lro_update)
 
-            # 6.10 The google.api.http annotation is changed.
+            # 3.10 The google.api.http annotation is changed.
             http_annotation_original = self._get_http_annotation(method_original)
             http_annotation_update = self._get_http_annotation(method_update)
             self._compare_http_annotation(
