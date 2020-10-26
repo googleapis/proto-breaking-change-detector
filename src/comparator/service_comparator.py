@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 from google.protobuf.descriptor_pb2 import ServiceDescriptorProto
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from google.protobuf.descriptor_pb2 import DescriptorProto
@@ -22,7 +21,7 @@ from google.api import annotations_pb2
 from google.longrunning import operations_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional
 
 
 class ServiceComparator:
@@ -163,35 +162,23 @@ class ServiceComparator:
     def _compare_http_annotation(
         self, http_annotation_original, http_annotation_update
     ):
-        if http_annotation_original.get(
-            "http_method", "None"
-        ) != http_annotation_update.get("http_method", "None"):
-            FindingContainer.addFinding(
-                FindingCategory.HTTP_ANNOTATION_CHANGE,
-                "",
-                "An existing http method is changed.",
-                True,
-            )
-        # TODO (xiaozhenliu): this should allow version updates. For example,
-        # from `v1/example:foo` to `v1beta1/example:foo` is not breaking change.
-        if http_annotation_original.get(
-            "http_uri", "None"
-        ) != http_annotation_update.get("http_uri", "None"):
-            FindingContainer.addFinding(
-                FindingCategory.HTTP_ANNOTATION_CHANGE,
-                "",
-                "An existing http method URI is changed.",
-                True,
-            )
-        if http_annotation_original.get("body", "None") != http_annotation_update.get(
-            "body", "None"
+        """Compare the fields `http_method, http_uri, body` of google.api.http annotation."""
+        for annotation in (
+            ("http_method", "None", "An existing http method is changed."),
+            ("http_uri", "None", "An existing http method URI is changed."),
+            ("body", "None", "An existing http method body is changed."),
         ):
-            FindingContainer.addFinding(
-                FindingCategory.HTTP_ANNOTATION_CHANGE,
-                "",
-                "An existing http method body is changed.",
-                True,
-            )
+            # TODO (xiaozhenliu): this should allow version updates. For example,
+            # from `v1/example:foo` to `v1beta1/example:foo` is not breaking change.
+            if http_annotation_original.get(
+                annotation[0], annotation[1]
+            ) != http_annotation_update.get(annotation[0], annotation[1]):
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_CHANGE,
+                    "",
+                    annotation[2],
+                    True,
+                )
 
     def _get_lro(self, method: MethodDescriptorProto):
         """Return the LRO operation_info annotation defined for this method."""
