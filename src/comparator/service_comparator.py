@@ -137,7 +137,7 @@ class ServiceComparator:
 
     def _get_http_annotation(self, method: MethodDescriptorProto):
         # Return the http annotation defined for this method.
-        # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'body': '*'}
+        # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
         # return {} if no http annotation exists.
         http = method.options.Extensions[annotations_pb2.http]
         potential_verbs = {
@@ -150,7 +150,7 @@ class ServiceComparator:
         }
         return next(
             (
-                {"http_method": verb, "http_uri": value, "body": http.body}
+                {"http_method": verb, "http_uri": value, "http_body": http.body}
                 for verb, value in potential_verbs.items()
                 if value
             ),
@@ -160,11 +160,11 @@ class ServiceComparator:
     def _compare_http_annotation(
         self, http_annotation_original, http_annotation_update
     ):
-        """Compare the fields `http_method, http_uri, body` of google.api.http annotation."""
+        """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""
         for annotation in (
             ("http_method", "None", "An existing http method is changed."),
             ("http_uri", "None", "An existing http method URI is changed."),
-            ("body", "None", "An existing http method body is changed."),
+            ("http_body", "None", "An existing http method body is changed."),
         ):
             # TODO (xiaozhenliu): this should allow version updates. For example,
             # from `v1/example:foo` to `v1beta1/example:foo` is not breaking change.
