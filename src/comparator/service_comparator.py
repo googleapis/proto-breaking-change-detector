@@ -138,7 +138,7 @@ class ServiceComparator:
     def _get_http_annotation(self, method: MethodDescriptorProto):
         # Return the http annotation defined for this method.
         # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
-        # return {} if no http annotation exists.
+        # return `None` if no http annotation exists.
         http = method.options.Extensions[annotations_pb2.http]
         potential_verbs = {
             "get": http.get,
@@ -154,13 +154,30 @@ class ServiceComparator:
                 for verb, value in potential_verbs.items()
                 if value
             ),
-            {},
+            None,
         )
 
     def _compare_http_annotation(
         self, http_annotation_original, http_annotation_update
     ):
         """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""
+        if not http_annotation_original or not http_annotation_update:
+            # (Aip127) APIs must provide HTTP definitions for each RPC that they define,
+            # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
+            # streaming state changes of the RPC, which is a breaking changes.
+            if http_annotation_original and not http_annotation_update:
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_REMOVAL,
+                    "",
+                    "A google.api.http annotation is removed.",
+                    True)
+            if not http_annotation_original and http_annotation_update:
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_ADDITION,
+                    "",
+                    "A google.api.http annotation is added.",
+                    True)
+            return
         for annotation in (
             ("http_method", "None", "An existing http method is changed."),
             ("http_uri", "None", "An existing http method URI is changed."),

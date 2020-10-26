@@ -46,6 +46,8 @@ class FindingCategory(enum.Enum):
     LRO_RESPONSE_CHANGE = 27
     LRO_METADATA_CHANGE = 28
     HTTP_ANNOTATION_CHANGE = 29
+    HTTP_ANNOTATION_REMOVAL = 30
+    HTTP_ANNOTATION_ADDITION = 31
 
 
 class Finding:
