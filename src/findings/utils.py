@@ -45,6 +45,8 @@ class FindingCategory(enum.Enum):
     METHOD_SIGNATURE_CHANGE = 26
     LRO_RESPONSE_CHANGE = 27
     LRO_METADATA_CHANGE = 28
+    LRO_ANNOTATION_ADDITION = 29
+    LRO_ANNOTATION_REMOVAL = 30
 
 
 class Finding:
