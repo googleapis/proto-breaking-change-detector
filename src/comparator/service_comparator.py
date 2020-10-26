@@ -148,14 +148,14 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.LRO_ANNOTATION_ADDITION,
                     "",
-                    f"A LRO operation_info annotation is added.",
+                    "A LRO operation_info annotation is added.",
                     True,
                 )
             if lro_original and not lro_update:
                 FindingContainer.addFinding(
                     FindingCategory.LRO_ANNOTATION_REMOVAL,
                     "",
-                    f"A LRO operation_info annotation is removed.",
+                    "A LRO operation_info annotation is removed.",
                     True,
                 )
             return
