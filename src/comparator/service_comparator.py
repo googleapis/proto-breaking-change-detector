@@ -164,7 +164,7 @@ class ServiceComparator:
         if not http_annotation_original or not http_annotation_update:
             # (Aip127) APIs must provide HTTP definitions for each RPC that they define,
             # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
-            # streaming state changes of the RPC, which is a breaking changes.
+            # streaming state changes of the RPC, which is a breaking change.
             if http_annotation_original and not http_annotation_update:
                 FindingContainer.addFinding(
                     FindingCategory.HTTP_ANNOTATION_REMOVAL,
@@ -184,7 +184,7 @@ class ServiceComparator:
             ("http_body", "None", "An existing http method body is changed."),
         ):
             # TODO (xiaozhenliu): this should allow version updates. For example,
-            # from `v1/example:foo` to `v1beta1/example:foo` is not breaking change.
+            # from `v1/example:foo` to `v1beta1/example:foo` is not a breaking change.
             if http_annotation_original.get(
                 annotation[0], annotation[1]
             ) != http_annotation_update.get(annotation[0], annotation[1]):
