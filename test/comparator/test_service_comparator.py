@@ -129,7 +129,6 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.annotation_messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        print()
         self.assertEqual(
             findings_map.get(
                 "The existing method_signature content is changed to error."
@@ -160,8 +159,19 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.annotation_messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        # TODO(xiaozhenliu): This should be removed once we have version updates
+        # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
+        # is allowed.
         self.assertEqual(
             findings_map.get("An existing http method URI is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
+        self.assertEqual(
+            findings_map.get("An existing http method is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
+        self.assertEqual(
+            findings_map.get("An existing http method body is changed.").category.name,
             "HTTP_ANNOTATION_CHANGE",
         )
 

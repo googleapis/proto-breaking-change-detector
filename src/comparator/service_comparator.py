@@ -141,6 +141,7 @@ class ServiceComparator:
     def _get_http_annotation(self, method: MethodDescriptorProto):
         # Return the http annotation defined for this method.
         # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'body': '*'}
+        # return {} if no http annotation exists.
         http = method.options.Extensions[annotations_pb2.http]
         potential_verbs = {
             "get": http.get,
