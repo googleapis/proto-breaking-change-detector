@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package example;
+
+import "google/api/resource.proto";
+
+option (google.api.resource_definition) = {
+  type: "example.googleapis.com/t1"
+  pattern: "foo/{foo}"
+  pattern: "foo/{foo}/bar/{bar}/t1"
+};
+
+option (google.api.resource_definition) = {
+  type: "example.googleapis.com/t2"
+  pattern: "foo/{foo}/bar/{bar}/t2"
+  pattern: "foo/{foo}/bar/"
+};
+
+option (google.api.resource_definition) = {
+  type: "example.googleapis.com/t3"
+  pattern: "foo/{foo}/bar/{bar}/t3"
+};

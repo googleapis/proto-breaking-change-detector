@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.api import resource_pb2
 from google.protobuf.descriptor_pb2 import FileDescriptorSet
 from google.protobuf.descriptor_pb2 import FileOptions
 from google.protobuf.descriptor_pb2 import DescriptorProto
@@ -20,6 +21,7 @@ from google.protobuf.descriptor_pb2 import EnumDescriptorProto
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
+from src.comparator.resource_database import ResourceDatabase
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from typing import Dict, Optional
@@ -36,6 +38,7 @@ class _FileSet:
         self.services_map: Dict[str, ServiceDescriptorProto] = {}
         self.messages_map: Dict[str, DescriptorProto] = {}
         self.enums_map: Dict[str, EnumDescriptorProto] = {}
+        self.resources_database = ResourceDatabase()
         for fd in file_set.file:
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self.packaging_options_map = self._get_packaging_options_map(fd.options)
@@ -44,6 +47,8 @@ class _FileSet:
                 (message.name, message) for message in fd.message_type
             )
             self.enums_map.update((enum.name, enum) for enum in fd.enum_type)
+            for resource in fd.options.Extensions[resource_pb2.resource_definition]:
+                self.resources_database.register_resource(resource)
 
     def _get_packaging_options_map(self, file_options: FileOptions):
         pass
@@ -66,6 +71,8 @@ class FileSetComparator:
         self._compare_messages(self.fs_original, self.fs_update)
         # 4. Check the enums map.
         self._compare_enums(self.fs_original, self.fs_update)
+        # 5. Check the file-level resource definitions
+        self._compare_resources(self.fs_original, self.fs_update)
 
     def _compare_services(self, fs_original, fs_update):
         keys_original = set(fs_original.services_map.keys())
@@ -109,3 +116,36 @@ class FileSetComparator:
             EnumComparator(
                 fs_original.enums_map.get(name), fs_update.enums_map.get(name)
             ).compare()
+
+    def _compare_resources(self, fs_original, fs_update):
+        resources_original = fs_original.resources_database
+        resources_update = fs_update.resources_database
+        resources_types_original = resources_original.types.keys()
+        resources_types_update = resources_update.types.keys()
+        # 1. Patterns of file-level resource definitions have changed.
+        for resource_type in set(resources_types_original) & set(
+            resources_types_update
+        ):
+            if (
+                resources_original.types[resource_type].pattern
+                != resources_update.types[resource_type].pattern
+            ):
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                    "",
+                    f"The patterns of resource definition {resource_type} has changed",
+                    True,
+                )
+        # 2. File-level resource definitions addition.
+        for resource_type in set(resources_types_update) - set(
+            resources_types_original
+        ):
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_DEFINITION_ADDITION,
+                "",
+                f"A file-level resource definition {resource_type} has been added.",
+                False,
+            )
+        # 3. File-level resource definitions removal may not be breaking change since
+        # the resource could be moved to message-level. This will be check in the message
+        # and field level (where the resource is referenced).
