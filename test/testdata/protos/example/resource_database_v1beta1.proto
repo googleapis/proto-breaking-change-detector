@@ -20,3 +20,19 @@ option (google.api.resource_definition) = {
   type: "example.googleapis.com/t3"
   pattern: "foo/{foo}/bar/{bar}/t3"
 };
+
+message Foo {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/Foo"
+    pattern: "foo/{foo}/bar"
+  }
+  string name = 1
+}
+
+message Bar {
+  // The resource definition is moved to file-level.
+}
+
+message Test {
+  // The resource definition is removed. This is a breaking change.
+}
