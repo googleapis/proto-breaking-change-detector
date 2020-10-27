@@ -135,16 +135,17 @@ class DescriptorComparator:
         resource_original = message_original.options.Extensions[resource_pb2.resource]
         resource_update = message_update.options.Extensions[resource_pb2.resource]
         # 1. A new resource definition is added.
-        if not resource_original and resource_update:
+        if not resource_original.type and resource_update.type:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 "",
                 f"A message-level resource definition {resource_update.type} has been added.",
                 True,
             )
-        # 3. Message-level resource definitions removal may not be breaking change since
+            return
+        # 2. Message-level resource definitions removal may not be breaking change since
         # the resource could be moved to file-level resource definition.
-        if resource_original and not resource_update:
+        if resource_original.type and not resource_update.type:
             # Check if the removed resource is in the global file-level resource database, if the resource
             # is not existing in global resource database, or the patterns are not the same,
             # then the removal is a breaking change.
@@ -153,7 +154,7 @@ class DescriptorComparator:
                     FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     "",
                     f"A message-level resource definition {resource_original.type} has been removed.",
-                    False,
+                    True,
                 )
             elif (
                 global_resources_update.types[resource_original.type].pattern
@@ -163,28 +164,23 @@ class DescriptorComparator:
                     FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     "",
                     f"A message-level resource definition {resource_original.type} has been removed.",
-                    False,
+                    True,
                 )
+            return
         # Resource is existing in both original and update versions.
-        # 4. Types of message-level resource definitions have changed.
-        if (
-            resource_original.type
-            != resource_update.type
-        ):
+        # 3. Types of message-level resource definitions have changed.
+        if resource_original.type != resource_update.type:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_CHANGE,
                 "",
-                "The type of message-level resource definition has changed.",
+                f"The type of message-level resource definition has changed from {resource_original.type} to {resource_update.type}.",
                 True,
             )
-        # 5. Patterns of message-level resource definitions have changed.
-        if (
-            resource_original.pattern
-            != resource_update.pattern
-        ):
+        # 4. Patterns of message-level resource definitions have changed.
+        if resource_original.pattern != resource_update.pattern:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_CHANGE,
                 "",
-                "The pattern of message-level resource definition has changed.",
+                f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
                 True,
             )

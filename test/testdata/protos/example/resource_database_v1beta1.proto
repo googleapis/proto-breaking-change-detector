@@ -22,15 +22,16 @@ option (google.api.resource_definition) = {
 };
 
 message Foo {
+  // The pattern of the resource is changed. This is a breaking change.
   option (google.api.resource) = {
     type: "example.googleapis.com/Foo"
     pattern: "foo/{foo}/bar"
-  }
-  string name = 1
+  };
+  string name = 1;
 }
 
 message Bar {
-  // The resource definition is moved to file-level.
+  // The resource definition is moved to file-level. Non-breaking.
 }
 
 message Test {

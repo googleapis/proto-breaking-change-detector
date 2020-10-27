@@ -18,9 +18,9 @@ option (google.api.resource_definition) = {
 message Foo {
   option (google.api.resource) = {
     type: "example.googleapis.com/Foo"
-    pattern: "foo/{foo}/bar"
-  }
-  string name = 1
+    pattern: "foo/{foo}/bar/{bar}"
+  };
+  string name = 1;
 }
 
 message Bar {
@@ -34,5 +34,5 @@ message Test {
   option (google.api.resource) = {
     type: "example.googleapis.com/Test"
     pattern: "foo/{foo}/test"
-  } 
+  };
 }
