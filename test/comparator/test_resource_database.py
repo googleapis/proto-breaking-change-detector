@@ -39,7 +39,7 @@ class ResourceDatabaseTest(unittest.TestCase):
                     self.resource_database.get_resource_by_pattern(resource.pattern[0]),
                     resource,
                 )
-            # Check a non-existing resource, shuold return None.
+            # Check a non-existing resource, should return None.
             self.assertEqual(
                 self.resource_database.get_resource_by_pattern("a/{a}/b{b}"),
                 None,

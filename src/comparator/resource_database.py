@@ -33,11 +33,9 @@ class ResourceDatabase:
             raise TypeError(
                 "APIs must define a resource type and resource pattern for each resource in the API."
             )
-        resource_type = resource_message.type
-        resource_pattern = resource_message.pattern
-        self.types[resource_type] = resource_message
+        self.types[resource_message.type] = resource_message
         self.patterns.update(
-            (pattern, resource_message) for pattern in resource_pattern
+            (pattern, resource_message) for pattern in resource_message.pattern
         )
 
     def get_resource_by_type(self, type):
