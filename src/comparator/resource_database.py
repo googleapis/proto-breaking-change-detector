@@ -36,16 +36,16 @@ class ResourceDatabase:
         resource_type = resource_message.type
         resource_pattern = resource_message.pattern
         self.types[resource_type] = resource_message
-        for pattern in resource_pattern:
-            self.patterns[pattern] = resource_message
+        self.patterns.update(
+            (pattern, resource_message) for pattern in resource_pattern
+        )
 
     def get_resource_by_type(self, type):
         """ Query the resource by type. Return None if the resource is not existing. """
         return self.types.get(type, None)
 
     def get_parent_resources_by_child_type(self, type) -> Sequence[ResourceDescriptor]:
-        """Query the resource by child_type.
-        Return [] if the parent resource is not existing."""
+        """Query the resources by child_type. Return [] if the parent resource is not existing."""
         result = []
         if not type:
             return result
@@ -56,7 +56,7 @@ class ResourceDatabase:
         # For each child_type pattern, split the pattern by '/'
         # and reconstruct the segments. If any parent pattern is existing
         # in the database, put it in the result sequence.
-        # For example: `a/{a}` is thre parent resource of `a/{a}/b{b}`
+        # For example: `a/{a}` is the parent resource of `a/{a}/b{b}`
         for child_pattern in child_resource.pattern:
             pattern = ""
             for segment in child_pattern.split("/"):
@@ -64,6 +64,7 @@ class ResourceDatabase:
                     pattern = pattern + "/"
                 pattern = pattern + segment
                 parent = self.get_resource_by_pattern(pattern)
+                # Check the parent resource is not child_resource itself.
                 if parent and (parent.type != child_resource.type):
                     result.append(parent)
         return result

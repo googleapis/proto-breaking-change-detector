@@ -39,10 +39,14 @@ class ResourceDatabaseTest(unittest.TestCase):
                     self.resource_database.get_resource_by_pattern(resource.pattern[0]),
                     resource,
                 )
-
+            # Check a non-existing resource, shuold return None.
+            self.assertEqual(
+                self.resource_database.get_resource_by_pattern("a/{a}/b{b}"),
+                None,
+            )
         # We should get the parent resource correctly by child_type.
         # The resource with pattern `foo/{foo}/bar/{bar}/t2` has the parent pattern of `foo/{foo}`
-        # which is also defined in the proto.
+        # which is also defined in the proto by type `example.googleapis.com/t1`.
         parent_resource = self.resource_database.get_parent_resources_by_child_type(
             "example.googleapis.com/t2"
         )
