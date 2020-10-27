@@ -12,33 +12,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.api import resource_pb2
 from google.protobuf.descriptor_pb2 import DescriptorProto
 from src.comparator.field_comparator import FieldComparator
+from src.comparator.resource_database import ResourceDatabase
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 
 
 class DescriptorComparator:
     def __init__(
-        self, message_original: DescriptorProto, message_update: DescriptorProto
+        self,
+        message_original: DescriptorProto,
+        message_update: DescriptorProto,
+        global_resources_original=None,
+        global_resources_update=None,
     ):
         self.message_original = message_original
         self.message_update = message_update
+        self.global_resources_original = global_resources_original
+        self.global_resources_update = global_resources_update
 
     def compare(self):
-        self._compare(self.message_original, self.message_update)
+        self._compare(
+            self.message_original,
+            self.message_update,
+            self.global_resources_original,
+            self.global_resources_update,
+        )
 
-    def _compare(self, message_original, message_update):
+    def _compare(
+        self,
+        message_original,
+        message_update,
+        global_resources_original=None,
+        global_resources_update=None,
+    ):
         # 1. If original message is None, then a new message is added.
-        if self.message_original is None:
-            msg = f"A new message {self.message_update.name} is added."
+        if message_original is None:
+            msg = f"A new message {message_update.name} is added."
             FindingContainer.addFinding(
                 FindingCategory.MESSAGE_ADDITION, "", msg, False
             )
             return
         # 2. If updated message is None, then the original message is removed.
-        if self.message_update is None:
-            msg = f"A message {self.message_original.name} is removed"
+        if message_update is None:
+            msg = f"A message {message_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.MESSAGE_REMOVAL, "", msg, True)
             return
 
@@ -59,9 +78,17 @@ class DescriptorComparator:
             self._compareNestedMessages(
                 {m.name: m for m in message_original.nested_type},
                 {m.name: m for m in message_update.nested_type},
+                global_resources_original,
+                global_resources_update,
             )
 
-        # 5. TODO(xiaozhenliu): check `google.api.resource` annotation.
+        # 5. Check `google.api.resource` annotation.
+        self._compareResources(
+            message_original,
+            message_update,
+            global_resources_original,
+            global_resources_update,
+        )
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
@@ -76,7 +103,13 @@ class DescriptorComparator:
                 fields_dict_original[fieldNumber], fields_dict_update[fieldNumber]
             ).compare()
 
-    def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
+    def _compareNestedMessages(
+        self,
+        nested_msg_dict_original,
+        nested_msg_dict_update,
+        global_resources_original,
+        global_resources_update,
+    ):
         message_name_original = set(nested_msg_dict_original.keys())
         message_name_update = set(nested_msg_dict_update.keys())
 
@@ -86,5 +119,72 @@ class DescriptorComparator:
             self._compare(None, nested_msg_dict_update[msgName])
         for msgName in message_name_update & message_name_original:
             self._compare(
-                nested_msg_dict_original[msgName], nested_msg_dict_update[msgName]
+                nested_msg_dict_original[msgName],
+                nested_msg_dict_update[msgName],
+                global_resources_original,
+                global_resources_update,
+            )
+
+    def _compareResources(
+        self,
+        message_original,
+        message_update,
+        global_resources_original,
+        global_resources_update,
+    ):
+        resource_original = message_original.options.Extensions[resource_pb2.resource]
+        resource_update = message_update.options.Extensions[resource_pb2.resource]
+        # 1. A new resource definition is added.
+        if not resource_original and resource_update:
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_DEFINITION_ADDITION,
+                "",
+                f"A message-level resource definition {resource_update.type} has been added.",
+                True,
+            )
+        # 3. Message-level resource definitions removal may not be breaking change since
+        # the resource could be moved to file-level resource definition.
+        if resource_original and not resource_update:
+            # Check if the removed resource is in the global file-level resource database, if the resource
+            # is not existing in global resource database, or the patterns are not the same,
+            # then the removal is a breaking change.
+            if resource_original.type not in global_resources_update.types:
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                    "",
+                    f"A message-level resource definition {resource_original.type} has been removed.",
+                    False,
+                )
+            elif (
+                global_resources_update.types[resource_original.type].pattern
+                != resource_original.pattern
+            ):
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                    "",
+                    f"A message-level resource definition {resource_original.type} has been removed.",
+                    False,
+                )
+        # Resource is existing in both original and update versions.
+        # 4. Types of message-level resource definitions have changed.
+        if (
+            resource_original.type
+            != resource_update.type
+        ):
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                "",
+                "The type of message-level resource definition has changed.",
+                True,
+            )
+        # 5. Patterns of message-level resource definitions have changed.
+        if (
+            resource_original.pattern
+            != resource_update.pattern
+        ):
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                "",
+                "The pattern of message-level resource definition has changed.",
+                True,
             )

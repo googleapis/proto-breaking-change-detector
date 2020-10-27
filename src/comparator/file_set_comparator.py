@@ -102,7 +102,10 @@ class FileSetComparator:
             DescriptorComparator(None, fs_update.messages_map.get(name)).compare()
         for name in keys_update & keys_original:
             DescriptorComparator(
-                fs_original.messages_map.get(name), fs_update.messages_map.get(name)
+                fs_original.messages_map.get(name),
+                fs_update.messages_map.get(name),
+                fs_original.resources_database,
+                fs_update.resources_database,
             ).compare()
 
     def _compare_enums(self, fs_original, fs_update):
