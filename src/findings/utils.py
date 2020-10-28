@@ -45,6 +45,7 @@ class FindingCategory(enum.Enum):
     RESOURCE_DEFINITION_CHANGE = 35
     RESOURCE_DEFINITION_REMOVAL = 36
 
+
 class Finding:
     class _Location:
         path: str

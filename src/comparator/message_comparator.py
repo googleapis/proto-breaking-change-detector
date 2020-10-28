@@ -86,11 +86,7 @@ class DescriptorComparator:
                 fields_dict_original[fieldNumber], fields_dict_update[fieldNumber]
             ).compare()
 
-    def _compareNestedMessages(
-        self,
-        nested_msg_dict_original,
-        nested_msg_dict_update,
-    ):
+    def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
         message_name_original = set(nested_msg_dict_original.keys())
         message_name_update = set(nested_msg_dict_update.keys())
 
@@ -103,12 +99,6 @@ class DescriptorComparator:
                 nested_msg_dict_original[msgName],
                 nested_msg_dict_update[msgName],
             )
-
-    def _get_resource_option(self, message):
-        resource = message.options.Extensions[resource_pb2.resource]
-        if not resource.type or not resource.pattern:
-            return None
-        return resource
 
     def _compareResources(
         self,
@@ -145,18 +135,12 @@ class DescriptorComparator:
                 global_resource_pattern = self.global_resources_update.types[
                     resource_original.type
                 ].pattern
-                removed_pattern = len(resource_original.pattern) > len(
-                    global_resource_pattern
-                )
-                pattern_change = False
-                for old_pattern, new_pattern in zip(
-                    resource_original.pattern, global_resource_pattern
-                ):
-                    if old_pattern != new_pattern:
-                        pattern_change = True
+
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.
-                if removed_pattern or pattern_change:
+                if self._compare_resource_patterns(
+                    resource_original.pattern, global_resource_pattern
+                ):
                     FindingContainer.addFinding(
                         FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                         "",
@@ -174,10 +158,28 @@ class DescriptorComparator:
                 True,
             )
         # 4. Patterns of message-level resource definitions have changed.
-        if resource_original.pattern != resource_update.pattern:
+        if self._compare_resource_patterns(
+            resource_original.pattern, resource_update.pattern
+        ):
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_CHANGE,
                 "",
                 f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
                 True,
             )
+
+    def _get_resource_option(self, message):
+        resource = message.options.Extensions[resource_pb2.resource]
+        if not resource.type or not resource.pattern:
+            return None
+        return resource
+
+    def _compare_resource_patterns(self, patterns_original, patterns_update):
+        # An existing pattern is removed.
+        if len(patterns_original) > len(patterns_update):
+            return True
+        # An existing pattern value is changed.
+        for old_pattern, new_pattern in zip(patterns_original, patterns_update):
+            if old_pattern != new_pattern:
+                return True
+        return False
