@@ -12,7 +12,7 @@ service Example {
 
   rpc Foo(FooRequest) returns (FooResponse) {
     option (google.api.http) = {
-      post: "/v1beta1/example:foo"
+      get: "/v1beta1/example:foo"
       body: "*"
     };
     option (google.api.method_signature) = "error, content, id";
@@ -21,7 +21,7 @@ service Example {
   rpc Bar(FooRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
       post: "/v1/example:bar"
-      body: "*"
+      body: "updatedHttpBody"
     };
     option (google.longrunning.operation_info) = {
       response_type: "FooResponse"
