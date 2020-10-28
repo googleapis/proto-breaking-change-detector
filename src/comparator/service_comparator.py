@@ -170,13 +170,13 @@ class ServiceComparator:
                     FindingCategory.HTTP_ANNOTATION_REMOVAL,
                     "",
                     "A google.api.http annotation is removed.",
-                    True)
+                    False)
             if not http_annotation_original and http_annotation_update:
                 FindingContainer.addFinding(
                     FindingCategory.HTTP_ANNOTATION_ADDITION,
                     "",
                     "A google.api.http annotation is added.",
-                    True)
+                    False)
             return
         for annotation in (
             ("http_method", "None", "An existing http method is changed."),
