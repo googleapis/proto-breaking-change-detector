@@ -151,9 +151,9 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SIGNATURE_CHANGE,
                     "",
-                    f"An existing method_signature is changed from {old_sig} to {new_sig}.",
+                    f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
                     True,
-                )                
+                )
 
     def _paged_result_field(
         self, method: MethodDescriptorProto, messages_map: Dict[str, DescriptorProto]
