@@ -122,7 +122,9 @@ class DescriptorComparator:
         # the resource could be moved to file-level resource definition.
         # 3. Note that the type change of an existing resource definition is like one resource
         # is removed and another one is added.
-        if (resource_original and not resource_update) or (resource_original.type != resource_update.type):
+        if (resource_original and not resource_update) or (
+            resource_original.type != resource_update.type
+        ):
             # Check if the removed resource is in the global file-level resource database.
             if resource_original.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
