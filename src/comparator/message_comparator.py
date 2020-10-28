@@ -142,7 +142,7 @@ class DescriptorComparator:
 
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.
-                if self._compare_resource_patterns(
+                if self._compatible_patterns(
                     resource_original.pattern, global_resource_pattern
                 ):
                     FindingContainer.addFinding(
@@ -154,7 +154,7 @@ class DescriptorComparator:
             return
         # Resource is existing in both original and update versions.
         # 3. Patterns of message-level resource definitions have changed.
-        if self._compare_resource_patterns(
+        if self._compatible_patterns(
             resource_original.pattern, resource_update.pattern
         ):
             FindingContainer.addFinding(
@@ -170,7 +170,7 @@ class DescriptorComparator:
             return None
         return resource
 
-    def _compare_resource_patterns(self, patterns_original, patterns_update):
+    def _compatible_patterns(self, patterns_original, patterns_update):
         # An existing pattern is removed.
         if len(patterns_original) > len(patterns_update):
             return True
