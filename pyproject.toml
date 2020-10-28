@@ -2,7 +2,6 @@
 line-length = 88
 include = '\.pyi?$'
 exclude = '''
-
 (
   /(
     | api-common-protos
