@@ -125,6 +125,12 @@ class DescriptorComparator:
                 global_resources_update,
             )
 
+    def _get_resource_option(self, message):
+        resource = message.options.Extensions[resource_pb2.resource]
+        if not resource.type or not resource.pattern:
+            return None
+        return resource
+
     def _compareResources(
         self,
         message_original,
@@ -132,10 +138,12 @@ class DescriptorComparator:
         global_resources_original,
         global_resources_update,
     ):
-        resource_original = message_original.options.Extensions[resource_pb2.resource]
-        resource_update = message_update.options.Extensions[resource_pb2.resource]
+        resource_original = self._get_resource_option(message_original)
+        resource_update = self._get_resource_option(message_update)
+        if not resource_original and not resource_update:
+            return
         # 1. A new resource definition is added.
-        if not resource_original.type and resource_update.type:
+        if not resource_original and resource_update:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 "",
@@ -145,10 +153,8 @@ class DescriptorComparator:
             return
         # 2. Message-level resource definitions removal may not be breaking change since
         # the resource could be moved to file-level resource definition.
-        if resource_original.type and not resource_update.type:
-            # Check if the removed resource is in the global file-level resource database, if the resource
-            # is not existing in global resource database, or the patterns are not the same,
-            # then the removal is a breaking change.
+        if resource_original and not resource_update:
+            # Check if the removed resource is in the global file-level resource database.
             if resource_original.type not in global_resources_update.types:
                 FindingContainer.addFinding(
                     FindingCategory.RESOURCE_DEFINITION_REMOVAL,
@@ -156,16 +162,30 @@ class DescriptorComparator:
                     f"A message-level resource definition {resource_original.type} has been removed.",
                     True,
                 )
-            elif (
-                global_resources_update.types[resource_original.type].pattern
-                != resource_original.pattern
-            ):
-                FindingContainer.addFinding(
-                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    "",
-                    f"A message-level resource definition {resource_original.type} has been removed.",
-                    True,
+            else:
+                # Check the patterns of existing file-level resource are compatible with
+                # the patterns of the removed message-level resource.
+                global_resource_pattern = global_resources_update.types[
+                    resource_original.type
+                ].pattern
+                removed_pattern = len(resource_original.pattern) > len(
+                    global_resource_pattern
                 )
+                pattern_change = False
+                for old_pattern, new_pattern in zip(
+                    resource_original.pattern, global_resource_pattern
+                ):
+                    if old_pattern != new_pattern:
+                        pattern_change = True
+                # If there is pattern removal, or pattern value change. Then the global file-level resource
+                # can not replace the original message-level resource.
+                if removed_pattern or pattern_change:
+                    FindingContainer.addFinding(
+                        FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                        "",
+                        f"A message-level resource definition {resource_original.type} has been removed.",
+                        True,
+                    )
             return
         # Resource is existing in both original and update versions.
         # 3. Types of message-level resource definitions have changed.

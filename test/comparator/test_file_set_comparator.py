@@ -101,7 +101,7 @@ class FileSetComparatorTest(unittest.TestCase):
         )
         self.assertEqual(
             findings_map[
-                "A file-level resource definition example.googleapis.com/t3 has been added."
+                "A file-level resource definition 'example.googleapis.com/t3' has been added."
             ].category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
