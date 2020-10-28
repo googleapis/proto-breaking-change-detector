@@ -131,7 +131,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "The existing method_signature content is changed to error.",
+            "An existing method_signature is changed from content to error.",
         )
         self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
 

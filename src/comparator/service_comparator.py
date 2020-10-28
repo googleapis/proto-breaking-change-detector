@@ -129,7 +129,7 @@ class ServiceComparator:
         return method.options.Extensions[client_pb2.method_signature]
 
     def _compare_method_signatures(self, signatures_original, signatures_update):
-        def _filter_fields(signatures: [str]) -> [str]:
+        def _filter_fields(signatures):
             fields = [
                 field.strip() for sig in signatures for field in sig.split(",") if field
             ]
@@ -139,22 +139,21 @@ class ServiceComparator:
         # For example: ['content, error'] to ['content', 'error']
         fields_original = _filter_fields(signatures_original)
         fields_update = _filter_fields(signatures_update)
-
-        for num, f in enumerate(fields_original):
-            if num >= len(fields_update):
+        if len(fields_original) > len(fields_update):
+            FindingContainer.addFinding(
+                FindingCategory.METHOD_SIGNATURE_CHANGE,
+                "",
+                "An existing method_signature is removed.",
+                True,
+            )
+        for old_sig, new_sig in zip(fields_original, fields_update):
+            if old_sig != new_sig:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SIGNATURE_CHANGE,
                     "",
-                    f"The existing method_signature {f} is removed.",
+                    f"An existing method_signature is changed from {old_sig} to {new_sig}.",
                     True,
-                )
-            if fields_update[num] != f:
-                FindingContainer.addFinding(
-                    FindingCategory.METHOD_SIGNATURE_CHANGE,
-                    "",
-                    f"The existing method_signature {f} is changed to {fields_update[num]}.",
-                    True,
-                )
+                )                
 
     def _paged_result_field(
         self, method: MethodDescriptorProto, messages_map: Dict[str, DescriptorProto]
