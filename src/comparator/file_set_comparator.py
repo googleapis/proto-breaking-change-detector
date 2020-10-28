@@ -131,7 +131,7 @@ class FileSetComparator:
                 FindingContainer.addFinding(
                     FindingCategory.RESOURCE_DEFINITION_CHANGE,
                     "",
-                    f"An existing pattern value of the resource definition {resource_type} is removed.",
+                    f"An existing pattern value of the resource definition '{resource_type}' is removed.",
                     True,
                 )
             # An existing pattern value is changed.
@@ -141,7 +141,7 @@ class FileSetComparator:
                     FindingContainer.addFinding(
                         FindingCategory.RESOURCE_DEFINITION_CHANGE,
                         "",
-                        f"Pattern value of the resource definition {resource_type} is updated from {old_pattern} to {new_pattern}.",
+                        f"Pattern value of the resource definition '{resource_type}' is updated from '{old_pattern}' to '{new_pattern}'.",
                         True,
                     )
 
@@ -150,9 +150,9 @@ class FileSetComparator:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 "",
-                f"A file-level resource definition {resource_type} has been added.",
+                f"A file-level resource definition '{resource_type}' has been added.",
                 False,
             )
         # 3. File-level resource definitions removal may not be breaking change since
-        # the resource could be moved to message-level. This will be check in the message
+        # the resource could be moved to message-level. This will be checked in the message
         # and field level (where the resource is referenced).

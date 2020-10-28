@@ -95,13 +95,13 @@ class FileSetComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[
-                "Pattern value of the resource definition example.googleapis.com/t2 is updated from foo/{foo}/bar/{bar}/t2 to foo/{foo}/bar/{bar}/t2_update."
+                "Pattern value of the resource definition 'example.googleapis.com/t2' is updated from 'foo/{foo}/bar/{bar}/t2' to 'foo/{foo}/bar/{bar}/t2_update'."
             ].category.name,
             "RESOURCE_DEFINITION_CHANGE",
         )
         self.assertEqual(
             findings_map[
-                "A file-level resource definition example.googleapis.com/t3 has been added."
+                "A file-level resource definition 'example.googleapis.com/t3' has been added."
             ].category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
