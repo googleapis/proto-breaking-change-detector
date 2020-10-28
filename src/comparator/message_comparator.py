@@ -34,20 +34,10 @@ class DescriptorComparator:
         self.global_resources_update = global_resources_update
 
     def compare(self):
-        self._compare(
-            self.message_original,
-            self.message_update,
-            self.global_resources_original,
-            self.global_resources_update,
-        )
+        # _compare method will be recursively called for nested message comparison.
+        self._compare(self.message_original, self.message_update)
 
-    def _compare(
-        self,
-        message_original,
-        message_update,
-        global_resources_original=None,
-        global_resources_update=None,
-    ):
+    def _compare(self, message_original, message_update):
         # 1. If original message is None, then a new message is added.
         if message_original is None:
             msg = f"A new message {message_update.name} is added."
@@ -78,17 +68,10 @@ class DescriptorComparator:
             self._compareNestedMessages(
                 {m.name: m for m in message_original.nested_type},
                 {m.name: m for m in message_update.nested_type},
-                global_resources_original,
-                global_resources_update,
             )
 
         # 5. Check `google.api.resource` annotation.
-        self._compareResources(
-            message_original,
-            message_update,
-            global_resources_original,
-            global_resources_update,
-        )
+        self._compareResources(message_original, message_update)
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
@@ -107,8 +90,6 @@ class DescriptorComparator:
         self,
         nested_msg_dict_original,
         nested_msg_dict_update,
-        global_resources_original,
-        global_resources_update,
     ):
         message_name_original = set(nested_msg_dict_original.keys())
         message_name_update = set(nested_msg_dict_update.keys())
@@ -121,8 +102,6 @@ class DescriptorComparator:
             self._compare(
                 nested_msg_dict_original[msgName],
                 nested_msg_dict_update[msgName],
-                global_resources_original,
-                global_resources_update,
             )
 
     def _get_resource_option(self, message):
@@ -135,8 +114,6 @@ class DescriptorComparator:
         self,
         message_original,
         message_update,
-        global_resources_original,
-        global_resources_update,
     ):
         resource_original = self._get_resource_option(message_original)
         resource_update = self._get_resource_option(message_update)
@@ -155,7 +132,7 @@ class DescriptorComparator:
         # the resource could be moved to file-level resource definition.
         if resource_original and not resource_update:
             # Check if the removed resource is in the global file-level resource database.
-            if resource_original.type not in global_resources_update.types:
+            if resource_original.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
                     FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     "",
@@ -165,7 +142,7 @@ class DescriptorComparator:
             else:
                 # Check the patterns of existing file-level resource are compatible with
                 # the patterns of the removed message-level resource.
-                global_resource_pattern = global_resources_update.types[
+                global_resource_pattern = self.global_resources_update.types[
                     resource_original.type
                 ].pattern
                 removed_pattern = len(resource_original.pattern) > len(
