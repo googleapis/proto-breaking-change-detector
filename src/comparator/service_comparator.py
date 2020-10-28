@@ -206,37 +206,41 @@ class ServiceComparator:
                 "Operation, but is missing a response type or "
                 "metadata type.",
             )
-        return [op.response_type, op.metadata_type]
+        return {"response_type": op.response_type, "metadata_type": op.metadata_type}
 
     def _compare_lro_annotations(self, lro_original, lro_update):
         if not lro_original or not lro_update:
+            # LRO operation_info annotation addition.
             if not lro_original and lro_update:
                 FindingContainer.addFinding(
                     FindingCategory.LRO_ANNOTATION_ADDITION,
                     "",
                     "A LRO operation_info annotation is added.",
-                    True,
+                    False,
                 )
+            # LRO operation_info annotation removal.
             if lro_original and not lro_update:
                 FindingContainer.addFinding(
                     FindingCategory.LRO_ANNOTATION_REMOVAL,
                     "",
                     "A LRO operation_info annotation is removed.",
-                    True,
+                    False,
                 )
             return
-        if lro_original[0] != lro_update[0]:
+        # The response_type value of LRO operation_info is changed.
+        if lro_original["response_type"] != lro_update["response_type"]:
             FindingContainer.addFinding(
                 FindingCategory.LRO_RESPONSE_CHANGE,
                 "",
-                f"The resposne_type of LRO operation_info annotation is changed from {lro_original[0]} to {lro_update[0]}",
+                f"The response_type of LRO operation_info annotation is changed from {lro_original['response_type']} to {lro_update['response_type']}",
                 True,
             )
-        if lro_original[1] != lro_update[1]:
+        # The metadata_type value of LRO operation_info is changed.
+        if lro_original["metadata_type"] != lro_update["metadata_type"]:
             FindingContainer.addFinding(
                 FindingCategory.LRO_METADATA_CHANGE,
                 "",
-                f"The metadata_type of LRO operation_info annotation is changed from {lro_original[1]} to {lro_update[1]}",
+                f"The metadata_type of LRO operation_info annotation is changed from {lro_original['metadata_type']} to {lro_update['metadata_type']}",
                 True,
             )
 
@@ -245,7 +249,7 @@ class ServiceComparator:
         return method.options.Extensions[client_pb2.method_signature]
 
     def _compare_method_signatures(self, signatures_original, signatures_update):
-        def _filter_fields(signatures: [str]) -> [str]:
+        def _filter_fields(signatures):
             fields = [
                 field.strip() for sig in signatures for field in sig.split(",") if field
             ]
@@ -255,20 +259,19 @@ class ServiceComparator:
         # For example: ['content, error'] to ['content', 'error']
         fields_original = _filter_fields(signatures_original)
         fields_update = _filter_fields(signatures_update)
-
-        for num, f in enumerate(fields_original):
-            if num >= len(fields_update):
+        if len(fields_original) > len(fields_update):
+            FindingContainer.addFinding(
+                FindingCategory.METHOD_SIGNATURE_CHANGE,
+                "",
+                "An existing method_signature is removed.",
+                True,
+            )
+        for old_sig, new_sig in zip(fields_original, fields_update):
+            if old_sig != new_sig:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SIGNATURE_CHANGE,
                     "",
-                    f"The existing method_signature {f} is removed.",
-                    True,
-                )
-            if fields_update[num] != f:
-                FindingContainer.addFinding(
-                    FindingCategory.METHOD_SIGNATURE_CHANGE,
-                    "",
-                    f"The existing method_signature {f} is changed to {fields_update[num]}.",
+                    f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
                     True,
                 )
 

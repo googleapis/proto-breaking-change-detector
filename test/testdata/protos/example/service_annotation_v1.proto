@@ -28,7 +28,6 @@ service Example {
       metadata_type: "FooMetadata"
     };
   }
-
 }
 
 message FooRequest {
