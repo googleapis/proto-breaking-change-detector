@@ -120,26 +120,33 @@ class FileSetComparator:
     def _compare_resources(self, fs_original, fs_update):
         resources_original = fs_original.resources_database
         resources_update = fs_update.resources_database
-        resources_types_original = resources_original.types.keys()
-        resources_types_update = resources_update.types.keys()
+        resources_types_original = set(resources_original.types.keys())
+        resources_types_update = set(resources_update.types.keys())
         # 1. Patterns of file-level resource definitions have changed.
-        for resource_type in set(resources_types_original) & set(
-            resources_types_update
-        ):
-            if (
-                resources_original.types[resource_type].pattern
-                != resources_update.types[resource_type].pattern
-            ):
+        for resource_type in resources_types_original & resources_types_update:
+            patterns_original = resources_original.types[resource_type].pattern
+            patterns_update = resources_update.types[resource_type].pattern
+            # An existing pattern is removed.
+            if len(patterns_original) > len(patterns_update):
                 FindingContainer.addFinding(
                     FindingCategory.RESOURCE_DEFINITION_CHANGE,
                     "",
-                    f"The patterns of resource definition {resource_type} has changed",
+                    f"An existing pattern value of the resource definition {resource_type} is removed.",
                     True,
                 )
+            # An existing pattern value is changed.
+            # A new pattern value appended to the pattern list is not consider breaking change.
+            for old_pattern, new_pattern in zip(patterns_original, patterns_update):
+                if old_pattern != new_pattern:
+                    FindingContainer.addFinding(
+                        FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                        "",
+                        f"Pattern value of the resource definition {resource_type} is updated from {old_pattern} to {new_pattern}.",
+                        True,
+                    )
+
         # 2. File-level resource definitions addition.
-        for resource_type in set(resources_types_update) - set(
-            resources_types_original
-        ):
+        for resource_type in resources_types_update - resources_types_original:
             FindingContainer.addFinding(
                 FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 "",

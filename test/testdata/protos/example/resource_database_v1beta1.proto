@@ -12,7 +12,7 @@ option (google.api.resource_definition) = {
 
 option (google.api.resource_definition) = {
   type: "example.googleapis.com/t2"
-  pattern: "foo/{foo}/bar/{bar}/t2"
+  pattern: "foo/{foo}/bar/{bar}/t2_update"
   pattern: "foo/{foo}/bar/"
 };
 
