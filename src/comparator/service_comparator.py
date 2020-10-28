@@ -17,6 +17,8 @@ from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from google.protobuf.descriptor_pb2 import DescriptorProto
 from google.protobuf.descriptor_pb2 import MethodDescriptorProto
 from google.api import client_pb2
+from google.api import annotations_pb2
+from google.longrunning import operations_pb2
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from typing import Dict, Optional
@@ -48,10 +50,7 @@ class ServiceComparator:
             msg = f"A service {self.service_original.name} is removed"
             FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
             return
-
-        # 4. TODO(xiaozhenliu): LRO operation_info annotation
-        # 5. TODO(xiaozhenliu): google.api.http annotation
-        # 6. Check the methods list
+        # 3. Check the methods list
         self._compareRpcMethods(
             self.service_original,
             self.service_update,
@@ -70,18 +69,18 @@ class ServiceComparator:
         methods_update = {x.name: x for x in service_update.method}
         methods_original_keys = set(methods_original.keys())
         methods_update_keys = set(methods_update.keys())
-        # 6.1 An RPC method is removed.
+        # 3.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
             msg = f"An rpc method {name} is removed"
             FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
-        # 6.2 An RPC method is added.
+        # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
             msg = f"An rpc method {name} is added"
             FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
             method_update = methods_update[name]
-            # 6.3 The request type of an RPC method is changed.
+            # 3.3 The request type of an RPC method is changed.
             input_type_original = method_original.input_type.rsplit(".", 1)[-1]
             input_type_update = method_update.input_type.rsplit(".", 1)[-1]
             if input_type_original != input_type_update:
@@ -89,7 +88,7 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
                 )
-            # 6.4 The request type of an RPC method is changed.
+            # 3.4 The response type of an RPC method is changed.
             # We use short message name `FooRequest` instead of `.example.v1.FooRequest`
             # because the package name will always be updated e.g `.example.v1beta1.FooRequest`
             response_type_original = method_original.output_type.rsplit(".", 1)[-1]
@@ -99,19 +98,19 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_RESPONSE_TYPE_CHANGE, "", msg, True
                 )
-            # 6.5 The request streaming state of an RPC method is changed.
+            # 3.5 The request streaming state of an RPC method is changed.
             if method_original.client_streaming != method_update.client_streaming:
                 msg = f"The request streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_CLIENT_STREAMING_CHANGE, "", msg, True
                 )
-            # 6.6 The response streaming state of an RPC method is changed.
+            # 3.6 The response streaming state of an RPC method is changed.
             if method_original.server_streaming != method_update.server_streaming:
                 msg = f"The response streaming type of method {name} is changed"
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_SERVER_STREAMING_CHANGE, "", msg, True
                 )
-            # 6.7 The paginated response of an RPC method is changed.
+            # 3.7 The paginated response of an RPC method is changed.
             if self._paged_result_field(
                 method_original, messages_map_original
             ) != self._paged_result_field(method_update, messages_map_update):
@@ -119,10 +118,133 @@ class ServiceComparator:
                 FindingContainer.addFinding(
                     FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True
                 )
-            # 6.8 The method_signature annotation is changed.
+            # 3.8 The method_signature annotation is changed.
             signatures_original = self._get_signatures(method_original)
             signatures_update = self._get_signatures(method_update)
             self._compare_method_signatures(signatures_original, signatures_update)
+
+            # 3.9 The LRO operation_info annotation is changed.
+            lro_original = self._get_lro(method_original)
+            lro_update = self._get_lro(method_update)
+            self._compare_lro_annotations(lro_original, lro_update)
+
+            # 3.10 The google.api.http annotation is changed.
+            http_annotation_original = self._get_http_annotation(method_original)
+            http_annotation_update = self._get_http_annotation(method_update)
+            self._compare_http_annotation(
+                http_annotation_original, http_annotation_update
+            )
+
+    def _get_http_annotation(self, method: MethodDescriptorProto):
+        # Return the http annotation defined for this method.
+        # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
+        # return `None` if no http annotation exists.
+        http = method.options.Extensions[annotations_pb2.http]
+        potential_verbs = {
+            "get": http.get,
+            "put": http.put,
+            "post": http.post,
+            "delete": http.delete,
+            "patch": http.patch,
+            "custom": http.custom.path,
+        }
+        return next(
+            (
+                {"http_method": verb, "http_uri": value, "http_body": http.body}
+                for verb, value in potential_verbs.items()
+                if value
+            ),
+            None,
+        )
+
+    def _compare_http_annotation(
+        self, http_annotation_original, http_annotation_update
+    ):
+        """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""
+        if not http_annotation_original or not http_annotation_update:
+            # (Aip127) APIs must provide HTTP definitions for each RPC that they define,
+            # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
+            # streaming state changes of the RPC, which is a breaking change.
+            if http_annotation_original and not http_annotation_update:
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_REMOVAL,
+                    "",
+                    "A google.api.http annotation is removed.",
+                    False,
+                )
+            if not http_annotation_original and http_annotation_update:
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_ADDITION,
+                    "",
+                    "A google.api.http annotation is added.",
+                    False,
+                )
+            return
+        for annotation in (
+            ("http_method", "None", "An existing http method is changed."),
+            ("http_uri", "None", "An existing http method URI is changed."),
+            ("http_body", "None", "An existing http method body is changed."),
+        ):
+            # TODO (xiaozhenliu): this should allow version updates. For example,
+            # from `v1/example:foo` to `v1beta1/example:foo` is not a breaking change.
+            if http_annotation_original.get(
+                annotation[0], annotation[1]
+            ) != http_annotation_update.get(annotation[0], annotation[1]):
+                FindingContainer.addFinding(
+                    FindingCategory.HTTP_ANNOTATION_CHANGE,
+                    "",
+                    annotation[2],
+                    True,
+                )
+
+    def _get_lro(self, method: MethodDescriptorProto):
+        """Return the LRO operation_info annotation defined for this method."""
+        if not method.output_type.endswith("google.longrunning.Operation"):
+            return None
+        op = method.options.Extensions[operations_pb2.operation_info]
+        if not op.response_type or not op.metadata_type:
+            raise TypeError(
+                f"rpc {method.name} returns a google.longrunning."
+                "Operation, but is missing a response type or "
+                "metadata type.",
+            )
+        return {"response_type": op.response_type, "metadata_type": op.metadata_type}
+
+    def _compare_lro_annotations(self, lro_original, lro_update):
+        if not lro_original or not lro_update:
+            # LRO operation_info annotation addition.
+            if not lro_original and lro_update:
+                FindingContainer.addFinding(
+                    FindingCategory.LRO_ANNOTATION_ADDITION,
+                    "",
+                    "A LRO operation_info annotation is added.",
+                    False,
+                )
+            # LRO operation_info annotation removal.
+            if lro_original and not lro_update:
+                FindingContainer.addFinding(
+                    FindingCategory.LRO_ANNOTATION_REMOVAL,
+                    "",
+                    "A LRO operation_info annotation is removed.",
+                    False,
+                )
+            return
+        # The response_type value of LRO operation_info is changed.
+        if lro_original["response_type"] != lro_update["response_type"]:
+            FindingContainer.addFinding(
+                FindingCategory.LRO_RESPONSE_CHANGE,
+                "",
+                f"The response_type of LRO operation_info annotation is changed from {lro_original['response_type']} to {lro_update['response_type']}",
+                True,
+            )
+        # The metadata_type value of LRO operation_info is changed.
+        if lro_original["metadata_type"] != lro_update["metadata_type"]:
+            FindingContainer.addFinding(
+                FindingCategory.LRO_METADATA_CHANGE,
+                "",
+                f"The metadata_type of LRO operation_info annotation is changed from {lro_original['metadata_type']} to {lro_update['metadata_type']}",
+                True,
+            )
 
     def _get_signatures(self, method: MethodDescriptorProto):
         """Return the signature defined for this method."""
@@ -161,6 +283,9 @@ class ServiceComparator:
         """Return the response pagination field if the method is paginated."""
         # (AIP 158) The response must not be a streaming response for a paginated method.
         if method.server_streaming:
+            return None
+        # If the output type is `google.longrunning.Operation`, the method is not paginated.
+        if method.output_type.endswith("google.longrunning.Operation"):
             return None
         # API should provide a `string next_page_token` field in response messsage.
         # API should provide `int page_size` and `string page_token` fields in request message.

@@ -128,12 +128,52 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.annotation_messages_map_original,
             self.annotation_messages_map_update,
         ).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
-            finding.message,
-            "An existing method_signature is changed from 'content' to 'error'.",
+            findings_map.get(
+                "An existing method_signature is changed from 'content' to 'error'."
+            ).category.name,
+            "METHOD_SIGNATURE_CHANGE",
         )
-        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
+
+    def test_lro_annotation_change(self):
+        ServiceComparator(
+            self.service_annotation_original,
+            self.service_annotation_update,
+            self.annotation_messages_map_original,
+            self.annotation_messages_map_update,
+        ).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        self.assertEqual(
+            findings_map.get(
+                "The metadata_type of LRO operation_info annotation is changed from FooMetadata to FooMetadataUpdate"
+            ).category.name,
+            "LRO_METADATA_CHANGE",
+        )
+
+    def test_http_annotation_change(self):
+        ServiceComparator(
+            self.service_annotation_original,
+            self.service_annotation_update,
+            self.annotation_messages_map_original,
+            self.annotation_messages_map_update,
+        ).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        # TODO(xiaozhenliu): This should be removed once we have version updates
+        # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
+        # is allowed.
+        self.assertEqual(
+            findings_map.get("An existing http method URI is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
+        self.assertEqual(
+            findings_map.get("An existing http method is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
+        self.assertEqual(
+            findings_map.get("An existing http method body is changed.").category.name,
+            "HTTP_ANNOTATION_CHANGE",
+        )
 
     @classmethod
     def tearDownClass(cls):
