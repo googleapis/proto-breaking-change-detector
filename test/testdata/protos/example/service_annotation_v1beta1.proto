@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package example.v1beta1;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+import "google/rpc/status.proto";
+import "google/longrunning/operations.proto";
+
+
+service Example {
+
+  rpc Foo(FooRequest) returns (FooResponse) {
+    option (google.api.http) = {
+      get: "/v1beta1/example:foo"
+      body: "*"
+    };
+    option (google.api.method_signature) = "error, content, id";
+  }
+
+  rpc Bar(FooRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1/example:bar"
+      body: "updatedHttpBody"
+    };
+    option (google.longrunning.operation_info) = {
+      response_type: "FooResponse"
+      metadata_type: "FooMetadataUpdate"
+    };
+  }
+}
+
+message FooRequest {
+    string content = 1;
+    google.rpc.Status error = 2;
+    string id = 3;
+}
+
+message FooResponse {}
+
+message FooMetadataUpdate {}
