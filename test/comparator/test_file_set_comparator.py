@@ -135,7 +135,7 @@ class FileSetComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[
-                "The original type 'example.googleapis.com/t1' and updated child_type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
+                "The child_type 'example.googleapis.com/t1' and type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
             ].category.name,
             "RESOURCE_REFERENCE_CHANGE",
         )
