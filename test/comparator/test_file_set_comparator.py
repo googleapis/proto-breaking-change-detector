@@ -105,6 +105,18 @@ class FileSetComparatorTest(unittest.TestCase):
             ].category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
+        self.assertEqual(
+            findings_map[
+                "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+            ].category.name,
+            "RESOURCE_DEFINITION_CHANGE",
+        )
+        self.assertEqual(
+            findings_map[
+                "A message-level resource definition example.googleapis.com/Test has been removed."
+            ].category.name,
+            "RESOURCE_DEFINITION_REMOVAL",
+        )
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 
