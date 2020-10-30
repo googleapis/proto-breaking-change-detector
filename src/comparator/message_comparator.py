@@ -84,7 +84,12 @@ class DescriptorComparator:
             FieldComparator(None, fields_dict_update[fieldNumber]).compare()
         for fieldNumber in fields_number_original & fields_number_update:
             FieldComparator(
-                fields_dict_original[fieldNumber], fields_dict_update[fieldNumber]
+                fields_dict_original[fieldNumber],
+                fields_dict_update[fieldNumber],
+                self.global_resources_original,
+                self.global_resources_update,
+                self._get_resource_option(self.message_original),
+                self._get_resource_option(self.message_update),
             ).compare()
 
     def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
