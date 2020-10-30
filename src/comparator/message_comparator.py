@@ -69,8 +69,9 @@ class DescriptorComparator:
                 {m.name: m for m in message_original.nested_type},
                 {m.name: m for m in message_update.nested_type},
             )
+        # 5. TODO(xiaozhenliu) Check breaking changes in nested enum.
 
-        # 5. Check `google.api.resource` annotation.
+        # 6. Check `google.api.resource` annotation.
         self._compareResources(message_original, message_update)
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
