@@ -12,17 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.api import resource_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 
 
 class FieldComparator:
+    # global_resources: file-level resource definitions.
+    # local_resource: message-level resource definition.
+    # We need the resource database information to determine if the resource_reference
+    # annotation removal or change is breaking or not.
     def __init__(
-        self, field_original: FieldDescriptorProto, field_update: FieldDescriptorProto
+        self,
+        field_original: FieldDescriptorProto,
+        field_update: FieldDescriptorProto,
+        global_resources_original=None,
+        global_resources_update=None,
+        local_resource_original=None,
+        local_resource_update=None,
     ):
         self.field_original = field_original
         self.field_update = field_update
+        self.global_resources_original = global_resources_original
+        self.global_resources_update = global_resources_update
+        self.local_resource_original = local_resource_original
+        self.local_resource_update = local_resource_update
 
     def compare(self):
         # 1. If original FieldDescriptor is None, then a
@@ -85,6 +100,109 @@ class FieldComparator:
                 )
 
         # 6. Check `google.api.resource_reference` annotation.
-        # TODO(xiaozhenliu): annotation is removed, but the using
-        # file-level resource is added to the message.
-        # This should not be taken as breaking change.
+        self._compare_resource_reference(self.field_original, self.field_update)
+
+    def _compare_resource_reference(self, field_original, field_update):
+        resource_ref_original = self._get_resource_reference(field_original)
+        resource_ref_update = self._get_resource_reference(field_update)
+        # No resource_reference annotations found for the field in both versions.
+        if not resource_ref_original and not resource_ref_update:
+            return
+        # A `google.api.resource_reference` annotation is added.
+        if not resource_ref_original and resource_ref_update:
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_REFERENCE_ADDITION,
+                "",
+                f"A resource reference option is added to the field {field_original.name}",
+                False,
+            )
+            return
+        # Resource annotation is removed, check if it is added as a message resource.
+        if resource_ref_original and not resource_ref_update:
+            if not self._resource_ref_in_local(resource_ref_original):
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_REFERENCE_REMOVAL,
+                    "",
+                    f"A resource reference option of field '{field_original.name}' is removed.",
+                    True,
+                )
+            return
+        # Resource annotation is both existing in the field for original and update versions.
+        # They both use `type` or `child_type`.
+        if (resource_ref_original.type and resource_ref_update.type) or (
+            resource_ref_original.child_type and resource_ref_update.child_type
+        ):
+            original_type = (
+                resource_ref_original.type or resource_ref_original.child_type
+            )
+            update_type = resource_ref_update.type or resource_ref_update.child_type
+            if original_type != update_type:
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_REFERENCE_CHANGE,
+                    "",
+                    f"The type of resource reference option in field '{field_original.name}' is changed from '{original_type}' to '{update_type}'.",
+                    True,
+                )
+            return
+        # The `type` is changed to `child_type` or `child_type` is changed to `type`, but
+        # resulting referenced resource patterns can be resolved to be identical,
+        # in that case it is not considered breaking.
+        # Register the message-level resource into the global resource database,
+        # so that we can query the parent resources for child_type.
+        self._register_local_resource()
+        if resource_ref_original.child_type and resource_ref_update.type:
+            self._is_parent_type(
+                resource_ref_original.child_type, resource_ref_update.type, True
+            )
+        if resource_ref_original.type and resource_ref_update.child_type:
+            self._is_parent_type(
+                resource_ref_update.child_type, resource_ref_original.type, False
+            )
+
+    def _get_resource_reference(self, field):
+        reference = field.options.Extensions[resource_pb2.resource_reference]
+        if not reference.type and not reference.child_type:
+            return None
+        return reference
+
+    def _resource_ref_in_local(self, resource_ref):
+        """Check if the resource type is in the local resources defined by a message option."""
+        if not self.local_resource_update:
+            return False
+        checked_type = resource_ref.type or resource_ref.child_type
+        if not checked_type:
+            raise TypeError(
+                "In a resource_reference annotation, either `type` or `child_type` field should be defined"
+            )
+        if self.local_resource_update.type != checked_type:
+            return False
+        return True
+
+    def _register_local_resource(self):
+        # Add message-level resource definition to the global resource database for query.
+        self.global_resources_original.register_resource(self.local_resource_original)
+        self.global_resources_update.register_resource(self.local_resource_update)
+
+    def _is_parent_type(self, child_type, parent_type, original_is_child):
+        if original_is_child:
+            parent_resources = (
+                self.global_resources_original.get_parent_resources_by_child_type(
+                    child_type
+                )
+            )
+        else:
+            parent_resources = (
+                self.global_resources_update.get_parent_resources_by_child_type(
+                    child_type
+                )
+            )
+        if parent_type not in [parent.type for parent in parent_resources]:
+            # Resulting referenced resource patterns cannot be resolved identical.
+            FindingContainer.addFinding(
+                FindingCategory.RESOURCE_REFERENCE_CHANGE,
+                "",
+                f"The child_type '{child_type}' and type '{parent_type}' of "
+                f"resource reference option in field '{self.field_original.name}' "
+                "cannot be resolved to the identical resource.",
+                True,
+            )
