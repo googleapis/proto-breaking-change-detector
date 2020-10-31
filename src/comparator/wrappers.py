@@ -32,6 +32,7 @@ from src.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional
 
 
+# TODO(xiaozhenliu): parse SourceCode location in each descriptor.
 @dataclasses.dataclass(frozen=True)
 class EnumValue:
     """Description of an enum value."""
@@ -65,7 +66,7 @@ class Enum:
 
 
 class Field:
-    """Description of an field."""
+    """Description of a field."""
 
     def __init__(
         self,
@@ -214,9 +215,14 @@ class Method:
 
         If it is a longrunning method, just return `.google.longrunning.Operation`
         """
-        if self.method_pb.output_type.endswith(".google.longrunning.Operation"):
+        if self.longrunning:
             return self.method_pb.output_type
         return self.method_pb.output_type.rsplit(".", 1)[-1]
+
+    @property
+    def longrunning(self) -> bool:
+        """Return True if this is a longrunning method."""
+        return self.method_pb.output_type.endswith(".google.longrunning.Operation")
 
     @property
     def paged_result_field(self) -> Optional[FieldDescriptorProto]:
@@ -225,7 +231,7 @@ class Method:
         if self.method_pb.server_streaming:
             return None
         # If the output type is `google.longrunning.Operation`, the method is not paginated.
-        if self.method_pb.output_type.endswith("google.longrunning.Operation"):
+        if self.longrunning:
             return None
         # API should provide a `string next_page_token` field in response messsage.
         # API should provide `int page_size` and `string page_token` fields in request message.
@@ -255,7 +261,7 @@ class Method:
         return None
 
     @property
-    def lro(self):
+    def lro_annotation(self):
         """Return the LRO operation_info annotation defined for this method."""
         if not self.output.endswith("google.longrunning.Operation"):
             return None
@@ -273,7 +279,7 @@ class Method:
 
     @property
     def method_signatures(self) -> Optional[Sequence[str]]:
-        """Return the signature defined for this method."""
+        """Return the signatures defined for this method."""
         signatures = self.method_pb.options.Extensions[client_pb2.method_signature]
         fields = [
             field.strip() for sig in signatures for field in sig.split(",") if field
@@ -386,5 +392,5 @@ class FileSet:
         # TODO(xiaozhenliu): check with One-platform about the version naming.
         # We should allow minor version updates, then the packaging options like
         # `java_package = "com.pubsub.v1"` will always be changed. But versions
-        # updates between two stable versions (e.g. v1 to v2) is not permitted.
+        # update between two stable versions (e.g. v1 to v2) is not permitted.
         pass

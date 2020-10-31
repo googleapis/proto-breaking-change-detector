@@ -49,8 +49,9 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(bar_method.input, "FooRequest")
         self.assertEqual(bar_method.output, ".google.longrunning.Operation")
         self.assertEqual(bar_method.paged_result_field, None)
-        self.assertEqual(bar_method.lro["response_type"], "FooResponse")
-        self.assertEqual(bar_method.lro["metadata_type"], "FooMetadata")
+        self.assertTrue(bar_method.longrunning)
+        self.assertEqual(bar_method.lro_annotation["response_type"], "FooResponse")
+        self.assertEqual(bar_method.lro_annotation["metadata_type"], "FooMetadata")
         self.assertEqual(bar_method.http_annotation["http_uri"], "/v1/example:bar")
 
     def test_message_wrapper(self):
