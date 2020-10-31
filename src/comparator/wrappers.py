@@ -53,6 +53,11 @@ class Enum:
 
     @property
     def values(self) -> Dict[int, EnumValue]:
+        """Return EnumValues in this Enum.
+
+        Returns:
+            Dict[int, EnumValue]: EnumValue is identified by number.
+        """
         return {
             enum_value.number: EnumValue(enum_value)
             for enum_value in self.enum_pb.value
@@ -60,7 +65,7 @@ class Enum:
 
 
 class Field:
-    """Description of an enum."""
+    """Description of an field."""
 
     def __init__(
         self,
@@ -68,6 +73,12 @@ class Field:
         file_resources: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
     ):
+        """file_resources: file-level resource definitions.
+        message_resource: message-level resource definition.
+
+        We need the resource database information to determine if the resource_reference
+        annotation removal or change is breaking or not.
+        """
         self.field_pb = field_pb
         self.file_resources = file_resources
         self.message_resource = message_resource
@@ -78,10 +89,20 @@ class Field:
 
     @property
     def label(self):
+        """Return the label of the field.
+
+        Returns:
+            str: "LABEL_OPTIONAL", "LABEL_REPEATED" or "LABEL_REQUIRED".
+        """
         return FieldDescriptorProto().Label.Name(self.field_pb.label)
 
     @property
     def required(self) -> bool:
+        """Return True if this field is required, False otherwise.
+
+        Returns:
+            bool: Whether this field is required in field_behavior annotation.
+        """
         return (
             field_behavior_pb2.FieldBehavior.Value("REQUIRED")
             in self.field_pb.options.Extensions[field_behavior_pb2.field_behavior]
@@ -89,19 +110,23 @@ class Field:
 
     @property
     def proto_type(self):
+        """Return the proto type constant e.g. `TYPE_ENUM`"""
         return FieldDescriptorProto().Type.Name(self.field_pb.type)
 
     @property
     def oneof(self):
+        """Return if the field is in oneof"""
         return self.field_pb.HasField("oneof_index")
 
     @property
     def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:
+        """Return the resource_reference annotation of the field if any"""
         resource_ref = self.field_pb.options.Extensions[resource_pb2.resource_reference]
         return resource_ref if resource_ref.type or resource_ref.child_type else None
 
     @property
     def child_type(self) -> bool:
+        """Return True if the resource_reference has child_type, False otherwise"""
         resource_ref = self.field_pb.options.Extensions[resource_pb2.resource_reference]
         return True if len(resource_ref.child_type) > 0 else False
 
@@ -123,6 +148,11 @@ class Message:
 
     @property
     def fields(self) -> Dict[int, Field]:
+        """Return fields in this message.
+
+        Returns:
+            Dict[int, Field]: Field is identified by number.
+        """
         return {
             field.number: Field(field, self.file_resources, self.resource)
             for field in self.message_pb.field
@@ -130,6 +160,7 @@ class Message:
 
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
+        """Return the nested messsages in the message. Message is identified by name."""
         return {
             message.name: Message(message, self.file_resources)
             for message in self.message_pb.nested_type
@@ -137,10 +168,12 @@ class Message:
 
     @property
     def nested_enums(self) -> Dict[str, Enum]:
+        """Return the nested enums in the message. Enum is identified by name."""
         return {enum.name: Enum(enum) for enum in self.message_pb.enum_type}
 
     @property
     def oneof_fields(self) -> Sequence[Field]:
+        """Return the fields list that are in the oneof."""
         return [field for field in self.fields.values() if field.oneof]
 
     @property
@@ -167,10 +200,20 @@ class Method:
 
     @property
     def input(self):
+        """Return the shortened input type of a method. We only need the name
+        of the message to query in the messages_map.
+        For example: `.example.v1.FooRequest` -> `FooRequest`
+        """
         return self.method_pb.input_type.rsplit(".", 1)[-1]
 
     @property
     def output(self):
+        """Return the shortened output type of a method. We only need the name
+        of the message to query in the messages_map.
+        For example: `.example.v1.FooResponse` -> `FooResponse`
+
+        If it is a longrunning method, just return `.google.longrunning.Operation`
+        """
         if self.method_pb.output_type.endswith(".google.longrunning.Operation"):
             return self.method_pb.output_type
         return self.method_pb.output_type.rsplit(".", 1)[-1]
@@ -239,9 +282,12 @@ class Method:
 
     @property
     def http_annotation(self):
-        # Return the http annotation defined for this method.
-        # The example return is {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
-        # return `None` if no http annotation exists.
+        """Return the http annotation defined for this method.
+        The example return is:
+        {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
+
+        return `None` if no http annotation exists.
+        """
         http = self.method_pb.options.Extensions[annotations_pb2.http]
         potential_verbs = {
             "get": http.get,
@@ -278,6 +324,7 @@ class Service:
 
     @property
     def methods(self) -> Dict[str, Method]:
+        """Return the methods defined in the service. Method is identified by name."""
         return {
             method.name: Method(method, self.messages_map)
             for method in self.service_pb.method

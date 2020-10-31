@@ -23,9 +23,7 @@ class WrappersTest(unittest.TestCase):
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet out of it.
 
-    _INVOKER = UnittestInvoker(
-        ["wrappers.proto"], "wrappers_descriptor_set.pb", True
-    )
+    _INVOKER = UnittestInvoker(["wrappers.proto"], "wrappers_descriptor_set.pb", True)
     _FILE_SET = FileSet(_INVOKER.run())
 
     def test_file_set_wrapper(self):
