@@ -26,12 +26,6 @@ class DescriptorComparator:
     ):
         self.message_original = message_original
         self.message_update = message_update
-        self.global_resources_original = (
-            message_original.file_resources if message_original else None
-        )
-        self.global_resources_update = (
-            message_update.file_resources if message_update else None
-        )
 
     def compare(self):
         # _compare method will be recursively called for nested message comparison.
@@ -51,6 +45,8 @@ class DescriptorComparator:
             FindingContainer.addFinding(FindingCategory.MESSAGE_REMOVAL, "", msg, True)
             return
 
+        self.global_resources_original = self.message_original.file_resources
+        self.global_resources_update = self.message_update.file_resources
         # 3. Check breaking changes in each fields. Note: Fields are
         # identified by number, not by name. Descriptor.fields_by_number
         # (dict int -> FieldDescriptor) indexed by number.
