@@ -16,6 +16,7 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.enum_comparator import EnumComparator
 from src.findings.finding_container import FindingContainer
+from src.comparator.wrappers import Enum
 
 
 class EnumComparatorTest(unittest.TestCase):
@@ -37,8 +38,8 @@ class EnumComparatorTest(unittest.TestCase):
     def setUp(self):
         # We take the enumDescriptorProto `phoneType` and `phoneTypeUpdate` from the original
         # and updated `_descriptor_set.pb` files for comparison.
-        self.enum_original = self._PB_ORIGNAL.file[0].message_type[0].enum_type[0]
-        self.enum_update = self._PB_UPDATE.file[0].message_type[0].enum_type[0]
+        self.enum_original = Enum(self._PB_ORIGNAL.file[0].message_type[0].enum_type[0])
+        self.enum_update = Enum(self._PB_UPDATE.file[0].message_type[0].enum_type[0])
 
     def tearDown(self):
         FindingContainer.reset()

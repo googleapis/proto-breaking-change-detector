@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.api import resource_pb2
-from google.protobuf.descriptor_pb2 import DescriptorProto
 from src.comparator.field_comparator import FieldComparator
-from src.comparator.resource_database import ResourceDatabase
+from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 
@@ -23,15 +21,17 @@ from src.findings.utils import FindingCategory
 class DescriptorComparator:
     def __init__(
         self,
-        message_original: DescriptorProto,
-        message_update: DescriptorProto,
-        global_resources_original=None,
-        global_resources_update=None,
+        message_original: Message,
+        message_update: Message,
     ):
         self.message_original = message_original
         self.message_update = message_update
-        self.global_resources_original = global_resources_original
-        self.global_resources_update = global_resources_update
+        self.global_resources_original = (
+            message_original.file_resources if message_original else None
+        )
+        self.global_resources_update = (
+            message_update.file_resources if message_update else None
+        )
 
     def compare(self):
         # _compare method will be recursively called for nested message comparison.
@@ -54,25 +54,25 @@ class DescriptorComparator:
         # 3. Check breaking changes in each fields. Note: Fields are
         # identified by number, not by name. Descriptor.fields_by_number
         # (dict int -> FieldDescriptor) indexed by number.
-        if message_original.field or message_update.field:
+        if message_original.fields or message_update.fields:
             self._compareNestedFields(
-                {f.number: f for f in message_original.field},
-                {f.number: f for f in message_update.field},
+                message_original.fields,
+                message_update.fields,
             )
 
         # 4. Check breaking changes in nested message.
         # Descriptor.nested_types_by_name (dict str -> Descriptor)
         # indexed by name. Recursively call _compare for nested
         # message type comparison.
-        if message_original.nested_type or message_update.nested_type:
+        if message_original.nested_messages or message_update.nested_messages:
             self._compareNestedMessages(
-                {m.name: m for m in message_original.nested_type},
-                {m.name: m for m in message_update.nested_type},
+                message_original.nested_messages,
+                message_update.nested_messages,
             )
         # 5. TODO(xiaozhenliu) Check breaking changes in nested enum.
 
         # 6. Check `google.api.resource` annotation.
-        self._compareResources(message_original, message_update)
+        self._compareResources(message_original.resource, message_update.resource)
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
@@ -86,10 +86,6 @@ class DescriptorComparator:
             FieldComparator(
                 fields_dict_original[fieldNumber],
                 fields_dict_update[fieldNumber],
-                self.global_resources_original,
-                self.global_resources_update,
-                self._get_resource_option(self.message_original),
-                self._get_resource_option(self.message_update),
             ).compare()
 
     def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
@@ -108,11 +104,9 @@ class DescriptorComparator:
 
     def _compareResources(
         self,
-        message_original,
-        message_update,
+        resource_original,
+        resource_update,
     ):
-        resource_original = self._get_resource_option(message_original)
-        resource_update = self._get_resource_option(message_update)
         if not resource_original and not resource_update:
             return
         # 1. A new resource definition is added.
@@ -131,6 +125,14 @@ class DescriptorComparator:
         if (resource_original and not resource_update) or (
             resource_original.type != resource_update.type
         ):
+            if not self.global_resources_update:
+                FindingContainer.addFinding(
+                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                    "",
+                    f"A message-level resource definition {resource_original.type} has been removed.",
+                    True,
+                )
+                return
             # Check if the removed resource is in the global file-level resource database.
             if resource_original.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
@@ -169,12 +171,6 @@ class DescriptorComparator:
                 f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
                 True,
             )
-
-    def _get_resource_option(self, message):
-        resource = message.options.Extensions[resource_pb2.resource]
-        if not resource.type or not resource.pattern:
-            return None
-        return resource
 
     def _compatible_patterns(self, patterns_original, patterns_update):
         # An existing pattern is removed.

@@ -12,16 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf.descriptor_pb2 import EnumDescriptorProto
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
+from src.comparator.wrappers import Enum
 
 
 class EnumComparator:
-    def __init__(
-        self, enum_original: EnumDescriptorProto, enum_update: EnumDescriptorProto
-    ):
+    def __init__(self, enum_original: Enum, enum_update: Enum):
         self.enum_original = enum_original
         self.enum_update = enum_update
 
@@ -47,8 +45,8 @@ class EnumComparator:
         # of them stay the same. Enum values are identified by number,
         # not by name.
         else:
-            enum_values_dict_original = {x.number: x for x in self.enum_original.value}
-            enum_values_dict_update = {x.number: x for x in self.enum_update.value}
+            enum_values_dict_original = self.enum_original.values
+            enum_values_dict_update = self.enum_update.values
             enum_values_keys_set_original = set(enum_values_dict_original.keys())
             enum_values_keys_set_update = set(enum_values_dict_update.keys())
             # Compare Enum values that only exist in original version
