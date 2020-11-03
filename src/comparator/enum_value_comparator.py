@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf.descriptor_pb2 import EnumValueDescriptorProto
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
+from src.comparator.wrappers import EnumValue
 
 
 class EnumValueComparator:
     def __init__(
         self,
-        enum_value_original: EnumValueDescriptorProto,
-        enum_value_update: EnumValueDescriptorProto,
+        enum_value_original: EnumValue,
+        enum_value_update: EnumValue,
     ):
         self.enum_value_original = enum_value_original
         self.enum_value_update = enum_value_update

@@ -16,7 +16,7 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.file_set_comparator import FileSetComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.comparator.wrappers import FileSet
 
 
 class FileSetComparatorTest(unittest.TestCase):
@@ -35,7 +35,9 @@ class FileSetComparatorTest(unittest.TestCase):
         _INVOKER_UPDATE = UnittestInvoker(
             ["service_v1beta1.proto"], "service_v1beta1_descriptor_set.pb"
         )
-        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        FileSetComparator(
+            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+        ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[
@@ -53,7 +55,9 @@ class FileSetComparatorTest(unittest.TestCase):
         _INVOKER_UPDATE = UnittestInvoker(
             ["message_v1beta1.proto"], "message_v1beta1_descriptor_set.pb"
         )
-        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        FileSetComparator(
+            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+        ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[
@@ -71,7 +75,9 @@ class FileSetComparatorTest(unittest.TestCase):
         _INVOKER_UPDATE = UnittestInvoker(
             ["enum_v1beta1.proto"], "enum_v1beta1_descriptor_set.pb"
         )
-        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        FileSetComparator(
+            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+        ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map["An Enum BookType is removed"].category.name,
@@ -91,7 +97,9 @@ class FileSetComparatorTest(unittest.TestCase):
             "resource_database_v1beta1_descriptor_set.pb",
             True,
         )
-        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        FileSetComparator(
+            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+        ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[
@@ -131,7 +139,9 @@ class FileSetComparatorTest(unittest.TestCase):
             "resource_reference_v1beta1_descriptor_set.pb",
             True,
         )
-        FileSetComparator(_INVOKER_ORIGNAL.run(), _INVOKER_UPDATE.run()).compare()
+        FileSetComparator(
+            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+        ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
             findings_map[

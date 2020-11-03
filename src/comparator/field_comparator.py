@@ -16,6 +16,7 @@ from google.api import resource_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
+from src.comparator.wrappers import Field
 
 
 class FieldComparator:
@@ -25,19 +26,11 @@ class FieldComparator:
     # annotation removal or change is breaking or not.
     def __init__(
         self,
-        field_original: FieldDescriptorProto,
-        field_update: FieldDescriptorProto,
-        global_resources_original=None,
-        global_resources_update=None,
-        local_resource_original=None,
-        local_resource_update=None,
+        field_original: Field,
+        field_update: Field,
     ):
         self.field_original = field_original
         self.field_update = field_update
-        self.global_resources_original = global_resources_original
-        self.global_resources_update = global_resources_update
-        self.local_resource_original = local_resource_original
-        self.local_resource_update = local_resource_update
 
     def compare(self):
         # 1. If original FieldDescriptor is None, then a
@@ -54,6 +47,11 @@ class FieldComparator:
             FindingContainer.addFinding(FindingCategory.FIELD_REMOVAL, "", msg, True)
             return
 
+        self.global_resources_original = self.field_original.file_resources
+        self.global_resources_update = self.field_update.file_resources
+        self.local_resource_original = self.field_original.message_resource
+        self.local_resource_update = self.field_update.message_resource
+
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
         if self.field_original.name != self.field_update.name:
@@ -66,29 +64,21 @@ class FieldComparator:
         # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
         if self.field_original.label != self.field_update.label:
-            option_original = FieldDescriptorProto().Label.Name(
-                self.field_original.label
-            )
-            option_update = FieldDescriptorProto().Label.Name(self.field_update.label)
-            msg = f"Repeated state of the Field is changed, the original is {option_original}, but the updated is {option_update}"
+            msg = f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}"
             FindingContainer.addFinding(
                 FindingCategory.FIELD_REPEATED_CHANGE, "", msg, True
             )
 
         # 5. If the FieldDescriptors have the same repeated state,
         # check if the type of them stay the same.
-        if self.field_original.type != self.field_update.type:
-            type_original = FieldDescriptorProto().Type.Name(self.field_original.type)
-            type_update = FieldDescriptorProto().Type.Name(self.field_update.type)
-            msg = f"Type of the field is changed, the original is {type_original}, but the updated is {type_update}"
+        if self.field_original.proto_type != self.field_update.proto_type:
+            msg = f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}"
             FindingContainer.addFinding(
                 FindingCategory.FIELD_TYPE_CHANGE, "", msg, True
             )
         # 6. Check the oneof_index of the field.
-        oneof_original = self.field_original.HasField("oneof_index")
-        oneof_update = self.field_update.HasField("oneof_index")
-        if oneof_original != oneof_update:
-            if oneof_original:
+        if self.field_original.oneof != self.field_update.oneof:
+            if self.field_original.oneof:
                 msg = f"The existing field {self.field_original.name} is moved out of One-of."
                 FindingContainer.addFinding(
                     FindingCategory.FIELD_ONEOF_REMOVAL, "", msg, True
@@ -103,8 +93,8 @@ class FieldComparator:
         self._compare_resource_reference(self.field_original, self.field_update)
 
     def _compare_resource_reference(self, field_original, field_update):
-        resource_ref_original = self._get_resource_reference(field_original)
-        resource_ref_update = self._get_resource_reference(field_update)
+        resource_ref_original = self.field_original.resource_reference
+        resource_ref_update = self.field_update.resource_reference
         # No resource_reference annotations found for the field in both versions.
         if not resource_ref_original and not resource_ref_update:
             return
@@ -129,9 +119,7 @@ class FieldComparator:
             return
         # Resource annotation is both existing in the field for original and update versions.
         # They both use `type` or `child_type`.
-        if (resource_ref_original.type and resource_ref_update.type) or (
-            resource_ref_original.child_type and resource_ref_update.child_type
-        ):
+        if field_original.child_type == field_update.child_type:
             original_type = (
                 resource_ref_original.type or resource_ref_original.child_type
             )
@@ -150,20 +138,14 @@ class FieldComparator:
         # Register the message-level resource into the global resource database,
         # so that we can query the parent resources for child_type.
         self._register_local_resource()
-        if resource_ref_original.child_type and resource_ref_update.type:
+        if field_original.child_type:
             self._is_parent_type(
                 resource_ref_original.child_type, resource_ref_update.type, True
             )
-        if resource_ref_original.type and resource_ref_update.child_type:
+        if field_update.child_type:
             self._is_parent_type(
                 resource_ref_update.child_type, resource_ref_original.type, False
             )
-
-    def _get_resource_reference(self, field):
-        reference = field.options.Extensions[resource_pb2.resource_reference]
-        if not reference.type and not reference.child_type:
-            return None
-        return reference
 
     def _resource_ref_in_local(self, resource_ref):
         """Check if the resource type is in the local resources defined by a message option."""
