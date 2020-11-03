@@ -36,15 +36,21 @@ class FieldComparator:
         # 1. If original FieldDescriptor is None, then a
         # new FieldDescriptor is added.
         if self.field_original is None:
-            msg = f"A new Field {self.field_update.name} is added."
-            FindingContainer.addFinding(FindingCategory.FIELD_ADDITION, "", msg, False)
+            FindingContainer.addFinding(
+                category=FindingCategory.FIELD_ADDITION,
+                location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
+                message=f"A new Field {self.field_update.name} is added.",
+                actionable=False)
             return
 
         # 2. If updated FieldDescriptor is None, then
         # the original FieldDescriptor is removed.
         if self.field_update is None:
-            msg = f"A Field {self.field_original.name} is removed"
-            FindingContainer.addFinding(FindingCategory.FIELD_REMOVAL, "", msg, True)
+            FindingContainer.addFinding(
+                category=FindingCategory.FIELD_REMOVAL,
+                location=f"{self.field_original.proto_file_name} Line: {self.field_original.source_code_line}",
+                message=f"A Field {self.field_original.name} is removed",
+                actionable=True)
             return
 
         self.global_resources_original = self.field_original.file_resources
@@ -55,41 +61,57 @@ class FieldComparator:
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
         if self.field_original.name != self.field_update.name:
-            msg = f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}"
             FindingContainer.addFinding(
-                FindingCategory.FIELD_NAME_CHANGE, "", msg, True
+                category=FindingCategory.FIELD_NAME_CHANGE,
+                location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
+                message=f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}",
+                actionable=True
             )
             return
 
         # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
+        # TODO(xiaozhenliu): add location information for field.label
         if self.field_original.label != self.field_update.label:
-            msg = f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}"
             FindingContainer.addFinding(
-                FindingCategory.FIELD_REPEATED_CHANGE, "", msg, True
+                category=FindingCategory.FIELD_REPEATED_CHANGE,
+                location="",
+                message=f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}",
+                actionable=True
             )
 
         # 5. If the FieldDescriptors have the same repeated state,
         # check if the type of them stay the same.
+        # TODO(xiaozhenliu): add location information for field.type
         if self.field_original.proto_type != self.field_update.proto_type:
-            msg = f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}"
             FindingContainer.addFinding(
-                FindingCategory.FIELD_TYPE_CHANGE, "", msg, True
+                category=FindingCategory.FIELD_TYPE_CHANGE,
+                location="",
+                message=f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}",
+                actionable=True
             )
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
+            location = f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}"
             if self.field_original.oneof:
                 msg = f"The existing field {self.field_original.name} is moved out of One-of."
                 FindingContainer.addFinding(
-                    FindingCategory.FIELD_ONEOF_REMOVAL, "", msg, True
+                    category=FindingCategory.FIELD_ONEOF_REMOVAL,
+                    location=location,
+                    message=msg,
+                    actionable=True
                 )
             else:
                 msg = f"The existing field {self.field_original.name} is moved into One-of."
                 FindingContainer.addFinding(
-                    FindingCategory.FIELD_ONEOF_ADDITION, "", msg, True
+                    category=FindingCategory.FIELD_ONEOF_ADDITION,
+                    location=location,
+                    message=msg,
+                    actionable=True
                 )
 
         # 6. Check `google.api.resource_reference` annotation.
+        # TODO(xiaozhenliu): add location information for field.resource_reference.
         self._compare_resource_reference(self.field_original, self.field_update)
 
     def _compare_resource_reference(self, field_original, field_update):
