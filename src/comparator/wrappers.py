@@ -31,10 +31,20 @@ from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional, Tuple
 
-# TODO(xiaozhenliu): parse SourceCode location in each descriptor.
+
+# TODO(xiaozhenliu): parse SourceCode location for properties in each descriptor.
+# For example: during comparison, we will need the source code line number for method.input.
+# The annotations cannot precisely located, because they are customized options, and we
+# use field number to get the location. For extension options, they share the same path [..., 1000].
 @dataclasses.dataclass(frozen=True)
 class EnumValue:
-    """Description of an enum value."""
+    """Description of an enum value.
+
+    proto_file_name: the proto file where the EnumValue exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the EnumValue, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     enum_value_pb: descriptor_pb2.EnumValueDescriptorProto
     proto_file_name: str
@@ -53,7 +63,13 @@ class EnumValue:
 
 @dataclasses.dataclass(frozen=True)
 class Enum:
-    """Description of an enum."""
+    """Description of an enum.
+
+    proto_file_name: the proto file where the Enum exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the Enum, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     enum_pb: descriptor_pb2.EnumDescriptorProto
     proto_file_name: str
@@ -88,7 +104,13 @@ class Enum:
 
 
 class Field:
-    """Description of a field."""
+    """Description of a field.
+
+    proto_file_name: the proto file where the Field exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the Field, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     def __init__(
         self,
@@ -169,7 +191,13 @@ class Field:
 
 
 class Message:
-    """Description of a message (defined with the ``message`` keyword)."""
+    """Description of a message (defined with the ``message`` keyword).
+
+    proto_file_name: the proto file where the Message exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the Message, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     def __init__(
         self,
@@ -268,7 +296,13 @@ class Message:
 
 
 class Method:
-    """Description of a method (defined with the ``rpc`` keyword)."""
+    """Description of a method (defined with the ``rpc`` keyword).
+
+    proto_file_name: the proto file where the Method exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the Method, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     def __init__(
         self,
@@ -411,7 +445,13 @@ class Method:
 
 
 class Service:
-    """Description of a service (defined with the ``service`` keyword)."""
+    """Description of a service (defined with the ``service`` keyword).
+
+    proto_file_name: the proto file where the Service exists.
+    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    path: the path to the MethServiceod, by querying the above dictionary using the path,
+          we can get the location information.
+    """
 
     def __init__(
         self,
@@ -507,6 +547,7 @@ class FileSet:
             ] = {}
             for location in fd.source_code_info.location:
                 source_code_locations[tuple(location.path)] = location
+
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self.packaging_options_map = self._get_packaging_options_map(fd.options)
             for resource in fd.options.Extensions[resource_pb2.resource_definition]:
