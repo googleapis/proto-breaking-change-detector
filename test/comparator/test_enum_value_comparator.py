@@ -16,7 +16,7 @@ import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
-from src.comparator.wrappers import EnumValue
+from src.comparator.wrappers import FileSet
 
 
 class EnumValueComparatorTest(unittest.TestCase):
@@ -33,9 +33,9 @@ class EnumValueComparatorTest(unittest.TestCase):
 
     def setUp(self):
         # Get `MOBILE` and `HOME` enumValueDescriptorProto from `message_v1_descriptor_set.pb`.
-        enum_type_values = self._PB_ORIGNAL.file[0].message_type[0].enum_type[0].value
-        self.enumValue_mobile = EnumValue(enum_type_values[0])
-        self.enumValue_home = EnumValue(enum_type_values[1])
+        enum_type_values = FileSet(self._PB_ORIGNAL).messages_map["Person"].nested_enums["PhoneType"].values
+        self.enumValue_mobile = enum_type_values[0]
+        self.enumValue_home = enum_type_values[1]
 
     def tearDown(self):
         FindingContainer.reset()

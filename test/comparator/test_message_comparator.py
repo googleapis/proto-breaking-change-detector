@@ -15,7 +15,7 @@
 import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.message_comparator import DescriptorComparator
-from src.comparator.wrappers import Message
+from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
 
 
@@ -38,10 +38,10 @@ class DescriptorComparatorTest(unittest.TestCase):
     def setUp(self):
         # Get `Person` and `AddressBook` DescriptoProto from the
         # original and updated `*_descriptor_set.pb` files.
-        self.person_msg = Message(self._PB_ORIGNAL.file[0].message_type[0])
-        self.person_msg_update = Message(self._PB_UPDATE.file[0].message_type[0])
-        self.addressBook_msg = Message(self._PB_ORIGNAL.file[0].message_type[1])
-        self.addressBook_msg_update = Message(self._PB_UPDATE.file[0].message_type[1])
+        self.person_msg = FileSet(self._PB_ORIGNAL).messages_map["Person"]
+        self.person_msg_update = FileSet(self._PB_UPDATE).messages_map["Person"]
+        self.addressBook_msg = FileSet(self._PB_ORIGNAL).messages_map["AddressBook"]
+        self.addressBook_msg_update = FileSet(self._PB_UPDATE).messages_map["AddressBook"]
 
     def tearDown(self):
         FindingContainer.reset()
