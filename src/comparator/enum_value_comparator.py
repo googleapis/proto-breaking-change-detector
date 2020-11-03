@@ -29,19 +29,25 @@ class EnumValueComparator:
     def compare(self):
         # 1. If original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
-            msg = f"A new EnumValue {self.enum_value_update.name} is added."
             FindingContainer.addFinding(
-                FindingCategory.ENUM_VALUE_ADDITION, "", msg, False
+                category=FindingCategory.ENUM_VALUE_ADDITION,
+                location=f"{self.enum_value_update.proto_file_name} Line: {self.enum_value_update.source_code_line}",
+                message=f"A new EnumValue {self.enum_value_update.name} is added.",
+                actionable=False,
             )
         # 2. If updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
-            msg = f"An EnumValue {self.enum_value_original.name} is removed"
             FindingContainer.addFinding(
-                FindingCategory.ENUM_VALUE_REMOVAL, "", msg, True
+                category=FindingCategory.ENUM_VALUE_REMOVAL,
+                location=f"{self.enum_value_original.proto_file_name} Line: {self.enum_value_original.source_code_line}",
+                message=f"An EnumValue {self.enum_value_original.name} is removed",
+                actionable=True,
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is changed.
         elif self.enum_value_original.name != self.enum_value_update.name:
-            msg = f"Name of the EnumValue is changed, the original is {self.enum_value_original.name}, but the updated is {self.enum_value_update.name}"
             FindingContainer.addFinding(
-                FindingCategory.ENUM_VALUE_NAME_CHANGE, "", msg, True
+                category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
+                location=f"{self.enum_value_update.proto_file_name} Line: {self.enum_value_update.source_code_line}",
+                message=f"Name of the EnumValue is changed, the original is {self.enum_value_original.name}, but the updated is {self.enum_value_update.name}",
+                actionable=True,
             )
