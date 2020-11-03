@@ -44,16 +44,7 @@ class EnumComparator:
                 actionable=True,
             )
 
-        # 3. If both EnumDescriptors are existing, check if the name is changed.
-        elif self.enum_original.name != self.enum_update.name:
-            FindingContainer.addFinding(
-                category=FindingCategory.ENUM_NAME_CHANGE,
-                location=f"{self.enum_update.proto_file_name} Line: {self.enum_update.source_code_line}",
-                message=f"Name of the Enum is changed, the original is {self.enum_original.name}, but the updated is {self.enum_update.name}",
-                actionable=True,
-            )
-
-        # 4. If the EnumDescriptors have the same name, check the values
+        # 3. If the EnumDescriptors have the same name, check the values
         # of them stay the same. Enum values are identified by number,
         # not by name.
         else:
