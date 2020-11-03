@@ -1,8 +1,7 @@
 import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.service_comparator import ServiceComparator
-from src.comparator.wrappers import Service
-from src.comparator.wrappers import Message
+from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
 
 
@@ -30,38 +29,19 @@ class DescriptorComparatorTest(unittest.TestCase):
 
     def setUp(self):
         # Get `Example` service from the original and updated `service_*.proto` files.
-        service_v1_pb = self._INVOKER_SERVICE_ORIGNAL.run()
-        service_v1beta1_pb = self._INVOKER_SERVICE_UPDATE.run()
-        self.messages_map_original = {
-            m.name: Message(m) for m in service_v1_pb.file[0].message_type
-        }
-        self.messages_map_update = {
-            m.name: Message(m) for m in service_v1beta1_pb.file[0].message_type
-        }
-        self.service_original = Service(
-            service_v1_pb.file[0].service[0], self.messages_map_original
-        )
-        self.service_update = Service(
-            service_v1beta1_pb.file[0].service[0], self.messages_map_update
-        )
+        self.service_original = FileSet(
+            self._INVOKER_SERVICE_ORIGNAL.run()
+        ).services_map["Example"]
+        self.service_update = FileSet(self._INVOKER_SERVICE_UPDATE.run()).services_map[
+            "Example"
+        ]
         # Get `Example` service from the original and updated `service_annotation_*.proto` files.
-        service_annotation_v1_pb = self._INVOKER_ANNOTATION_ORIGNAL.run()
-        service_annotation_v1beta1_pb = self._INVOKER_ANNOTATION_UPDATE.run()
-        self.annotation_messages_map_original = {
-            m.name: Message(m) for m in service_annotation_v1_pb.file[0].message_type
-        }
-        self.annotation_messages_map_update = {
-            m.name: Message(m)
-            for m in service_annotation_v1beta1_pb.file[0].message_type
-        }
-        self.service_annotation_original = Service(
-            service_annotation_v1_pb.file[0].service[0],
-            self.annotation_messages_map_original,
-        )
-        self.service_annotation_update = Service(
-            service_annotation_v1beta1_pb.file[0].service[0],
-            self.annotation_messages_map_update,
-        )
+        self.service_annotation_original = FileSet(
+            self._INVOKER_ANNOTATION_ORIGNAL.run()
+        ).services_map["Example"]
+        self.service_annotation_update = FileSet(
+            self._INVOKER_ANNOTATION_UPDATE.run()
+        ).services_map["Example"]
 
     def tearDown(self):
         FindingContainer.reset()

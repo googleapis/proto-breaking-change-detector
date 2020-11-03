@@ -46,6 +46,7 @@ class UnittestInvoker:
             protoc_command.append(f"--proto_path={self._PROTOBUF_PROTOS_DIR}")
         descriptor_set_output = os.path.join(self._PROTOS_DIR, self.descriptor_set_file)
         protoc_command.append(f"-o{descriptor_set_output}")
+        protoc_command.append("--include_source_info")
         protoc_command.extend(
             os.path.join(self._PROTOS_DIR, pf) for pf in self.proto_files
         )
