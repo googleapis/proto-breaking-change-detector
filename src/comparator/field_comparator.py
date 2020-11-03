@@ -40,7 +40,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_ADDITION,
                 location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
                 message=f"A new Field {self.field_update.name} is added.",
-                actionable=False)
+                actionable=False,
+            )
             return
 
         # 2. If updated FieldDescriptor is None, then
@@ -50,7 +51,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REMOVAL,
                 location=f"{self.field_original.proto_file_name} Line: {self.field_original.source_code_line}",
                 message=f"A Field {self.field_original.name} is removed",
-                actionable=True)
+                actionable=True,
+            )
             return
 
         self.global_resources_original = self.field_original.file_resources
@@ -65,7 +67,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_NAME_CHANGE,
                 location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
                 message=f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}",
-                actionable=True
+                actionable=True,
             )
             return
 
@@ -77,7 +79,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
                 location="",
                 message=f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}",
-                actionable=True
+                actionable=True,
             )
 
         # 5. If the FieldDescriptors have the same repeated state,
@@ -88,7 +90,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 location="",
                 message=f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}",
-                actionable=True
+                actionable=True,
             )
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
@@ -99,7 +101,7 @@ class FieldComparator:
                     category=FindingCategory.FIELD_ONEOF_REMOVAL,
                     location=location,
                     message=msg,
-                    actionable=True
+                    actionable=True,
                 )
             else:
                 msg = f"The existing field {self.field_original.name} is moved into One-of."
@@ -107,7 +109,7 @@ class FieldComparator:
                     category=FindingCategory.FIELD_ONEOF_ADDITION,
                     location=location,
                     message=msg,
-                    actionable=True
+                    actionable=True,
                 )
 
         # 6. Check `google.api.resource_reference` annotation.

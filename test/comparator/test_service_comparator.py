@@ -74,7 +74,9 @@ class DescriptorComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         method_removal_finding = findings_map["An rpc method shouldRemove is removed"]
         self.assertEqual(method_removal_finding.category.name, "METHOD_REMOVAL")
-        self.assertEqual(method_removal_finding.location.path, "service_v1.proto Line: 11")
+        self.assertEqual(
+            method_removal_finding.location.path, "service_v1.proto Line: 11"
+        )
         self.assertEqual(
             findings_map[
                 "Input type of method Foo is changed from FooRequest to FooRequestUpdate"
