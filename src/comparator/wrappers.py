@@ -58,6 +58,7 @@ class EnumValue:
     def source_code_line(self):
         """Return the start line number of source code in the proto file. This is zero-based."""
         location = self.source_code_locations[self.path]
+        # The line number is zero-based, +1 to get the actual line number in .proto file.
         return location.span[0] + 1
 
 
@@ -86,6 +87,8 @@ class Enum:
         Returns:
             Dict[int, EnumValue]: EnumValue is identified by number.
         """
+        # EnumDescriptorProto.value has field number 2.
+        # So we append (2, value_index) to the path.
         return {
             enum_value.number: EnumValue(
                 enum_value,
@@ -226,6 +229,8 @@ class Message:
         Returns:
             Dict[int, Field]: Field is identified by number.
         """
+        # DescriptorProto.field has field number 2.
+        # So we append (2, field_index) to the path.
         return {
             field.number: Field(
                 field,
@@ -245,6 +250,8 @@ class Message:
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
         """Return the nested messsages in the message. Message is identified by name."""
+        # DescriptorProto.nested_type has field number 3.
+        # So we append (3, nested_message_index) to the path.
         return {
             message.name: Message(
                 message,
@@ -263,6 +270,8 @@ class Message:
     @property
     def nested_enums(self) -> Dict[str, Enum]:
         """Return the nested enums in the message. Enum is identified by name."""
+        # DescriptorProto.enum_type has field number 4.
+        # So we append (4, nested_enum_index) to the path.
         return {
             enum.name: Enum(
                 enum,
@@ -476,6 +485,8 @@ class Service:
     @property
     def methods(self) -> Dict[str, Method]:
         """Return the methods defined in the service. Method is identified by name."""
+        # ServiceDescriptorProto.method has field number 2.
+        # So we append (2, method_index) to the path.
         return {
             method.name: Method(
                 method,
