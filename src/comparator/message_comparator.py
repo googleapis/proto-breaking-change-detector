@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from src.comparator.field_comparator import FieldComparator
+from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
@@ -65,7 +66,12 @@ class DescriptorComparator:
                 message_original.nested_messages,
                 message_update.nested_messages,
             )
-        # 5. TODO(xiaozhenliu) Check breaking changes in nested enum.
+        # 5. Check breaking changes in nested enum.
+        if message_original.nested_enums or message_update.nested_enums:
+            self._compareNestedEnums(
+                message_original.nested_enums,
+                message_update.nested_enums,
+            )
 
         # 6. Check `google.api.resource` annotation.
         self._compareResources(message_original.resource, message_update.resource)
@@ -97,6 +103,20 @@ class DescriptorComparator:
                 nested_msg_dict_original[msgName],
                 nested_msg_dict_update[msgName],
             )
+
+    def _compareNestedEnums(self, nested_enum_dict_original, nested_enum_dict_update):
+        enum_name_original = set(nested_enum_dict_original.keys())
+        enum_name_update = set(nested_enum_dict_update.keys())
+
+        for name in enum_name_original - enum_name_update:
+            EnumComparator(nested_enum_dict_original[name], None).compare()
+        for name in enum_name_update - enum_name_original:
+            EnumComparator(None, nested_enum_dict_update[name]).compare()
+        for name in enum_name_original & enum_name_update:
+            EnumComparator(
+                nested_enum_dict_original[name],
+                nested_enum_dict_update[name],
+            ).compare()
 
     def _compareResources(
         self,
