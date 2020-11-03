@@ -144,6 +144,11 @@ class Field:
         return self.field_pb.name
 
     @property
+    def number(self):
+        """Return the number of the field."""
+        return self.field_pb.number
+
+    @property
     def label(self):
         """Return the label of the field.
 
@@ -359,10 +364,20 @@ class Method:
         return self.method_pb.output_type.endswith(".google.longrunning.Operation")
 
     @property
+    def client_streaming(self) -> bool:
+        """Return True if this is a client-streamign method."""
+        return self.method_pb.client_streaming
+
+    @property
+    def server_streaming(self) -> bool:
+        """Return True if this is a server-streaming method."""
+        return self.method_pb.server_streaming
+
+    @property
     def paged_result_field(self) -> Optional[FieldDescriptorProto]:
         """Return the response pagination field if the method is paginated."""
         # (AIP 158) The response must not be a streaming response for a paginated method.
-        if self.method_pb.server_streaming:
+        if self.server_streaming:
             return None
         # If the output type is `google.longrunning.Operation`, the method is not paginated.
         if self.longrunning:
@@ -383,7 +398,7 @@ class Method:
             (response_fields_map, "TYPE_STRING", "next_page_token"),
         ):
             field = page_field[0].get(page_field[2], None)
-            if not field or field.type != page_field[1]:
+            if not field or field.proto_type != page_field[1]:
                 return None
 
         # Return the first repeated field.

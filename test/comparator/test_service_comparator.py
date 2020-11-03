@@ -1,8 +1,9 @@
 import unittest
 from test.tools.invoker import UnittestInvoker
 from src.comparator.service_comparator import ServiceComparator
+from src.comparator.wrappers import Service
+from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
 
 
 class DescriptorComparatorTest(unittest.TestCase):
@@ -31,27 +32,36 @@ class DescriptorComparatorTest(unittest.TestCase):
         # Get `Example` service from the original and updated `service_*.proto` files.
         service_v1_pb = self._INVOKER_SERVICE_ORIGNAL.run()
         service_v1beta1_pb = self._INVOKER_SERVICE_UPDATE.run()
-        self.service_original = service_v1_pb.file[0].service[0]
-        self.service_update = service_v1beta1_pb.file[0].service[0]
         self.messages_map_original = {
-            m.name: m for m in service_v1_pb.file[0].message_type
+            m.name: Message(m) for m in service_v1_pb.file[0].message_type
         }
         self.messages_map_update = {
-            m.name: m for m in service_v1beta1_pb.file[0].message_type
+            m.name: Message(m) for m in service_v1beta1_pb.file[0].message_type
         }
+        self.service_original = Service(
+            service_v1_pb.file[0].service[0], self.messages_map_original
+        )
+        self.service_update = Service(
+            service_v1beta1_pb.file[0].service[0], self.messages_map_update
+        )
         # Get `Example` service from the original and updated `service_annotation_*.proto` files.
         service_annotation_v1_pb = self._INVOKER_ANNOTATION_ORIGNAL.run()
         service_annotation_v1beta1_pb = self._INVOKER_ANNOTATION_UPDATE.run()
-        self.service_annotation_original = service_annotation_v1_pb.file[0].service[0]
-        self.service_annotation_update = service_annotation_v1beta1_pb.file[0].service[
-            0
-        ]
         self.annotation_messages_map_original = {
-            m.name: m for m in service_annotation_v1_pb.file[0].message_type
+            m.name: Message(m) for m in service_annotation_v1_pb.file[0].message_type
         }
         self.annotation_messages_map_update = {
-            m.name: m for m in service_annotation_v1beta1_pb.file[0].message_type
+            m.name: Message(m)
+            for m in service_annotation_v1beta1_pb.file[0].message_type
         }
+        self.service_annotation_original = Service(
+            service_annotation_v1_pb.file[0].service[0],
+            self.annotation_messages_map_original,
+        )
+        self.service_annotation_update = Service(
+            service_annotation_v1beta1_pb.file[0].service[0],
+            self.annotation_messages_map_update,
+        )
 
     def tearDown(self):
         FindingContainer.reset()
@@ -60,8 +70,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_original,
             None,
-            self.messages_map_original,
-            self.messages_map_update,
         ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A service Example is removed")
@@ -71,8 +79,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             None,
             self.service_original,
-            self.messages_map_original,
-            self.messages_map_update,
         ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new service Example is added.")
@@ -82,8 +88,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_original,
             self.service_update,
-            self.messages_map_original,
-            self.messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
@@ -125,8 +129,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_annotation_original,
             self.service_annotation_update,
-            self.annotation_messages_map_original,
-            self.annotation_messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
@@ -140,8 +142,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_annotation_original,
             self.service_annotation_update,
-            self.annotation_messages_map_original,
-            self.annotation_messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         self.assertEqual(
@@ -155,8 +155,6 @@ class DescriptorComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_annotation_original,
             self.service_annotation_update,
-            self.annotation_messages_map_original,
-            self.annotation_messages_map_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         # TODO(xiaozhenliu): This should be removed once we have version updates
