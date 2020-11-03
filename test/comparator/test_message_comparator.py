@@ -53,12 +53,14 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A message Person is removed")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 5")
 
     def test_message_addition(self):
         DescriptorComparator(None, self.addressBook_msg).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new message AddressBook is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 27")
 
     def test_field_change(self):
         # There is field change in message `Person`. Type of field `id`
@@ -75,11 +77,12 @@ class DescriptorComparatorTest(unittest.TestCase):
     def test_nested_message_change(self):
         # Field `type` in the nested message `PhoneNumber` is removed.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
-        findingLength = len(FindingContainer.getAllFindings())
+        finding = FindingContainer.getAllFindings()[len(FindingContainer.getAllFindings()) - 1]
         self.assertEqual(
-            FindingContainer.getAllFindings()[findingLength - 1].category.name,
+            finding.category.name,
             "FIELD_REMOVAL",
         )
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 18")
 
     @classmethod
     def tearDownClass(cls):

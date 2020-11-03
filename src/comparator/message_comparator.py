@@ -34,15 +34,20 @@ class DescriptorComparator:
     def _compare(self, message_original, message_update):
         # 1. If original message is None, then a new message is added.
         if message_original is None:
-            msg = f"A new message {message_update.name} is added."
             FindingContainer.addFinding(
-                FindingCategory.MESSAGE_ADDITION, "", msg, False
+                category=FindingCategory.MESSAGE_ADDITION,
+                location=f"{message_update.proto_file_name} Line: {message_update.source_code_line}",
+                message=f"A new message {message_update.name} is added.",
+                actionable=False
             )
             return
         # 2. If updated message is None, then the original message is removed.
         if message_update is None:
-            msg = f"A message {message_original.name} is removed"
-            FindingContainer.addFinding(FindingCategory.MESSAGE_REMOVAL, "", msg, True)
+            FindingContainer.addFinding(
+                category=FindingCategory.MESSAGE_REMOVAL,
+                location=f"{message_original.proto_file_name} Line: {message_original.source_code_line}",
+                message=f"A message {message_original.name} is removed",
+                actionable=True)
             return
 
         self.global_resources_original = self.message_original.file_resources
@@ -68,6 +73,7 @@ class DescriptorComparator:
         # 5. TODO(xiaozhenliu) Check breaking changes in nested enum.
 
         # 6. Check `google.api.resource` annotation.
+        # TODO(xiaozhenliu): add source code information for resource annotation.
         self._compareResources(message_original.resource, message_update.resource)
 
     def _compareNestedFields(self, fields_dict_original, fields_dict_update):
@@ -108,10 +114,10 @@ class DescriptorComparator:
         # 1. A new resource definition is added.
         if not resource_original and resource_update:
             FindingContainer.addFinding(
-                FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                "",
-                f"A message-level resource definition {resource_update.type} has been added.",
-                False,
+                category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
+                location="",
+                message=f"A message-level resource definition {resource_update.type} has been added.",
+                actionable=False,
             )
             return
         # 2. Message-level resource definitions removal may not be breaking change since
@@ -123,19 +129,19 @@ class DescriptorComparator:
         ):
             if not self.global_resources_update:
                 FindingContainer.addFinding(
-                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    "",
-                    f"A message-level resource definition {resource_original.type} has been removed.",
-                    True,
+                    category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                    location="",
+                    message=f"A message-level resource definition {resource_original.type} has been removed.",
+                    actionable=True,
                 )
                 return
             # Check if the removed resource is in the global file-level resource database.
             if resource_original.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
-                    FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    "",
-                    f"A message-level resource definition {resource_original.type} has been removed.",
-                    True,
+                    category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                    location="",
+                    message=f"A message-level resource definition {resource_original.type} has been removed.",
+                    actionable=True,
                 )
             else:
                 # Check the patterns of existing file-level resource are compatible with
@@ -150,10 +156,10 @@ class DescriptorComparator:
                     resource_original.pattern, global_resource_pattern
                 ):
                     FindingContainer.addFinding(
-                        FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                        "",
-                        f"A message-level resource definition {resource_original.type} has been removed.",
-                        True,
+                        category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                        location="",
+                        message=f"A message-level resource definition {resource_original.type} has been removed.",
+                        actionable=True,
                     )
             return
         # Resource is existing in both original and update versions.
@@ -162,10 +168,10 @@ class DescriptorComparator:
             resource_original.pattern, resource_update.pattern
         ):
             FindingContainer.addFinding(
-                FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                "",
-                f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
-                True,
+                category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                location="",
+                message=f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
+                actionable=True,
             )
 
     def _compatible_patterns(self, patterns_original, patterns_update):
