@@ -31,15 +31,21 @@ class ServiceComparator:
     def compare(self):
         # 1. If original service is None, then a new service is added.
         if self.service_original is None:
-            msg = f"A new service {self.service_update.name} is added."
             FindingContainer.addFinding(
-                FindingCategory.SERVICE_ADDITION, "", msg, False
+                category=FindingCategory.SERVICE_ADDITION,
+                location=f"{self.service_update.proto_file_name} Line: {self.service_update.source_code_line}",
+                message=f"A new service {self.service_update.name} is added.",
+                actionable=False,
             )
             return
         # 2. If updated service is None, then the original service is removed.
         if self.service_update is None:
-            msg = f"A service {self.service_original.name} is removed"
-            FindingContainer.addFinding(FindingCategory.SERVICE_REMOVAL, "", msg, True)
+            FindingContainer.addFinding(
+                category=FindingCategory.SERVICE_REMOVAL,
+                location=f"{self.service_original.proto_file_name} Line: {self.service_original.source_code_line}",
+                message=f"A service {self.service_original.name} is removed",
+                actionable=True,
+            )
             return
         self.messages_map_original = self.service_original.messages_map
         self.messages_map_update = self.service_update.messages_map
@@ -64,12 +70,22 @@ class ServiceComparator:
         methods_update_keys = set(methods_update.keys())
         # 3.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
-            msg = f"An rpc method {name} is removed"
-            FindingContainer.addFinding(FindingCategory.METHOD_REMOVAL, "", msg, True)
+            removed_method = methods_original[name]
+            FindingContainer.addFinding(
+                category=FindingCategory.METHOD_REMOVAL,
+                location=f"{removed_method.proto_file_name} Line: {removed_method.source_code_line}",
+                message=f"An rpc method {name} is removed",
+                actionable=True,
+            )
         # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
-            msg = f"An rpc method {name} is added"
-            FindingContainer.addFinding(FindingCategory.METHOD_ADDTION, "", msg, False)
+            added_method = methods_update[name]
+            FindingContainer.addFinding(
+                category=FindingCategory.METHOD_ADDTION,
+                location=f"{added_method.proto_file_name} Line: {added_method.source_code_line}",
+                message=f"An rpc method {name} is added",
+                actionable=False,
+            )
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
             method_update = methods_update[name]
@@ -77,36 +93,53 @@ class ServiceComparator:
             input_type_original = method_original.input
             input_type_update = method_update.input
             if input_type_original != input_type_update:
-                msg = f"Input type of method {name} is changed from {input_type_original} to {input_type_update}"
+                # TODO(xiaozhenliu): add location information for method.input
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_INPUT_TYPE_CHANGE, "", msg, True
+                    category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
+                    location="",
+                    message=f"Input type of method {name} is changed from {input_type_original} to {input_type_update}",
+                    actionable=True,
                 )
             # 3.4 The response type of an RPC method is changed.
             response_type_original = method_original.output
             response_type_update = method_update.output
             if response_type_original != response_type_update:
-                msg = f"Output type of method {name} is changed from {response_type_original} to {response_type_update}"
+                # TODO(xiaozhenliu): add location information for method.output
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_RESPONSE_TYPE_CHANGE, "", msg, True
+                    category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
+                    location="",
+                    message=f"Output type of method {name} is changed from {response_type_original} to {response_type_update}",
+                    actionable=True,
                 )
             # 3.5 The request streaming state of an RPC method is changed.
             if method_original.client_streaming != method_update.client_streaming:
-                msg = f"The request streaming type of method {name} is changed"
+                # TODO(xiaozhenliu): add location information for method.client_streaming
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_CLIENT_STREAMING_CHANGE, "", msg, True
+                    category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
+                    location="",
+                    message=f"The request streaming type of method {name} is changed",
+                    actionable=True,
                 )
             # 3.6 The response streaming state of an RPC method is changed.
             if method_original.server_streaming != method_update.server_streaming:
-                msg = f"The response streaming type of method {name} is changed"
+                # TODO(xiaozhenliu): add location information for method.server_streaming
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_SERVER_STREAMING_CHANGE, "", msg, True
+                    category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
+                    location="",
+                    message=f"The response streaming type of method {name} is changed",
+                    actionable=True,
                 )
             # 3.7 The paginated response of an RPC method is changed.
             if method_original.paged_result_field != method_update.paged_result_field:
-                msg = f"The paginated response of method {name} is changed"
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE, "", msg, True
+                    category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
+                    location=f"{method_update.proto_file_name} Line: {method_update.source_code_line}",
+                    message=f"The paginated response of method {name} is changed",
+                    actionable=True,
                 )
+            # TODO(xiaozhenliu): add lsource code information for annotations.
+            # The customized annotation options share the same field number (1000)
+            # in MethodDescriptorProto.options.
             # 3.8 The method_signature annotation is changed.
             signatures_original = method_original.method_signatures
             signatures_update = method_update.method_signatures

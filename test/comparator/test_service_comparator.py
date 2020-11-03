@@ -54,6 +54,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A service Example is removed")
         self.assertEqual(finding.category.name, "SERVICE_REMOVAL")
+        self.assertEqual(finding.location.path, "service_v1.proto Line: 5")
 
     def test_service_addition(self):
         ServiceComparator(
@@ -63,6 +64,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new service Example is added.")
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
+        self.assertEqual(finding.location.path, "service_v1.proto Line: 5")
 
     def test_method_change(self):
         ServiceComparator(
@@ -70,10 +72,9 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.service_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        self.assertEqual(
-            findings_map["An rpc method shouldRemove is removed"].category.name,
-            "METHOD_REMOVAL",
-        )
+        method_removal_finding = findings_map["An rpc method shouldRemove is removed"]
+        self.assertEqual(method_removal_finding.category.name, "METHOD_REMOVAL")
+        self.assertEqual(method_removal_finding.location.path, "service_v1.proto Line: 11")
         self.assertEqual(
             findings_map[
                 "Input type of method Foo is changed from FooRequest to FooRequestUpdate"
