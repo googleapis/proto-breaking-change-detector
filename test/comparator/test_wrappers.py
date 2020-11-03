@@ -48,10 +48,10 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_method.paged_result_field, None)
         self.assertEqual(foo_method.method_signatures, ["content", "error"])
         self.assertEqual(foo_method.http_annotation["http_uri"], "/v1/example:foo")
-        self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
 
         # Method `Foo` is defined at Line21 in .proto file.
         self.assertEqual(foo_method.source_code_line, 21)
+        self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
 
         self.assertEqual(bar_method.input, "FooRequest")
         self.assertEqual(bar_method.output, ".google.longrunning.Operation")
