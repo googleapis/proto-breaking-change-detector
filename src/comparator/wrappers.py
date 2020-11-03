@@ -56,9 +56,9 @@ class EnumValue:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
-        # The line number is zero-based, +1 to get the actual line number in .proto file.
+        # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
         return location.span[0] + 1
 
 
@@ -101,7 +101,7 @@ class Enum:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
         return location.span[0] + 1
 
@@ -193,7 +193,7 @@ class Field:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
         return location.span[0] + 1
 
@@ -227,6 +227,7 @@ class Message:
     def name(self) -> str:
         return self.message_pb.name
 
+    # fmt: off
     @property
     def fields(self) -> Dict[int, Field]:
         """Return fields in this message.
@@ -241,11 +242,7 @@ class Message:
                 field,
                 self.proto_file_name,
                 self.source_code_locations,
-                self.path
-                + (
-                    2,
-                    i,
-                ),
+                self.path + (2, i,),
                 self.file_resources,
                 self.resource,
             )
@@ -262,11 +259,7 @@ class Message:
                 message,
                 self.proto_file_name,
                 self.source_code_locations,
-                self.path
-                + (
-                    3,
-                    i,
-                ),
+                self.path + (3, i,),
                 self.file_resources,
             )
             for i, message in enumerate(self.message_pb.nested_type)
@@ -282,14 +275,11 @@ class Message:
                 enum,
                 self.proto_file_name,
                 self.source_code_locations,
-                self.path
-                + (
-                    4,
-                    i,
-                ),
+                self.path + (4, i,),
             )
             for i, enum in enumerate(self.message_pb.enum_type)
         }
+    # fmt: on
 
     @property
     def oneof_fields(self) -> Sequence[Field]:
@@ -304,7 +294,7 @@ class Message:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
         return location.span[0] + 1
 
@@ -463,7 +453,7 @@ class Method:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
         return location.span[0] + 1
 
@@ -502,20 +492,18 @@ class Service:
         """Return the methods defined in the service. Method is identified by name."""
         # ServiceDescriptorProto.method has field number 2.
         # So we append (2, method_index) to the path.
+        # fmt: off
         return {
             method.name: Method(
                 method,
                 self.messages_map,
                 self.proto_file_name,
                 self.source_code_locations,
-                self.path
-                + (
-                    2,
-                    i,
-                ),
+                self.path + (2, i,),
             )
             for i, method in enumerate(self.service_pb.method)
         }
+        # fmt: on
 
     @property
     def host(self) -> Optional[str]:
@@ -546,7 +534,7 @@ class Service:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file. This is zero-based."""
+        """Return the start line number of source code in the proto file."""
         location = self.source_code_locations[self.path]
         return location.span[0] + 1
 
@@ -579,6 +567,7 @@ class FileSet:
             for resource in fd.options.Extensions[resource_pb2.resource_definition]:
                 self.resources_database.register_resource(resource)
             # FileDescriptorProto.message_type has field number 4
+            # fmt: off
             self.messages_map.update(
                 (
                     message.name,
@@ -586,11 +575,7 @@ class FileSet:
                         message,
                         fd.name,
                         source_code_locations,
-                        path
-                        + (
-                            4,
-                            i,
-                        ),
+                        path + (4, i,),
                         self.resources_database,
                     ),
                 )
@@ -605,11 +590,7 @@ class FileSet:
                         self.messages_map,
                         fd.name,
                         source_code_locations,
-                        path
-                        + (
-                            6,
-                            i,
-                        ),
+                        path + (6, i,),
                     ),
                 )
                 for i, service in enumerate(fd.service)
@@ -622,15 +603,12 @@ class FileSet:
                         enum,
                         fd.name,
                         source_code_locations,
-                        path
-                        + (
-                            5,
-                            i,
-                        ),
+                        path + (5, i,),
                     ),
                 )
                 for i, enum in enumerate(fd.enum_type)
             )
+            # fmt: on
 
     def _get_packaging_options_map(self, file_options: descriptor_pb2.FileOptions):
         # TODO(xiaozhenliu): check with One-platform about the version naming.

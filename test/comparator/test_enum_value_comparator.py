@@ -33,7 +33,12 @@ class EnumValueComparatorTest(unittest.TestCase):
 
     def setUp(self):
         # Get `MOBILE` and `HOME` enumValueDescriptorProto from `message_v1_descriptor_set.pb`.
-        enum_type_values = FileSet(self._PB_ORIGNAL).messages_map["Person"].nested_enums["PhoneType"].values
+        enum_type_values = (
+            FileSet(self._PB_ORIGNAL)
+            .messages_map["Person"]
+            .nested_enums["PhoneType"]
+            .values
+        )
         self.enumValue_mobile = enum_type_values[0]
         self.enumValue_home = enum_type_values[1]
 

@@ -41,7 +41,9 @@ class DescriptorComparatorTest(unittest.TestCase):
         self.person_msg = FileSet(self._PB_ORIGNAL).messages_map["Person"]
         self.person_msg_update = FileSet(self._PB_UPDATE).messages_map["Person"]
         self.addressBook_msg = FileSet(self._PB_ORIGNAL).messages_map["AddressBook"]
-        self.addressBook_msg_update = FileSet(self._PB_UPDATE).messages_map["AddressBook"]
+        self.addressBook_msg_update = FileSet(self._PB_UPDATE).messages_map[
+            "AddressBook"
+        ]
 
     def tearDown(self):
         FindingContainer.reset()

@@ -38,8 +38,12 @@ class EnumComparatorTest(unittest.TestCase):
     def setUp(self):
         # We take the enumDescriptorProto `phoneType` and `phoneType` from the original
         # and updated `_descriptor_set.pb` files for comparison.
-        self.enum_original = FileSet(self._PB_ORIGNAL).messages_map["Person"].nested_enums["PhoneType"]
-        self.enum_update = FileSet(self._PB_UPDATE).messages_map["Person"].nested_enums["PhoneType"]
+        self.enum_original = (
+            FileSet(self._PB_ORIGNAL).messages_map["Person"].nested_enums["PhoneType"]
+        )
+        self.enum_update = (
+            FileSet(self._PB_UPDATE).messages_map["Person"].nested_enums["PhoneType"]
+        )
 
     def tearDown(self):
         FindingContainer.reset()

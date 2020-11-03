@@ -36,29 +36,22 @@ class FieldComparatorTest(unittest.TestCase):
     _PB_UPDATE = _INVOKER_UPDATE.run()
 
     def setUp(self):
-        person_fields_v1 = FileSet(self._PB_ORIGNAL).messages_map["Person"].fields
-        person_fields_v1beta1 = FileSet(self._PB_UPDATE).messages_map["Person"].fields
-        self.name_field_v1 = person_fields_v1[1]
-        self.id_field_v1 = person_fields_v1[2]
-        self.id_field_v1beta1 = person_fields_v1beta1[2]
-        self.email_field_v1 = person_fields_v1[3]
-        self.email_field_v1beta1 = person_fields_v1beta1[3]
-        self.phones_field_v1 = person_fields_v1[4]
-        self.phones_field_v1beta1 = person_fields_v1beta1[4]
-        self.single_field_v1 = person_fields_v1[5]
-        self.single_field_v1beta1 = person_fields_v1beta1[5]
+        self.person_fields_v1 = FileSet(self._PB_ORIGNAL).messages_map["Person"].fields
+        self.person_fields_v1beta1 = (
+            FileSet(self._PB_UPDATE).messages_map["Person"].fields
+        )
 
     def tearDown(self):
         FindingContainer.reset()
 
     def test_field_removal(self):
-        FieldComparator(self.name_field_v1, None).compare()
+        FieldComparator(self.person_fields_v1[1], None).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A Field name is removed")
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
 
     def test_field_addition(self):
-        FieldComparator(None, self.name_field_v1).compare()
+        FieldComparator(None, self.person_fields_v1[1]).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new Field name is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
@@ -66,7 +59,9 @@ class FieldComparatorTest(unittest.TestCase):
     def test_type_change(self):
         # Field `id` is `int32` type in `message_v1.proto`,
         # but updated to `string` in `message_v1beta1.proto`.
-        FieldComparator(self.id_field_v1, self.id_field_v1beta1).compare()
+        FieldComparator(
+            self.person_fields_v1[2], self.person_fields_v1beta1[2]
+        ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
@@ -78,7 +73,9 @@ class FieldComparatorTest(unittest.TestCase):
     def test_repeated_label_change(self):
         # Field `phones` in `message_v1.proto` has `repeated` label,
         # but it's removed in the `message_v1beta1.proto`.
-        FieldComparator(self.phones_field_v1, self.phones_field_v1beta1).compare()
+        FieldComparator(
+            self.person_fields_v1[4], self.person_fields_v1beta1[4]
+        ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
@@ -90,7 +87,9 @@ class FieldComparatorTest(unittest.TestCase):
     def test_name_change(self):
         # Field `email = 3` in `message_v1.proto` is renamed to
         # `email_address = 3` in the `message_v1beta1.proto`.
-        FieldComparator(self.email_field_v1, self.email_field_v1beta1).compare()
+        FieldComparator(
+            self.person_fields_v1[3], self.person_fields_v1beta1[3]
+        ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
@@ -100,7 +99,9 @@ class FieldComparatorTest(unittest.TestCase):
 
     def test_oneof_change(self):
         # Field `single = 5` in `message_v1.proto` is moved out of One-of.
-        FieldComparator(self.single_field_v1, self.single_field_v1beta1).compare()
+        FieldComparator(
+            self.person_fields_v1[5], self.person_fields_v1beta1[5]
+        ).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,

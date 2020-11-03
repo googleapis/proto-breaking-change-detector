@@ -29,11 +29,19 @@ class DescriptorComparatorTest(unittest.TestCase):
 
     def setUp(self):
         # Get `Example` service from the original and updated `service_*.proto` files.
-        self.service_original = FileSet(self._INVOKER_SERVICE_ORIGNAL.run()).services_map["Example"]
-        self.service_update = FileSet(self._INVOKER_SERVICE_UPDATE.run()).services_map["Example"]
+        self.service_original = FileSet(
+            self._INVOKER_SERVICE_ORIGNAL.run()
+        ).services_map["Example"]
+        self.service_update = FileSet(self._INVOKER_SERVICE_UPDATE.run()).services_map[
+            "Example"
+        ]
         # Get `Example` service from the original and updated `service_annotation_*.proto` files.
-        self.service_annotation_original = FileSet(self._INVOKER_ANNOTATION_ORIGNAL.run()).services_map["Example"]
-        self.service_annotation_update = FileSet(self._INVOKER_ANNOTATION_UPDATE.run()).services_map["Example"]
+        self.service_annotation_original = FileSet(
+            self._INVOKER_ANNOTATION_ORIGNAL.run()
+        ).services_map["Example"]
+        self.service_annotation_update = FileSet(
+            self._INVOKER_ANNOTATION_UPDATE.run()
+        ).services_map["Example"]
 
     def tearDown(self):
         FindingContainer.reset()
