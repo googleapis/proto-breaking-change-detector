@@ -48,6 +48,8 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_method.paged_result_field, None)
         self.assertEqual(foo_method.method_signatures, ["content", "error"])
         self.assertEqual(foo_method.http_annotation["http_uri"], "/v1/example:foo")
+        self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
+
         # Method `Foo` is defined at Line21 in .proto file.
         self.assertEqual(foo_method.source_code_line, 21)
 
@@ -67,6 +69,7 @@ class WrappersTest(unittest.TestCase):
         # Message `FooRequest` is defined at Line41 in .proto file.
         self.assertEqual(foo_request_message.source_code_line, 41)
         self.assertTrue(foo_request_message.nested_messages["NestedMessage"])
+        self.assertEqual(foo_request_message.proto_file_name, "wrappers.proto")
         # Nested message `NestedMessage` is defined at Line50 in .proto file.
         self.assertEqual(
             foo_request_message.nested_messages["NestedMessage"].source_code_line, 50
@@ -98,6 +101,7 @@ class WrappersTest(unittest.TestCase):
         )
         # Enum `enum_field` is defined at Line57 in .proto file.
         self.assertEqual(enum_field.source_code_line, 57)
+        self.assertEqual(enum_field.proto_file_name, "wrappers.proto")
 
     def test_enum_wrapper(self):
         enum = self._FILE_SET.enums_map["Enum1"]
@@ -106,6 +110,7 @@ class WrappersTest(unittest.TestCase):
         # EnumValue `a` and `b` are defined at Line57 in .proto file.
         self.assertEqual(enum.values[0].source_code_line, 65)
         self.assertEqual(enum.values[1].source_code_line, 66)
+        self.assertEqual(enum.values[0].proto_file_name, "wrappers.proto")
 
     @classmethod
     def tearDownClass(cls):
