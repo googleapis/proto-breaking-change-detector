@@ -40,6 +40,7 @@ class WrappersTest(unittest.TestCase):
         service = self._FILE_SET.services_map["Example"]
         # Service `Example` is defined at Line19 in .proto file.
         self.assertEqual(service.source_code_line, 19)
+        self.assertEqual(service.proto_file_name, "wrappers.proto")
         foo_method = service.methods["Foo"]
         bar_method = service.methods["Bar"]
         self.assertEqual(foo_method.input, "FooRequest")
