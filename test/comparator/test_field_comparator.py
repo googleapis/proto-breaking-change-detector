@@ -73,6 +73,8 @@ class FieldComparatorTest(unittest.TestCase):
             " but the updated is TYPE_STRING",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 7)
 
     def test_repeated_label_change(self):
         # Field `phones` in `message_v1.proto` has `repeated` label,
@@ -87,6 +89,8 @@ class FieldComparatorTest(unittest.TestCase):
             " but the updated is LABEL_OPTIONAL",
         )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 21)
 
     def test_name_change(self):
         # Field `email = 3` in `message_v1.proto` is renamed to
@@ -108,11 +112,8 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(
             self.person_fields_v1[5], self.person_fields_v1beta1[5]
         ).compare()
-        finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "The existing field single is moved out of One-of.",
-        )
+        findings = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings["The existing field single is moved out of One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
         self.assertEqual(finding.location.source_code_line, 22)

@@ -170,7 +170,17 @@ class Field:
         Returns:
             str: "LABEL_OPTIONAL", "LABEL_REPEATED" or "LABEL_REQUIRED".
         """
-        return FieldDescriptorProto().Label.Name(self.field_pb.label)
+        # For proto3, only LABEL_REPEATED is explicitly specified which has a path.
+        # For "LABEL_OPTIONAL" and "LABEL_REQUIRED", return the path of the field.
+        label_repeated = (
+            FieldDescriptorProto().Label.Name(self.field_pb.label) == "LABEL_REPEATED"
+        )
+        # FieldDescriptorProto.label has field number 4.
+        return WithLocation(
+            FieldDescriptorProto().Label.Name(self.field_pb.label),
+            self.source_code_locations,
+            self.path + (4,) if label_repeated else self.path,
+        )
 
     @property
     def required(self) -> bool:
@@ -187,10 +197,15 @@ class Field:
     @property
     def proto_type(self):
         """Return the proto type constant e.g. `TYPE_ENUM`"""
-        return FieldDescriptorProto().Type.Name(self.field_pb.type)
+        # FieldDescriptorProto.type has field number 5.
+        return WithLocation(
+            FieldDescriptorProto().Type.Name(self.field_pb.type),
+            self.source_code_locations,
+            self.path + (5,),
+        )
 
     @property
-    def oneof(self):
+    def oneof(self) -> bool:
         """Return if the field is in oneof"""
         return self.field_pb.HasField("oneof_index")
 
@@ -198,7 +213,14 @@ class Field:
     def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:
         """Return the resource_reference annotation of the field if any"""
         resource_ref = self.field_pb.options.Extensions[resource_pb2.resource_reference]
-        return resource_ref if resource_ref.type or resource_ref.child_type else None
+        # FieldDescriptorProto.options has field number 8.
+        # fmt: off
+        return (
+            WithLocation(resource_ref, self.source_code_locations, self.path + (8, 1000,))
+            if resource_ref.type or resource_ref.child_type
+            else None
+        )
+        # fmt: on
 
     @property
     def child_type(self) -> bool:
@@ -419,14 +441,14 @@ class Method:
             (response_fields_map, "TYPE_STRING", "next_page_token"),
         ):
             field = page_field[0].get(page_field[2], None)
-            if not field or field.proto_type != page_field[1]:
+            if not field or field.proto_type.value != page_field[1]:
                 return None
 
         # Return the first repeated field.
         # The field containing pagination results should be the first
         # field in the message and have a field number of 1.
         for field in response_fields_map.values():
-            if field.label == "LABEL_REPEATED" and field.number == 1:
+            if field.label.value == "LABEL_REPEATED" and field.number == 1:
                 return field
         return None
 
@@ -614,7 +636,6 @@ class FileSet:
             ] = {}
             for location in fd.source_code_info.location:
                 source_code_locations[tuple(location.path)] = location
-
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self.packaging_options_map = self._get_packaging_options_map(fd.options)
             for resource in fd.options.Extensions[resource_pb2.resource_definition]:

@@ -60,12 +60,12 @@ class FileSetComparatorTest(unittest.TestCase):
             FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        self.assertEqual(
-            findings_map[
-                "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
-            ].category.name,
-            "FIELD_TYPE_CHANGE",
-        )
+        finding = findings_map[
+            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
+        ]
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 7)
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 
