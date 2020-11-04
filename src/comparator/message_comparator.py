@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from src.comparator.field_comparator import FieldComparator
+from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
@@ -57,7 +58,7 @@ class DescriptorComparator:
         # identified by number, not by name. Descriptor.fields_by_number
         # (dict int -> FieldDescriptor) indexed by number.
         if message_original.fields or message_update.fields:
-            self._compareNestedFields(
+            self._compare_nested_fields(
                 message_original.fields,
                 message_update.fields,
             )
@@ -67,17 +68,21 @@ class DescriptorComparator:
         # indexed by name. Recursively call _compare for nested
         # message type comparison.
         if message_original.nested_messages or message_update.nested_messages:
-            self._compareNestedMessages(
+            self._compare_nested_messages(
                 message_original.nested_messages,
                 message_update.nested_messages,
             )
-        # 5. TODO(xiaozhenliu) Check breaking changes in nested enum.
+        # 5. Check breaking changes in nested enum.
+        if message_original.nested_enums or message_update.nested_enums:
+            self._compare_nested_enums(
+                message_original.nested_enums,
+                message_update.nested_enums,
+            )
 
         # 6. Check `google.api.resource` annotation.
-        # TODO(xiaozhenliu): add source code information for resource annotation.
-        self._compareResources(message_original.resource, message_update.resource)
+        self._compare_resources(message_original.resource, message_update.resource)
 
-    def _compareNestedFields(self, fields_dict_original, fields_dict_update):
+    def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
         fields_number_update = set(fields_dict_update.keys())
 
@@ -91,7 +96,9 @@ class DescriptorComparator:
                 fields_dict_update[fieldNumber],
             ).compare()
 
-    def _compareNestedMessages(self, nested_msg_dict_original, nested_msg_dict_update):
+    def _compare_nested_messages(
+        self, nested_msg_dict_original, nested_msg_dict_update
+    ):
         message_name_original = set(nested_msg_dict_original.keys())
         message_name_update = set(nested_msg_dict_update.keys())
 
@@ -105,7 +112,21 @@ class DescriptorComparator:
                 nested_msg_dict_update[msgName],
             )
 
-    def _compareResources(
+    def _compare_nested_enums(self, nested_enum_dict_original, nested_enum_dict_update):
+        enum_name_original = set(nested_enum_dict_original.keys())
+        enum_name_update = set(nested_enum_dict_update.keys())
+
+        for name in enum_name_original - enum_name_update:
+            EnumComparator(nested_enum_dict_original[name], None).compare()
+        for name in enum_name_update - enum_name_original:
+            EnumComparator(None, nested_enum_dict_update[name]).compare()
+        for name in enum_name_original & enum_name_update:
+            EnumComparator(
+                nested_enum_dict_original[name],
+                nested_enum_dict_update[name],
+            ).compare()
+
+    def _compare_resources(
         self,
         resource_original,
         resource_update,

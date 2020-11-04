@@ -66,25 +66,27 @@ class DescriptorComparatorTest(unittest.TestCase):
         # There is field change in message `Person`. Type of field `id`
         # is changed from `int32` to `string`.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
-        finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of the field is changed, the original is "
-            "TYPE_INT32, but the updated is TYPE_STRING",
-        )
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
+        ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
     def test_nested_message_change(self):
         # Field `type` in the nested message `PhoneNumber` is removed.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
-        finding = FindingContainer.getAllFindings()[
-            len(FindingContainer.getAllFindings()) - 1
-        ]
-        self.assertEqual(
-            finding.category.name,
-            "FIELD_REMOVAL",
-        )
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map["A Field type is removed"]
+        self.assertEqual(finding.category.name, "FIELD_REMOVAL")
         self.assertEqual(finding.location.path, "message_v1.proto Line: 18")
+
+    def test_nested_enum_change(self):
+        # EnumValue `SCHOOL` in the nested enum `PhoneType` is added.
+        DescriptorComparator(self.person_msg, self.person_msg_update).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map["A new EnumValue SCHOOL is added."]
+        self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 14")
 
     @classmethod
     def tearDownClass(cls):
