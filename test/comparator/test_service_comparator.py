@@ -151,6 +151,9 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.service_annotation_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        # TODO(xiaozhenliu): This should be removed once we have version updates
+        # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
+        # is allowed.
         uri_change_finding = findings_map["An existing http method URI is changed."]
         method_change_finding = findings_map["An existing http method is changed."]
         body_change_finding = findings_map["An existing http method body is changed."]

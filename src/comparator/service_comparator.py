@@ -139,8 +139,6 @@ class ServiceComparator:
                     message=f"The paginated response of method {name} is changed",
                     actionable=True,
                 )
-            # The customized annotation options share the same field number (1000)
-            # in MethodDescriptorProto.options.
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)
 
