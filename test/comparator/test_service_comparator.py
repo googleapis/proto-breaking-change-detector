@@ -77,23 +77,32 @@ class DescriptorComparatorTest(unittest.TestCase):
         self.assertEqual(
             method_removal_finding.location.path, "service_v1.proto Line: 11"
         )
+        method_input_change = findings_map[
+            "Input type of method Foo is changed from FooRequest to FooRequestUpdate"
+        ]
+        self.assertEqual(method_input_change.category.name, "METHOD_INPUT_TYPE_CHANGE")
         self.assertEqual(
-            findings_map[
-                "Input type of method Foo is changed from FooRequest to FooRequestUpdate"
-            ].category.name,
-            "METHOD_INPUT_TYPE_CHANGE",
+            method_input_change.location.path, "service_v1beta1.proto Line: 7"
+        )
+        method_output_change = findings_map[
+            "Output type of method Foo is changed from FooResponse to FooResponseUpdate"
+        ]
+        self.assertEqual(
+            method_output_change.category.name, "METHOD_RESPONSE_TYPE_CHANGE"
         )
         self.assertEqual(
-            findings_map[
-                "Output type of method Foo is changed from FooResponse to FooResponseUpdate"
-            ].category.name,
-            "METHOD_RESPONSE_TYPE_CHANGE",
+            method_output_change.location.path, "service_v1beta1.proto Line: 7"
         )
+        method_client_streaming_change = findings_map[
+            "The request streaming type of method Bar is changed"
+        ]
         self.assertEqual(
-            findings_map[
-                "The request streaming type of method Bar is changed"
-            ].category.name,
+            method_client_streaming_change.category.name,
             "METHOD_CLIENT_STREAMING_CHANGE",
+        )
+        self.assertEqual(
+            method_client_streaming_change.location.path,
+            "service_v1beta1.proto Line: 9",
         )
         self.assertEqual(
             findings_map[
@@ -114,11 +123,12 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.service_annotation_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "An existing method_signature is changed from 'content' to 'error'."
+        ]
+        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
         self.assertEqual(
-            findings_map.get(
-                "An existing method_signature is changed from 'content' to 'error'."
-            ).category.name,
-            "METHOD_SIGNATURE_CHANGE",
+            finding.location.path, "service_annotation_v1beta1.proto Line: 18"
         )
 
     def test_lro_annotation_change(self):
@@ -127,11 +137,12 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.service_annotation_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "The metadata_type of LRO operation_info annotation is changed from FooMetadata to FooMetadataUpdate"
+        ]
+        self.assertEqual(finding.category.name, "LRO_METADATA_CHANGE")
         self.assertEqual(
-            findings_map.get(
-                "The metadata_type of LRO operation_info annotation is changed from FooMetadata to FooMetadataUpdate"
-            ).category.name,
-            "LRO_METADATA_CHANGE",
+            finding.location.path, "service_annotation_v1beta1.proto Line: 26"
         )
 
     def test_http_annotation_change(self):
@@ -143,17 +154,24 @@ class DescriptorComparatorTest(unittest.TestCase):
         # TODO(xiaozhenliu): This should be removed once we have version updates
         # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
         # is allowed.
+        uri_change_finding = findings_map["An existing http method URI is changed."]
+        method_change_finding = findings_map["An existing http method is changed."]
+        body_change_finding = findings_map["An existing http method body is changed."]
+
+        self.assertEqual(uri_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            findings_map.get("An existing http method URI is changed.").category.name,
-            "HTTP_ANNOTATION_CHANGE",
+            uri_change_finding.location.path,
+            "service_annotation_v1beta1.proto Line: 14",
         )
+        self.assertEqual(method_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            findings_map.get("An existing http method is changed.").category.name,
-            "HTTP_ANNOTATION_CHANGE",
+            method_change_finding.location.path,
+            "service_annotation_v1beta1.proto Line: 14",
         )
+        self.assertEqual(body_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            findings_map.get("An existing http method body is changed.").category.name,
-            "HTTP_ANNOTATION_CHANGE",
+            body_change_finding.location.path,
+            "service_annotation_v1beta1.proto Line: 22",
         )
 
     @classmethod
