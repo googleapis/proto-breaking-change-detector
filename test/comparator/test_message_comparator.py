@@ -77,7 +77,9 @@ class DescriptorComparatorTest(unittest.TestCase):
     def test_nested_message_change(self):
         # Field `type` in the nested message `PhoneNumber` is removed.
         DescriptorComparator(self.person_msg, self.person_msg_update).compare()
-        finding = FindingContainer.getAllFindings()[len(FindingContainer.getAllFindings()) - 1]
+        finding = FindingContainer.getAllFindings()[
+            len(FindingContainer.getAllFindings()) - 1
+        ]
         self.assertEqual(
             finding.category.name,
             "FIELD_REMOVAL",

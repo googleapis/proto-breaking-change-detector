@@ -38,7 +38,7 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_ADDITION,
                 location=f"{message_update.proto_file_name} Line: {message_update.source_code_line}",
                 message=f"A new message {message_update.name} is added.",
-                actionable=False
+                actionable=False,
             )
             return
         # 2. If updated message is None, then the original message is removed.
@@ -47,7 +47,8 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_REMOVAL,
                 location=f"{message_original.proto_file_name} Line: {message_original.source_code_line}",
                 message=f"A message {message_original.name} is removed",
-                actionable=True)
+                actionable=True,
+            )
             return
 
         self.global_resources_original = self.message_original.file_resources
