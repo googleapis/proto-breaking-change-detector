@@ -53,12 +53,14 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A message Person is removed")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 5")
 
     def test_message_addition(self):
         DescriptorComparator(None, self.addressBook_msg).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new message AddressBook is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 27")
 
     def test_field_change(self):
         # There is field change in message `Person`. Type of field `id`
@@ -76,6 +78,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map["A Field type is removed"]
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 18")
 
     def test_nested_enum_change(self):
         # EnumValue `SCHOOL` in the nested enum `PhoneType` is added.
@@ -83,6 +86,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map["A new EnumValue SCHOOL is added."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 14")
 
     @classmethod
     def tearDownClass(cls):

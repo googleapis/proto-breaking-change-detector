@@ -53,18 +53,21 @@ class EnumComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "An Enum PhoneType is removed")
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 10")
 
     def test_enum_addition(self):
         EnumComparator(None, self.enum_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new Enum PhoneType is added.")
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 10")
 
     def test_enum_value_change(self):
         EnumComparator(self.enum_original, self.enum_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new EnumValue SCHOOL is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 14")
 
     def test_no_api_change(self):
         EnumComparator(self.enum_update, self.enum_update).compare()

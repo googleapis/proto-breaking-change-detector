@@ -27,21 +27,24 @@ class EnumComparator:
         # 1. If original EnumDescriptor is None, then a new
         # EnumDescriptor is added.
         if self.enum_original is None:
-            msg = f"A new Enum {self.enum_update.name} is added."
-            FindingContainer.addFinding(FindingCategory.ENUM_ADDITION, "", msg, False)
+            FindingContainer.addFinding(
+                category=FindingCategory.ENUM_ADDITION,
+                location=f"{self.enum_update.proto_file_name} Line: {self.enum_update.source_code_line}",
+                message=f"A new Enum {self.enum_update.name} is added.",
+                actionable=False,
+            )
 
         # 2. If updated EnumDescriptor is None, then the original
         # EnumDescriptor is removed.
         elif self.enum_update is None:
-            msg = f"An Enum {self.enum_original.name} is removed"
-            FindingContainer.addFinding(FindingCategory.ENUM_REMOVAL, "", msg, True)
+            FindingContainer.addFinding(
+                category=FindingCategory.ENUM_REMOVAL,
+                location=f"{self.enum_original.proto_file_name} Line: {self.enum_original.source_code_line}",
+                message=f"An Enum {self.enum_original.name} is removed",
+                actionable=True,
+            )
 
-        # 3. If both EnumDescriptors are existing, check if the name is changed.
-        elif self.enum_original.name != self.enum_update.name:
-            msg = f"Name of the Enum is changed, the original is {self.enum_original.name}, but the updated is {self.enum_update.name}"
-            FindingContainer.addFinding(FindingCategory.ENUM_NAME_CHANGE, "", msg, True)
-
-        # 4. If the EnumDescriptors have the same name, check the values
+        # 3. If the EnumDescriptors have the same name, check the values
         # of them stay the same. Enum values are identified by number,
         # not by name.
         else:
