@@ -43,8 +43,7 @@ class WithLocation:
     @property
     def source_code_line(self):
         if self.path not in self.source_code_locations:
-            print(self.path)
-            return "No source code line can be identified."
+            return f"No source code line can be identified by path {self.path}."
         return self.source_code_locations[self.path].span[0] + 1
 
 
