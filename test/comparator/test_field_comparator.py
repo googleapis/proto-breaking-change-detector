@@ -49,12 +49,14 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A Field name is removed")
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 6")
 
     def test_field_addition(self):
         FieldComparator(None, self.person_fields_v1[1]).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new Field name is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1.proto Line: 6")
 
     def test_type_change(self):
         # Field `id` is `int32` type in `message_v1.proto`,
@@ -96,6 +98,7 @@ class FieldComparatorTest(unittest.TestCase):
             "Name of the Field is changed, the original is email, but the updated is email_address",
         )
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 8")
 
     def test_oneof_change(self):
         # Field `single = 5` in `message_v1.proto` is moved out of One-of.
@@ -108,6 +111,7 @@ class FieldComparatorTest(unittest.TestCase):
             "The existing field single is moved out of One-of.",
         )
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 22")
 
     @classmethod
     def tearDownClass(cls):
