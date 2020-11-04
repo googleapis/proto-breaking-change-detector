@@ -213,14 +213,15 @@ class Field:
     def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:
         """Return the resource_reference annotation of the field if any"""
         resource_ref = self.field_pb.options.Extensions[resource_pb2.resource_reference]
-        # FieldDescriptorProto.options has field number 8.
-        # fmt: off
-        return (
-            WithLocation(resource_ref, self.source_code_locations, self.path + (8, 1000,))
-            if resource_ref.type or resource_ref.child_type
-            else None
+        if not resource_ref.type and not resource_ref.child_type:
+            return None
+        # FieldDescriptorProto.options has field number 8. And `resource_reference` takes field number 1055.
+        # If the reference uses `type`, the field number is 1,
+        # if the reference uses `child_type`, the field number is 2.
+        resource_ref_path = (
+            self.path + (8, 1055, 1) if resource_ref.type else self.path + (8, 1055, 2)
         )
-        # fmt: on
+        return WithLocation(resource_ref, self.source_code_locations, resource_ref_path)
 
     @property
     def child_type(self) -> bool:
