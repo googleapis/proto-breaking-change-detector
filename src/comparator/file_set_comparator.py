@@ -93,7 +93,8 @@ class FileSetComparator:
             if len(patterns_original) > len(patterns_update):
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                    location="",
+                    proto_file_name="",
+                    source_code_line=0,
                     message=f"An existing pattern value of the resource definition '{resource_type}' is removed.",
                     actionable=True,
                 )
@@ -103,7 +104,8 @@ class FileSetComparator:
                 if old_pattern != new_pattern:
                     FindingContainer.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                        location="",
+                        proto_file_name="",
+                        source_code_line=0,
                         message=f"Pattern value of the resource definition '{resource_type}' is updated from '{old_pattern}' to '{new_pattern}'.",
                         actionable=True,
                     )
@@ -112,7 +114,8 @@ class FileSetComparator:
         for resource_type in resources_types_update - resources_types_original:
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                location="",
+                proto_file_name="",
+                source_code_line=0,
                 message=f"A file-level resource definition '{resource_type}' has been added.",
                 actionable=False,
             )

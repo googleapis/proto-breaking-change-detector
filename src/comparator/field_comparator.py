@@ -38,7 +38,8 @@ class FieldComparator:
         if self.field_original is None:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_ADDITION,
-                location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.source_code_line,
                 message=f"A new Field {self.field_update.name} is added.",
                 actionable=False,
             )
@@ -49,7 +50,8 @@ class FieldComparator:
         if self.field_update is None:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_REMOVAL,
-                location=f"{self.field_original.proto_file_name} Line: {self.field_original.source_code_line}",
+                proto_file_name=self.field_original.proto_file_name,
+                source_code_line=self.field_original.source_code_line,
                 message=f"A Field {self.field_original.name} is removed",
                 actionable=True,
             )
@@ -65,7 +67,8 @@ class FieldComparator:
         if self.field_original.name != self.field_update.name:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_NAME_CHANGE,
-                location=f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}",
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.source_code_line,
                 message=f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}",
                 actionable=True,
             )
@@ -77,7 +80,8 @@ class FieldComparator:
         if self.field_original.label != self.field_update.label:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
-                location="",
+                proto_file_name="",
+                source_code_line=0,
                 message=f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}",
                 actionable=True,
             )
@@ -88,18 +92,21 @@ class FieldComparator:
         if self.field_original.proto_type != self.field_update.proto_type:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
-                location="",
+                proto_file_name="",
+                source_code_line=0,
                 message=f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}",
                 actionable=True,
             )
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
-            location = f"{self.field_update.proto_file_name} Line: {self.field_update.source_code_line}"
+            proto_file_name = self.field_update.proto_file_name
+            source_code_line = self.field_update.source_code_line
             if self.field_original.oneof:
                 msg = f"The existing field {self.field_original.name} is moved out of One-of."
                 FindingContainer.addFinding(
                     category=FindingCategory.FIELD_ONEOF_REMOVAL,
-                    location=location,
+                    proto_file_name=proto_file_name,
+                    source_code_line=source_code_line,
                     message=msg,
                     actionable=True,
                 )
@@ -107,7 +114,8 @@ class FieldComparator:
                 msg = f"The existing field {self.field_original.name} is moved into One-of."
                 FindingContainer.addFinding(
                     category=FindingCategory.FIELD_ONEOF_ADDITION,
-                    location=location,
+                    proto_file_name=proto_file_name,
+                    source_code_line=source_code_line,
                     message=msg,
                     actionable=True,
                 )
@@ -125,20 +133,22 @@ class FieldComparator:
         # A `google.api.resource_reference` annotation is added.
         if not resource_ref_original and resource_ref_update:
             FindingContainer.addFinding(
-                FindingCategory.RESOURCE_REFERENCE_ADDITION,
-                "",
-                f"A resource reference option is added to the field {field_original.name}",
-                False,
+                category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
+                proto_file_name="",
+                source_code_line=0,
+                message=f"A resource reference option is added to the field {field_original.name}",
+                actionable=False,
             )
             return
         # Resource annotation is removed, check if it is added as a message resource.
         if resource_ref_original and not resource_ref_update:
             if not self._resource_ref_in_local(resource_ref_original):
                 FindingContainer.addFinding(
-                    FindingCategory.RESOURCE_REFERENCE_REMOVAL,
-                    "",
-                    f"A resource reference option of field '{field_original.name}' is removed.",
-                    True,
+                    category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
+                    proto_file_name="",
+                    source_code_line=0,
+                    message=f"A resource reference option of field '{field_original.name}' is removed.",
+                    actionable=True,
                 )
             return
         # Resource annotation is both existing in the field for original and update versions.
@@ -150,10 +160,11 @@ class FieldComparator:
             update_type = resource_ref_update.type or resource_ref_update.child_type
             if original_type != update_type:
                 FindingContainer.addFinding(
-                    FindingCategory.RESOURCE_REFERENCE_CHANGE,
-                    "",
-                    f"The type of resource reference option in field '{field_original.name}' is changed from '{original_type}' to '{update_type}'.",
-                    True,
+                    category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
+                    proto_file_name="",
+                    source_code_line=0,
+                    message=f"The type of resource reference option in field '{field_original.name}' is changed from '{original_type}' to '{update_type}'.",
+                    actionabel=True,
                 )
             return
         # The `type` is changed to `child_type` or `child_type` is changed to `type`, but
@@ -205,10 +216,11 @@ class FieldComparator:
         if parent_type not in [parent.type for parent in parent_resources]:
             # Resulting referenced resource patterns cannot be resolved identical.
             FindingContainer.addFinding(
-                FindingCategory.RESOURCE_REFERENCE_CHANGE,
-                "",
-                f"The child_type '{child_type}' and type '{parent_type}' of "
+                category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
+                proto_file_name="",
+                source_code_line=0,
+                message=f"The child_type '{child_type}' and type '{parent_type}' of "
                 f"resource reference option in field '{self.field_original.name}' "
                 "cannot be resolved to the identical resource.",
-                True,
+                actionable=True,
             )

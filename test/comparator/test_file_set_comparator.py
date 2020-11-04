@@ -43,7 +43,8 @@ class FileSetComparatorTest(unittest.TestCase):
             "The paginated response of method paginatedMethod is changed"
         ]
         self.assertEqual(finding.category.name, "METHOD_PAGINATED_RESPONSE_CHANGE")
-        self.assertEqual(finding.location.path, "service_v1beta1.proto Line: 11")
+        self.assertEqual(finding.location.proto_file_name, "service_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 11)
 
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
@@ -81,7 +82,8 @@ class FileSetComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map["An Enum BookType is removed"]
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
-        self.assertEqual(finding.location.path, "enum_v1.proto Line: 5")
+        self.assertEqual(finding.location.proto_file_name, "enum_v1.proto")
+        self.assertEqual(finding.location.source_code_line, 5)
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 

@@ -54,7 +54,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A service Example is removed")
         self.assertEqual(finding.category.name, "SERVICE_REMOVAL")
-        self.assertEqual(finding.location.path, "service_v1.proto Line: 5")
+        self.assertEqual(finding.location.proto_file_name, "service_v1.proto")
+        self.assertEqual(finding.location.source_code_line, 5)
 
     def test_service_addition(self):
         ServiceComparator(
@@ -64,7 +65,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new service Example is added.")
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
-        self.assertEqual(finding.location.path, "service_v1.proto Line: 5")
+        self.assertEqual(finding.location.proto_file_name, "service_v1.proto")
+        self.assertEqual(finding.location.source_code_line, 5)
 
     def test_method_change(self):
         ServiceComparator(
@@ -72,18 +74,23 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.service_update,
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        # Method removal.
         method_removal_finding = findings_map["An rpc method shouldRemove is removed"]
         self.assertEqual(method_removal_finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(
-            method_removal_finding.location.path, "service_v1.proto Line: 11"
+            method_removal_finding.location.proto_file_name, "service_v1.proto"
         )
+        self.assertEqual(method_removal_finding.location.source_code_line, 11)
+        # Input type change.
         method_input_change = findings_map[
             "Input type of method Foo is changed from FooRequest to FooRequestUpdate"
         ]
         self.assertEqual(method_input_change.category.name, "METHOD_INPUT_TYPE_CHANGE")
         self.assertEqual(
-            method_input_change.location.path, "service_v1beta1.proto Line: 7"
+            method_input_change.location.proto_file_name, "service_v1beta1.proto"
         )
+        self.assertEqual(method_input_change.location.source_code_line, 7)
+        # Output type change.
         method_output_change = findings_map[
             "Output type of method Foo is changed from FooResponse to FooResponseUpdate"
         ]
@@ -91,8 +98,10 @@ class DescriptorComparatorTest(unittest.TestCase):
             method_output_change.category.name, "METHOD_RESPONSE_TYPE_CHANGE"
         )
         self.assertEqual(
-            method_output_change.location.path, "service_v1beta1.proto Line: 7"
+            method_output_change.location.proto_file_name, "service_v1beta1.proto"
         )
+        self.assertEqual(method_output_change.location.source_code_line, 7)
+        # Streaming state change.
         method_client_streaming_change = findings_map[
             "The request streaming type of method Bar is changed"
         ]
@@ -101,21 +110,33 @@ class DescriptorComparatorTest(unittest.TestCase):
             "METHOD_CLIENT_STREAMING_CHANGE",
         )
         self.assertEqual(
-            method_client_streaming_change.location.path,
-            "service_v1beta1.proto Line: 9",
+            method_client_streaming_change.location.proto_file_name,
+            "service_v1beta1.proto",
         )
+        self.assertEqual(method_client_streaming_change.location.source_code_line, 9)
+        method_server_streaming_change = findings_map[
+            "The response streaming type of method Bar is changed"
+        ]
         self.assertEqual(
-            findings_map[
-                "The response streaming type of method Bar is changed"
-            ].category.name,
+            method_server_streaming_change.category.name,
             "METHOD_SERVER_STREAMING_CHANGE",
         )
         self.assertEqual(
-            findings_map[
-                "The paginated response of method paginatedMethod is changed"
-            ].category.name,
-            "METHOD_PAGINATED_RESPONSE_CHANGE",
+            method_server_streaming_change.location.proto_file_name,
+            "service_v1beta1.proto",
         )
+        self.assertEqual(method_server_streaming_change.location.source_code_line, 9)
+        # Paginated state change.
+        paginated_change = findings_map[
+            "The paginated response of method paginatedMethod is changed"
+        ]
+        self.assertEqual(
+            paginated_change.category.name, "METHOD_PAGINATED_RESPONSE_CHANGE"
+        )
+        self.assertEqual(
+            paginated_change.location.proto_file_name, "service_v1beta1.proto"
+        )
+        self.assertEqual(paginated_change.location.source_code_line, 11)
 
     def test_method_signature_change(self):
         ServiceComparator(
@@ -128,8 +149,9 @@ class DescriptorComparatorTest(unittest.TestCase):
         ]
         self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
         self.assertEqual(
-            finding.location.path, "service_annotation_v1beta1.proto Line: 18"
+            finding.location.proto_file_name, "service_annotation_v1beta1.proto"
         )
+        self.assertEqual(finding.location.source_code_line, 18)
 
     def test_lro_annotation_change(self):
         ServiceComparator(
@@ -142,8 +164,9 @@ class DescriptorComparatorTest(unittest.TestCase):
         ]
         self.assertEqual(finding.category.name, "LRO_METADATA_CHANGE")
         self.assertEqual(
-            finding.location.path, "service_annotation_v1beta1.proto Line: 26"
+            finding.location.proto_file_name, "service_annotation_v1beta1.proto"
         )
+        self.assertEqual(finding.location.source_code_line, 26)
 
     def test_http_annotation_change(self):
         ServiceComparator(
@@ -160,19 +183,22 @@ class DescriptorComparatorTest(unittest.TestCase):
 
         self.assertEqual(uri_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            uri_change_finding.location.path,
-            "service_annotation_v1beta1.proto Line: 14",
+            uri_change_finding.location.proto_file_name,
+            "service_annotation_v1beta1.proto",
         )
+        self.assertEqual(uri_change_finding.location.source_code_line, 14)
         self.assertEqual(method_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            method_change_finding.location.path,
-            "service_annotation_v1beta1.proto Line: 14",
+            method_change_finding.location.proto_file_name,
+            "service_annotation_v1beta1.proto",
         )
+        self.assertEqual(method_change_finding.location.source_code_line, 14)
         self.assertEqual(body_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(
-            body_change_finding.location.path,
-            "service_annotation_v1beta1.proto Line: 22",
+            body_change_finding.location.proto_file_name,
+            "service_annotation_v1beta1.proto",
         )
+        self.assertEqual(body_change_finding.location.source_code_line, 22)
 
     @classmethod
     def tearDownClass(cls):
