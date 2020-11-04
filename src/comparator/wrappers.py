@@ -32,6 +32,22 @@ from src.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional, Tuple
 
 
+class WithLocation:
+    """Wrap the attribute with location information."""
+
+    def __init__(self, value, source_code_locations, path):
+        self.value = value
+        self.path = path
+        self.source_code_locations = source_code_locations
+
+    @property
+    def source_code_line(self):
+        if self.path not in self.source_code_locations:
+            print(self.path)
+            return "No source code line can be identified."
+        return self.source_code_locations[self.path].span[0] + 1
+
+
 # TODO(xiaozhenliu): parse SourceCode location for properties in each descriptor.
 # For example: during comparison, we will need the source code line number for method.input.
 # The annotations cannot precisely located, because they are customized options, and we
@@ -334,7 +350,9 @@ class Method:
         of the message to query in the messages_map.
         For example: `.example.v1.FooRequest` -> `FooRequest`
         """
-        return self.method_pb.input_type.rsplit(".", 1)[-1]
+        input_type = self.method_pb.input_type.rsplit(".", 1)[-1]
+        # MethodDescriptorProto.input_type has field number 2
+        return WithLocation(input_type, self.source_code_locations, self.path + (2,))
 
     @property
     def output(self):
@@ -344,9 +362,13 @@ class Method:
 
         If it is a longrunning method, just return `.google.longrunning.Operation`
         """
-        if self.longrunning:
-            return self.method_pb.output_type
-        return self.method_pb.output_type.rsplit(".", 1)[-1]
+        output_type = (
+            self.method_pb.output_type
+            if self.longrunning
+            else self.method_pb.output_type.rsplit(".", 1)[-1]
+        )
+        # MethodDescriptorProto.output_type has field number 3
+        return WithLocation(output_type, self.source_code_locations, self.path + (3,))
 
     @property
     def longrunning(self) -> bool:
@@ -356,18 +378,28 @@ class Method:
     @property
     def client_streaming(self) -> bool:
         """Return True if this is a client-streamign method."""
-        return self.method_pb.client_streaming
+        # MethodDescriptorProto.client_streaming has field number 5
+        return WithLocation(
+            self.method_pb.client_streaming,
+            self.source_code_locations,
+            self.path + (5,),
+        )
 
     @property
     def server_streaming(self) -> bool:
         """Return True if this is a server-streaming method."""
-        return self.method_pb.server_streaming
+        # MethodDescriptorProto.client_streaming has field number 6
+        return WithLocation(
+            self.method_pb.server_streaming,
+            self.source_code_locations,
+            self.path + (6,),
+        )
 
     @property
     def paged_result_field(self) -> Optional[FieldDescriptorProto]:
         """Return the response pagination field if the method is paginated."""
         # (AIP 158) The response must not be a streaming response for a paginated method.
-        if self.server_streaming:
+        if self.server_streaming.value:
             return None
         # If the output type is `google.longrunning.Operation`, the method is not paginated.
         if self.longrunning:
@@ -377,8 +409,8 @@ class Method:
         # If the request field lacks any of the expected pagination fields,
         # then the method is not paginated.
         # Short message name e.g. .example.v1.FooRequest -> FooRequest
-        response_message = self.messages_map[self.output]
-        request_message = self.messages_map[self.input]
+        response_message = self.messages_map[self.output.value]
+        request_message = self.messages_map[self.input.value]
         response_fields_map = {f.name: f for f in response_message.fields.values()}
         request_fields_map = {f.name: f for f in request_message.fields.values()}
 
@@ -399,10 +431,11 @@ class Method:
                 return field
         return None
 
+    # fmt: off
     @property
     def lro_annotation(self):
         """Return the LRO operation_info annotation defined for this method."""
-        if not self.output.endswith("google.longrunning.Operation"):
+        if not self.output.value.endswith("google.longrunning.Operation"):
             return None
         op = self.method_pb.options.Extensions[operations_pb2.operation_info]
         if not op.response_type or not op.metadata_type:
@@ -411,10 +444,17 @@ class Method:
                 "Operation, but is missing a response type or "
                 "metadata type.",
             )
-        return {
+        lro_annotation = {
             "response_type": op.response_type,
             "metadata_type": op.metadata_type,
         }
+        # MethodDescriptorProto.method_options has field number 4,
+        # and MethodOptions.extensions[operation_info] has field number 1049.
+        return WithLocation(
+            lro_annotation,
+            self.source_code_locations,
+            self.path + (4, 1049),
+        )
 
     @property
     def method_signatures(self) -> Optional[Sequence[str]]:
@@ -423,7 +463,13 @@ class Method:
         fields = [
             field.strip() for sig in signatures for field in sig.split(",") if field
         ]
-        return fields
+        # MethodDescriptorProto.method_options has field number 4,
+        # and MethodOptions.extensions[method_signature] has field number 1051.
+        return WithLocation(
+            fields,
+            self.source_code_locations,
+            self.path + (4, 1051, 0),
+        )
 
     @property
     def http_annotation(self):
@@ -442,7 +488,7 @@ class Method:
             "patch": http.patch,
             "custom": http.custom.path,
         }
-        return next(
+        http_annotation = next(
             (
                 {"http_method": verb, "http_uri": value, "http_body": http.body}
                 for verb, value in potential_verbs.items()
@@ -450,6 +496,14 @@ class Method:
             ),
             None,
         )
+        # MethodDescriptorProto.method_options has field number 4,
+        # and MethodOptions.extensions[http_annotation] has field number 72295728.
+        return WithLocation(
+            http_annotation,
+            self.source_code_locations,
+            self.path + (4, 72295728,)
+        )
+    # fmt: on
 
     @property
     def source_code_line(self):

@@ -43,23 +43,31 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(service.proto_file_name, "wrappers.proto")
         foo_method = service.methods["Foo"]
         bar_method = service.methods["Bar"]
-        self.assertEqual(foo_method.input, "FooRequest")
-        self.assertEqual(foo_method.output, "FooResponse")
+        self.assertEqual(foo_method.input.value, "FooRequest")
+        self.assertEqual(foo_method.output.value, "FooResponse")
         self.assertEqual(foo_method.paged_result_field, None)
-        self.assertEqual(foo_method.method_signatures, ["content", "error"])
-        self.assertEqual(foo_method.http_annotation["http_uri"], "/v1/example:foo")
+        self.assertEqual(foo_method.method_signatures.value, ["content", "error"])
+        self.assertEqual(
+            foo_method.http_annotation.value["http_uri"], "/v1/example:foo"
+        )
 
         # Method `Foo` is defined at Line21 in .proto file.
         self.assertEqual(foo_method.source_code_line, 21)
         self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
 
-        self.assertEqual(bar_method.input, "FooRequest")
-        self.assertEqual(bar_method.output, ".google.longrunning.Operation")
+        self.assertEqual(bar_method.input.value, "FooRequest")
+        self.assertEqual(bar_method.output.value, ".google.longrunning.Operation")
         self.assertEqual(bar_method.paged_result_field, None)
         self.assertTrue(bar_method.longrunning)
-        self.assertEqual(bar_method.lro_annotation["response_type"], "FooResponse")
-        self.assertEqual(bar_method.lro_annotation["metadata_type"], "FooMetadata")
-        self.assertEqual(bar_method.http_annotation["http_uri"], "/v1/example:bar")
+        self.assertEqual(
+            bar_method.lro_annotation.value["response_type"], "FooResponse"
+        )
+        self.assertEqual(
+            bar_method.lro_annotation.value["metadata_type"], "FooMetadata"
+        )
+        self.assertEqual(
+            bar_method.http_annotation.value["http_uri"], "/v1/example:bar"
+        )
         # Method `Bar` is defined at Line29 in .proto file.
         self.assertEqual(bar_method.source_code_line, 29)
 

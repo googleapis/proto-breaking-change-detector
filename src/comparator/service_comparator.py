@@ -90,42 +90,44 @@ class ServiceComparator:
             method_original = methods_original[name]
             method_update = methods_update[name]
             # 3.3 The request type of an RPC method is changed.
-            input_type_original = method_original.input
-            input_type_update = method_update.input
+            input_type_original = method_original.input.value
+            input_type_update = method_update.input.value
             if input_type_original != input_type_update:
-                # TODO(xiaozhenliu): add location information for method.input
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
-                    location="",
+                    location=f"{method_update.proto_file_name} Line: {method_update.input.source_code_line}",
                     message=f"Input type of method {name} is changed from {input_type_original} to {input_type_update}",
                     actionable=True,
                 )
             # 3.4 The response type of an RPC method is changed.
-            response_type_original = method_original.output
-            response_type_update = method_update.output
+            response_type_original = method_original.output.value
+            response_type_update = method_update.output.value
             if response_type_original != response_type_update:
-                # TODO(xiaozhenliu): add location information for method.output
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
-                    location="",
+                    location=f"{method_update.proto_file_name} Line: {method_update.output.source_code_line}",
                     message=f"Output type of method {name} is changed from {response_type_original} to {response_type_update}",
                     actionable=True,
                 )
             # 3.5 The request streaming state of an RPC method is changed.
-            if method_original.client_streaming != method_update.client_streaming:
-                # TODO(xiaozhenliu): add location information for method.client_streaming
+            if (
+                method_original.client_streaming.value
+                != method_update.client_streaming.value
+            ):
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
-                    location="",
+                    location=f"{method_update.proto_file_name} Line: {method_update.client_streaming.source_code_line}",
                     message=f"The request streaming type of method {name} is changed",
                     actionable=True,
                 )
             # 3.6 The response streaming state of an RPC method is changed.
-            if method_original.server_streaming != method_update.server_streaming:
-                # TODO(xiaozhenliu): add location information for method.server_streaming
+            if (
+                method_original.server_streaming.value
+                != method_update.server_streaming.value
+            ):
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
-                    location="",
+                    location=f"{method_update.proto_file_name} Line: {method_update.server_streaming.source_code_line}",
                     message=f"The response streaming type of method {name} is changed",
                     actionable=True,
                 )
@@ -137,45 +139,39 @@ class ServiceComparator:
                     message=f"The paginated response of method {name} is changed",
                     actionable=True,
                 )
-            # TODO(xiaozhenliu): add source code information for annotations.
             # The customized annotation options share the same field number (1000)
             # in MethodDescriptorProto.options.
             # 3.8 The method_signature annotation is changed.
-            signatures_original = method_original.method_signatures
-            signatures_update = method_update.method_signatures
-            self._compare_method_signatures(signatures_original, signatures_update)
+            self._compare_method_signatures(method_original, method_update)
 
             # 3.9 The LRO operation_info annotation is changed.
-            self._compare_lro_annotations(
-                method_original.lro_annotation, method_update.lro_annotation
-            )
+            self._compare_lro_annotations(method_original, method_update)
 
             # 3.10 The google.api.http annotation is changed.
-            self._compare_http_annotation(
-                method_original.http_annotation, method_update.http_annotation
-            )
+            self._compare_http_annotation(method_original, method_update)
 
-    def _compare_http_annotation(
-        self, http_annotation_original, http_annotation_update
-    ):
+    def _compare_http_annotation(self, method_original, method_update):
         """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""
+        http_annotation_original = method_original.http_annotation.value
+        http_annotation_update = method_update.http_annotation.value
+
         if not http_annotation_original or not http_annotation_update:
             # (Aip127) APIs must provide HTTP definitions for each RPC that they define,
             # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
             # streaming state changes of the RPC, which is a breaking change.
             if http_annotation_original and not http_annotation_update:
                 FindingContainer.addFinding(
-                    FindingCategory.HTTP_ANNOTATION_REMOVAL,
-                    "",
-                    "A google.api.http annotation is removed.",
-                    False,
+                    category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
+                    location=f"{method_original.proto_file_name} Line: {method_original.http_annotation.source_code_line}",
+                    message="A google.api.http annotation is removed.",
+                    actionable=True,
                 )
             if not http_annotation_original and http_annotation_update:
                 FindingContainer.addFinding(
-                    FindingCategory.HTTP_ANNOTATION_ADDITION,
-                    "",
-                    "A google.api.http annotation is added.",
-                    False,
+                    category=FindingCategory.HTTP_ANNOTATION_ADDITION,
+                    location=f"{method_update.proto_file_name} Line: {method_update.http_annotation.source_code_line}",
+                    message="A google.api.http annotation is added.",
+                    actionable=False,
                 )
             return
         for annotation in (
@@ -189,61 +185,67 @@ class ServiceComparator:
                 annotation[0], annotation[1]
             ) != http_annotation_update.get(annotation[0], annotation[1]):
                 FindingContainer.addFinding(
-                    FindingCategory.HTTP_ANNOTATION_CHANGE,
-                    "",
-                    annotation[2],
-                    True,
+                    category=FindingCategory.HTTP_ANNOTATION_CHANGE,
+                    location=f"{method_update.proto_file_name} Line: {method_update.http_annotation.source_code_line}",
+                    message=annotation[2],
+                    actionable=True,
                 )
 
-    def _compare_lro_annotations(self, lro_original, lro_update):
-        if not lro_original or not lro_update:
-            # LRO operation_info annotation addition.
-            if not lro_original and lro_update:
-                FindingContainer.addFinding(
-                    FindingCategory.LRO_ANNOTATION_ADDITION,
-                    "",
-                    "A LRO operation_info annotation is added.",
-                    False,
-                )
-            # LRO operation_info annotation removal.
-            if lro_original and not lro_update:
-                FindingContainer.addFinding(
-                    FindingCategory.LRO_ANNOTATION_REMOVAL,
-                    "",
-                    "A LRO operation_info annotation is removed.",
-                    False,
-                )
+    def _compare_lro_annotations(self, method_original, method_update):
+        lro_original = method_original.lro_annotation
+        lro_update = method_update.lro_annotation
+        if not lro_original and not lro_update:
+            return
+        # LRO operation_info annotation addition.
+        if not lro_original and lro_update:
+            FindingContainer.addFinding(
+                category=FindingCategory.LRO_ANNOTATION_ADDITION,
+                location=f"{method_update.proto_file_name} Line: {method_update.lro_annotation.source_code_line}",
+                message="A LRO operation_info annotation is added.",
+                actionable=False,
+            )
+            return
+        # LRO operation_info annotation removal.
+        if lro_original and not lro_update:
+            FindingContainer.addFinding(
+                category=FindingCategory.LRO_ANNOTATION_REMOVAL,
+                location=f"{method_original.proto_file_name} Line: {method_original.lro_annotation.source_code_line}",
+                message="A LRO operation_info annotation is removed.",
+                actionable=False,
+            )
             return
         # The response_type value of LRO operation_info is changed.
-        if lro_original["response_type"] != lro_update["response_type"]:
+        if lro_original.value["response_type"] != lro_update.value["response_type"]:
             FindingContainer.addFinding(
-                FindingCategory.LRO_RESPONSE_CHANGE,
-                "",
-                f"The response_type of LRO operation_info annotation is changed from {lro_original['response_type']} to {lro_update['response_type']}",
-                True,
+                category=FindingCategory.LRO_RESPONSE_CHANGE,
+                location=f"{method_update.proto_file_name} Line: {lro_update.source_code_line}",
+                message=f"The response_type of LRO operation_info annotation is changed from {lro_original.value['response_type']} to {lro_update.value['response_type']}",
+                actionable=True,
             )
         # The metadata_type value of LRO operation_info is changed.
-        if lro_original["metadata_type"] != lro_update["metadata_type"]:
+        if lro_original.value["metadata_type"] != lro_update.value["metadata_type"]:
             FindingContainer.addFinding(
-                FindingCategory.LRO_METADATA_CHANGE,
-                "",
-                f"The metadata_type of LRO operation_info annotation is changed from {lro_original['metadata_type']} to {lro_update['metadata_type']}",
-                True,
+                category=FindingCategory.LRO_METADATA_CHANGE,
+                location=f"{method_update.proto_file_name} Line: {lro_update.source_code_line}",
+                message=f"The metadata_type of LRO operation_info annotation is changed from {lro_original.value['metadata_type']} to {lro_update.value['metadata_type']}",
+                actionable=True,
             )
 
-    def _compare_method_signatures(self, signatures_original, signatures_update):
+    def _compare_method_signatures(self, method_original, method_update):
+        signatures_original = method_original.method_signatures.value
+        signatures_update = method_update.method_signatures.value
         if len(signatures_original) > len(signatures_update):
             FindingContainer.addFinding(
-                FindingCategory.METHOD_SIGNATURE_CHANGE,
-                "",
-                "An existing method_signature is removed.",
-                True,
+                category=FindingCategory.METHOD_SIGNATURE_CHANGE,
+                location=f"{method_original.proto_file_name} Line: {method_original.method_signatures.source_code_line}",
+                message="An existing method_signature is removed.",
+                actionable=True,
             )
         for old_sig, new_sig in zip(signatures_original, signatures_update):
             if old_sig != new_sig:
                 FindingContainer.addFinding(
-                    FindingCategory.METHOD_SIGNATURE_CHANGE,
-                    "",
-                    f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
-                    True,
+                    category=FindingCategory.METHOD_SIGNATURE_CHANGE,
+                    location=f"{method_update.proto_file_name} Line: {method_update.method_signatures.source_code_line}",
+                    message=f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
+                    actionable=True,
                 )
