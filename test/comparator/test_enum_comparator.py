@@ -67,6 +67,7 @@ class EnumComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(finding.message, "A new EnumValue SCHOOL is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.location.path, "message_v1beta1.proto Line: 14")
 
     def test_no_api_change(self):
         EnumComparator(self.enum_update, self.enum_update).compare()
