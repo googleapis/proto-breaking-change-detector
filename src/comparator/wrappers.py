@@ -47,6 +47,22 @@ class WithLocation:
         return self.source_code_locations[self.path].span[0] + 1
 
 
+class Resource:
+    """Wrap the resource definition with location information and the file name where it exists."""
+
+    def __init__(self, value, proto_file_name, source_code_locations, path):
+        self.value = value
+        self.proto_file_name = proto_file_name
+        self.source_code_locations = source_code_locations
+        self.path = path
+
+    @property
+    def source_code_line(self):
+        if self.path not in self.source_code_locations:
+            return f"No source code line can be identified by path {self.path}."
+        return self.source_code_locations[self.path].span[0] + 1
+
+
 # TODO(xiaozhenliu): parse SourceCode location for properties in each descriptor.
 # For example: during comparison, we will need the source code line number for method.input.
 # The annotations cannot precisely located, because they are customized options, and we
@@ -330,8 +346,9 @@ class Message:
         resource = self.message_pb.options.Extensions[resource_pb2.resource]
         if not resource.type or not resource.pattern:
             return None
-        return WithLocation(
+        return Resource(
             resource,
+            self.proto_file_name,
             self.source_code_locations,
             self.path + (7, 1053),
         )
@@ -645,10 +662,15 @@ class FileSet:
                 source_code_locations[tuple(location.path)] = location
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self.packaging_options_map = self._get_packaging_options_map(fd.options)
-            for resource in fd.options.Extensions[resource_pb2.resource_definition]:
-                self.resources_database.register_resource(resource)
-            # FileDescriptorProto.message_type has field number 4
             # fmt: off
+            for i, resource in enumerate(
+                fd.options.Extensions[resource_pb2.resource_definition]
+            ):
+                resource_path = path + (8, 1053, i)
+                self.resources_database.register_resource(
+                    Resource(resource, fd.name, source_code_locations, resource_path)
+                )
+            # FileDescriptorProto.message_type has field number 4
             self.messages_map.update(
                 (
                     message.name,

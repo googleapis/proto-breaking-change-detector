@@ -102,18 +102,29 @@ class FileSetComparatorTest(unittest.TestCase):
             FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        file_resource_pattern_change = findings_map[
+            "Pattern value of the resource definition 'example.googleapis.com/t2' is updated from 'foo/{foo}/bar/{bar}/t2' to 'foo/{foo}/bar/{bar}/t2_update'."
+        ]
         self.assertEqual(
-            findings_map[
-                "Pattern value of the resource definition 'example.googleapis.com/t2' is updated from 'foo/{foo}/bar/{bar}/t2' to 'foo/{foo}/bar/{bar}/t2_update'."
-            ].category.name,
-            "RESOURCE_DEFINITION_CHANGE",
+            file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
         )
         self.assertEqual(
-            findings_map[
-                "A file-level resource definition 'example.googleapis.com/t3' has been added."
-            ].category.name,
+            file_resource_pattern_change.location.proto_file_name,
+            "resource_database_v1beta1.proto",
+        )
+        self.assertEqual(file_resource_pattern_change.location.source_code_line, 13)
+        file_resource_addition = findings_map[
+            "A file-level resource definition 'example.googleapis.com/t3' has been added."
+        ]
+        self.assertEqual(
+            file_resource_addition.category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
+        self.assertEqual(
+            file_resource_addition.location.proto_file_name,
+            "resource_database_v1beta1.proto",
+        )
+        self.assertEqual(file_resource_addition.location.source_code_line, 19)
         message_resource_pattern_change = findings_map[
             "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
         ]

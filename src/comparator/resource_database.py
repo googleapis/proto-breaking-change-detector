@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.api.resource_pb2 import ResourceDescriptor
 from typing import Sequence
 
 
@@ -25,37 +24,42 @@ class ResourceDatabase:
         self.types = {}
         self.patterns = {}
 
-    def register_resource(self, resource_message: ResourceDescriptor):
+    def register_resource(self, resource_with_location):
         """ Register a resource in the database. """
-        if not resource_message:
+        if not resource_with_location or not resource_with_location.value:
             return
+        resource_message = resource_with_location.value
         if not resource_message.type or not resource_message.pattern:
             raise TypeError(
                 "APIs must define a resource type and resource pattern for each resource in the API."
             )
-        self.types[resource_message.type] = resource_message
+        self.types[resource_message.type] = resource_with_location
         self.patterns.update(
-            (pattern, resource_message) for pattern in resource_message.pattern
+            (pattern, resource_with_location) for pattern in resource_message.pattern
         )
 
-    def get_resource_by_type(self, type):
+    def get_resource_by_type(self, resource_type):
         """ Query the resource by type. Return None if the resource is not existing. """
-        return self.types.get(type, None)
+        return self.types.get(resource_type, None)
 
-    def get_parent_resources_by_child_type(self, type) -> Sequence[ResourceDescriptor]:
+    def get_parent_resources_by_child_type(self, child_type):
         """Query the resources by child_type. Return [] if the parent resource is not existing."""
         result = []
-        if not type:
+        if not child_type:
             return result
-        child_resource = self.get_resource_by_type(type)
+        child_resource = self.get_resource_by_type(child_type)
         # The child_type is not existing in the database.
-        if not child_resource or not child_resource.pattern:
+        if (
+            not child_resource
+            or not child_resource.value
+            or not child_resource.value.pattern
+        ):
             return result
         # For each child_type pattern, split the pattern by '/'
         # and reconstruct the segments. If any parent pattern is existing
         # in the database, put it in the result sequence.
         # For example: `a/{a}` is the parent resource of `a/{a}/b{b}`
-        for child_pattern in child_resource.pattern:
+        for child_pattern in child_resource.value.pattern:
             pattern = ""
             for segment in child_pattern.split("/"):
                 if pattern != "":
@@ -63,7 +67,7 @@ class ResourceDatabase:
                 pattern = pattern + segment
                 parent = self.get_resource_by_pattern(pattern)
                 # Check the parent resource is not child_resource itself.
-                if parent and (parent.type != child_resource.type):
+                if parent and (parent.value.type != child_resource.value.type):
                     result.append(parent)
         return result
 

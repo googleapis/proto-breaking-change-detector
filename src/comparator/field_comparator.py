@@ -205,12 +205,10 @@ class FieldComparator:
         # Add message-level resource definition to the global resource database for query.
         if self.local_resource_original:
             self.global_resources_original.register_resource(
-                self.local_resource_original.value
+                self.local_resource_original
             )
         if self.local_resource_update:
-            self.global_resources_update.register_resource(
-                self.local_resource_update.value
-            )
+            self.global_resources_update.register_resource(self.local_resource_update)
 
     def _is_parent_type(
         self, child_type, parent_type, original_is_child, source_code_line
