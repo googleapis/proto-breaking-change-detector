@@ -85,16 +85,19 @@ class FileSetComparator:
         resources_types_original = set(resources_original.types.keys())
         resources_types_update = set(resources_update.types.keys())
         # 1. Patterns of file-level resource definitions have changed.
-        # TODO(xiaozhenliu): add source code information for file-level resource definition.
         for resource_type in resources_types_original & resources_types_update:
-            patterns_original = resources_original.types[resource_type].pattern
-            patterns_update = resources_update.types[resource_type].pattern
+            patterns_original = resources_original.types[resource_type].value.pattern
+            patterns_update = resources_update.types[resource_type].value.pattern
             # An existing pattern is removed.
             if len(patterns_original) > len(patterns_update):
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                    proto_file_name="",
-                    source_code_line=0,
+                    proto_file_name=resources_original.types[
+                        resource_type
+                    ].proto_file_name,
+                    source_code_line=resources_original.types[
+                        resource_type
+                    ].source_code_line,
                     message=f"An existing pattern value of the resource definition '{resource_type}' is removed.",
                     actionable=True,
                 )
@@ -104,8 +107,12 @@ class FileSetComparator:
                 if old_pattern != new_pattern:
                     FindingContainer.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                        proto_file_name="",
-                        source_code_line=0,
+                        proto_file_name=resources_update.types[
+                            resource_type
+                        ].proto_file_name,
+                        source_code_line=resources_update.types[
+                            resource_type
+                        ].source_code_line,
                         message=f"Pattern value of the resource definition '{resource_type}' is updated from '{old_pattern}' to '{new_pattern}'.",
                         actionable=True,
                     )
@@ -114,8 +121,8 @@ class FileSetComparator:
         for resource_type in resources_types_update - resources_types_original:
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                proto_file_name="",
-                source_code_line=0,
+                proto_file_name=resources_update.types[resource_type].proto_file_name,
+                source_code_line=resources_update.types[resource_type].source_code_line,
                 message=f"A file-level resource definition '{resource_type}' has been added.",
                 actionable=False,
             )

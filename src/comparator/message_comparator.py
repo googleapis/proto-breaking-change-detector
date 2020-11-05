@@ -175,7 +175,7 @@ class DescriptorComparator:
                 # the patterns of the removed message-level resource.
                 global_resource_pattern = self.global_resources_update.types[
                     resource_original.value.type
-                ].pattern
+                ].value.pattern
 
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.

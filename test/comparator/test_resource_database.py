@@ -16,6 +16,7 @@ import unittest
 from google.api import resource_pb2
 from test.tools.invoker import UnittestInvoker
 from src.comparator.resource_database import ResourceDatabase
+from src.comparator.wrappers import Resource
 
 
 class ResourceDatabaseTest(unittest.TestCase):
@@ -31,13 +32,15 @@ class ResourceDatabaseTest(unittest.TestCase):
         for f in self.descriptor_set.file:
             resources = f.options.Extensions[resource_pb2.resource_definition]
             for resource in resources:
-                self.resource_database.register_resource(resource)
+                resource_with_location = self._mock_resource(resource)
+                self.resource_database.register_resource(resource_with_location)
                 self.assertEqual(
-                    self.resource_database.get_resource_by_type(resource.type), resource
+                    self.resource_database.get_resource_by_type(resource.type),
+                    resource_with_location,
                 )
                 self.assertEqual(
                     self.resource_database.get_resource_by_pattern(resource.pattern[0]),
-                    resource,
+                    resource_with_location,
                 )
             # Check a non-existing resource, should return None.
             self.assertEqual(
@@ -50,7 +53,10 @@ class ResourceDatabaseTest(unittest.TestCase):
         parent_resource = self.resource_database.get_parent_resources_by_child_type(
             "example.googleapis.com/t2"
         )
-        self.assertEqual(parent_resource[0].type, "example.googleapis.com/t1")
+        self.assertEqual(parent_resource[0].value.type, "example.googleapis.com/t1")
+
+    def _mock_resource(self, resource):
+        return Resource(resource, proto_file_name="", source_code_locations={}, path=())
 
     @classmethod
     def tearDownClass(cls):

@@ -32,7 +32,7 @@ class WrappersTest(unittest.TestCase):
         self.assertTrue(self._FILE_SET.services_map)
         resources_database = self._FILE_SET.resources_database
         self.assertEqual(
-            resources_database.types["example.googleapis.com/t1"].pattern,
+            resources_database.types["example.googleapis.com/t1"].value.pattern,
             ["foo/{foo}", "foo/{foo}/bar/{bar}/t1"],
         )
 
