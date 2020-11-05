@@ -93,8 +93,8 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_request_message.oneof_fields[0].source_code_line, 47)
         self.assertEqual(foo_request_message.oneof_fields[1].source_code_line, 48)
         resource = foo_request_message.resource
-        self.assertEqual(resource.pattern, ["foo/{foo}/bar/{bar}"])
-        self.assertEqual(resource.type, "example.googleapis.com/Foo")
+        self.assertEqual(resource.value.pattern, ["foo/{foo}/bar/{bar}"])
+        self.assertEqual(resource.value.type, "example.googleapis.com/Foo")
 
     def test_field_wrapper(self):
         foo_response_message = self._FILE_SET.messages_map["FooResponse"]

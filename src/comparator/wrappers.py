@@ -328,7 +328,13 @@ class Message:
     def resource(self) -> Optional[resource_pb2.ResourceDescriptor]:
         """If this message describes a resource, return the resource."""
         resource = self.message_pb.options.Extensions[resource_pb2.resource]
-        return resource if resource.type and resource.pattern else None
+        if not resource.type or not resource.pattern:
+            return None
+        return WithLocation(
+            resource,
+            self.source_code_locations,
+            self.path + (7, 1053),
+        )
 
     @property
     def source_code_line(self):
