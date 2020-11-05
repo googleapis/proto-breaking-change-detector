@@ -120,6 +120,9 @@ class FileSetComparatorTest(unittest.TestCase):
             file_resource_addition.category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
+        message_resource_pattern_change = findings_map[
+            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+        ]
         self.assertEqual(
             file_resource_addition.location.proto_file_name,
             "resource_database_v1beta1.proto",
