@@ -56,7 +56,9 @@ class ResourceDatabaseTest(unittest.TestCase):
         self.assertEqual(parent_resource[0].value.type, "example.googleapis.com/t1")
 
     def _mock_resource(self, resource):
-        return WithLocation(resource, source_code_locations={}, path=(), proto_file_name="")
+        return WithLocation(
+            resource, source_code_locations={}, path=(), proto_file_name=""
+        )
 
     @classmethod
     def tearDownClass(cls):
