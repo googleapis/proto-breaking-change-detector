@@ -16,7 +16,7 @@ import unittest
 from google.api import resource_pb2
 from test.tools.invoker import UnittestInvoker
 from src.comparator.resource_database import ResourceDatabase
-from src.comparator.wrappers import Resource
+from src.comparator.wrappers import WithLocation
 
 
 class ResourceDatabaseTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class ResourceDatabaseTest(unittest.TestCase):
         self.assertEqual(parent_resource[0].value.type, "example.googleapis.com/t1")
 
     def _mock_resource(self, resource):
-        return Resource(resource, proto_file_name="", source_code_locations={}, path=())
+        return WithLocation(resource, source_code_locations={}, path=(), proto_file_name="")
 
     @classmethod
     def tearDownClass(cls):
