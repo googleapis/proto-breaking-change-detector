@@ -60,24 +60,34 @@ class FindingCategory(enum.Enum):
 
 class Finding:
     class _Location:
-        path: str
+        proto_file_name: str
+        source_code_line: int
 
-        def __init__(self, path):
-            self.path = path
+        def __init__(self, proto_file_name, source_code_line):
+            self.proto_file_name = proto_file_name
+            self.source_code_line = source_code_line
 
-    def __init__(self, category, path, message, actionable, extra_info=None):
+    def __init__(
+        self,
+        category,
+        proto_file_name,
+        source_code_line,
+        message,
+        actionable,
+        extra_info=None,
+    ):
         self.category = category
-        self.location = self._Location(path)
+        self.location = self._Location(proto_file_name, source_code_line)
         self.message = message
         self.actionable = actionable
         self.extra_info = extra_info
-        self._path = path
 
     def toDict(self):
         return {
             "category": self.category.value,
             "location": {
-                "path": self._path,
+                "proto_file_name": self.location.proto_file_name,
+                "source_code_line": self.location.source_code_line,
             },
             "message": self.message,
             "actionable": self.actionable,

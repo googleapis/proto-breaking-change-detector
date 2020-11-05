@@ -33,7 +33,8 @@ class ServiceComparator:
         if self.service_original is None:
             FindingContainer.addFinding(
                 category=FindingCategory.SERVICE_ADDITION,
-                location=f"{self.service_update.proto_file_name} Line: {self.service_update.source_code_line}",
+                proto_file_name=self.service_update.proto_file_name,
+                source_code_line=self.service_update.source_code_line,
                 message=f"A new service {self.service_update.name} is added.",
                 actionable=False,
             )
@@ -42,7 +43,8 @@ class ServiceComparator:
         if self.service_update is None:
             FindingContainer.addFinding(
                 category=FindingCategory.SERVICE_REMOVAL,
-                location=f"{self.service_original.proto_file_name} Line: {self.service_original.source_code_line}",
+                proto_file_name=self.service_original.proto_file_name,
+                source_code_line=self.service_original.source_code_line,
                 message=f"A service {self.service_original.name} is removed",
                 actionable=True,
             )
@@ -73,7 +75,8 @@ class ServiceComparator:
             removed_method = methods_original[name]
             FindingContainer.addFinding(
                 category=FindingCategory.METHOD_REMOVAL,
-                location=f"{removed_method.proto_file_name} Line: {removed_method.source_code_line}",
+                proto_file_name=removed_method.proto_file_name,
+                source_code_line=removed_method.source_code_line,
                 message=f"An rpc method {name} is removed",
                 actionable=True,
             )
@@ -82,7 +85,8 @@ class ServiceComparator:
             added_method = methods_update[name]
             FindingContainer.addFinding(
                 category=FindingCategory.METHOD_ADDTION,
-                location=f"{added_method.proto_file_name} Line: {added_method.source_code_line}",
+                proto_file_name=added_method.proto_file_name,
+                source_code_line=added_method.source_code_line,
                 message=f"An rpc method {name} is added",
                 actionable=False,
             )
@@ -95,7 +99,8 @@ class ServiceComparator:
             if input_type_original != input_type_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.input.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.input.source_code_line,
                     message=f"Input type of method {name} is changed from {input_type_original} to {input_type_update}",
                     actionable=True,
                 )
@@ -105,7 +110,8 @@ class ServiceComparator:
             if response_type_original != response_type_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.output.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.output.source_code_line,
                     message=f"Output type of method {name} is changed from {response_type_original} to {response_type_update}",
                     actionable=True,
                 )
@@ -116,7 +122,8 @@ class ServiceComparator:
             ):
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.client_streaming.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.client_streaming.source_code_line,
                     message=f"The request streaming type of method {name} is changed",
                     actionable=True,
                 )
@@ -127,7 +134,8 @@ class ServiceComparator:
             ):
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.server_streaming.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.server_streaming.source_code_line,
                     message=f"The response streaming type of method {name} is changed",
                     actionable=True,
                 )
@@ -135,7 +143,8 @@ class ServiceComparator:
             if method_original.paged_result_field != method_update.paged_result_field:
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.source_code_line,
                     message=f"The paginated response of method {name} is changed",
                     actionable=True,
                 )
@@ -163,14 +172,16 @@ class ServiceComparator:
             if http_annotation_original and not http_annotation_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
-                    location=f"{method_original.proto_file_name} Line: {method_original.http_annotation.source_code_line}",
+                    proto_file_name=method_original.proto_file_name,
+                    source_code_line=method_original.http_annotation.source_code_line,
                     message="A google.api.http annotation is removed.",
                     actionable=True,
                 )
             if not http_annotation_original and http_annotation_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_ADDITION,
-                    location=f"{method_update.proto_file_name} Line: {method_update.http_annotation.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.http_annotation.source_code_line,
                     message="A google.api.http annotation is added.",
                     actionable=False,
                 )
@@ -187,7 +198,8 @@ class ServiceComparator:
             ) != http_annotation_update.get(annotation[0], annotation[1]):
                 FindingContainer.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.http_annotation.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.http_annotation.source_code_line,
                     message=annotation[2],
                     actionable=True,
                 )
@@ -201,7 +213,8 @@ class ServiceComparator:
         if not lro_original and lro_update:
             FindingContainer.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
-                location=f"{method_update.proto_file_name} Line: {method_update.lro_annotation.source_code_line}",
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=method_update.lro_annotation.source_code_line,
                 message="A LRO operation_info annotation is added.",
                 actionable=False,
             )
@@ -210,7 +223,8 @@ class ServiceComparator:
         if lro_original and not lro_update:
             FindingContainer.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
-                location=f"{method_original.proto_file_name} Line: {method_original.lro_annotation.source_code_line}",
+                proto_file_name=method_original.proto_file_name,
+                source_code_line=method_original.lro_annotation.source_code_line,
                 message="A LRO operation_info annotation is removed.",
                 actionable=False,
             )
@@ -219,7 +233,8 @@ class ServiceComparator:
         if lro_original.value["response_type"] != lro_update.value["response_type"]:
             FindingContainer.addFinding(
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
-                location=f"{method_update.proto_file_name} Line: {lro_update.source_code_line}",
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=lro_update.source_code_line,
                 message=f"The response_type of LRO operation_info annotation is changed from {lro_original.value['response_type']} to {lro_update.value['response_type']}",
                 actionable=True,
             )
@@ -227,7 +242,8 @@ class ServiceComparator:
         if lro_original.value["metadata_type"] != lro_update.value["metadata_type"]:
             FindingContainer.addFinding(
                 category=FindingCategory.LRO_METADATA_CHANGE,
-                location=f"{method_update.proto_file_name} Line: {lro_update.source_code_line}",
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=lro_update.source_code_line,
                 message=f"The metadata_type of LRO operation_info annotation is changed from {lro_original.value['metadata_type']} to {lro_update.value['metadata_type']}",
                 actionable=True,
             )
@@ -238,7 +254,8 @@ class ServiceComparator:
         if len(signatures_original) > len(signatures_update):
             FindingContainer.addFinding(
                 category=FindingCategory.METHOD_SIGNATURE_CHANGE,
-                location=f"{method_original.proto_file_name} Line: {method_original.method_signatures.source_code_line}",
+                proto_file_name=method_original.proto_file_name,
+                source_code_line=method_original.method_signatures.source_code_line,
                 message="An existing method_signature is removed.",
                 actionable=True,
             )
@@ -246,7 +263,8 @@ class ServiceComparator:
             if old_sig != new_sig:
                 FindingContainer.addFinding(
                     category=FindingCategory.METHOD_SIGNATURE_CHANGE,
-                    location=f"{method_update.proto_file_name} Line: {method_update.method_signatures.source_code_line}",
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.method_signatures.source_code_line,
                     message=f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
                     actionable=True,
                 )

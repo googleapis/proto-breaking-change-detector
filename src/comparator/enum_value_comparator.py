@@ -31,7 +31,8 @@ class EnumValueComparator:
         if self.enum_value_original is None:
             FindingContainer.addFinding(
                 category=FindingCategory.ENUM_VALUE_ADDITION,
-                location=f"{self.enum_value_update.proto_file_name} Line: {self.enum_value_update.source_code_line}",
+                proto_file_name=self.enum_value_update.proto_file_name,
+                source_code_line=self.enum_value_update.source_code_line,
                 message=f"A new EnumValue {self.enum_value_update.name} is added.",
                 actionable=False,
             )
@@ -39,7 +40,8 @@ class EnumValueComparator:
         elif self.enum_value_update is None:
             FindingContainer.addFinding(
                 category=FindingCategory.ENUM_VALUE_REMOVAL,
-                location=f"{self.enum_value_original.proto_file_name} Line: {self.enum_value_original.source_code_line}",
+                proto_file_name=self.enum_value_original.proto_file_name,
+                source_code_line=self.enum_value_original.source_code_line,
                 message=f"An EnumValue {self.enum_value_original.name} is removed",
                 actionable=True,
             )
@@ -47,7 +49,8 @@ class EnumValueComparator:
         elif self.enum_value_original.name != self.enum_value_update.name:
             FindingContainer.addFinding(
                 category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
-                location=f"{self.enum_value_update.proto_file_name} Line: {self.enum_value_update.source_code_line}",
+                proto_file_name=self.enum_value_update.proto_file_name,
+                source_code_line=self.enum_value_update.source_code_line,
                 message=f"Name of the EnumValue is changed, the original is {self.enum_value_original.name}, but the updated is {self.enum_value_update.name}",
                 actionable=True,
             )

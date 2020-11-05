@@ -24,13 +24,21 @@ class FindingContainer:
     def addFinding(
         cls,
         category: FindingCategory,
-        location: str,
+        proto_file_name: str,
+        source_code_line: int,
         message: str,
         actionable: bool,
         extra_info=None,
     ):
         cls._finding_results.append(
-            Finding(category, location, message, actionable, extra_info)
+            Finding(
+                category,
+                proto_file_name,
+                source_code_line,
+                message,
+                actionable,
+                extra_info,
+            )
         )
 
     @classmethod

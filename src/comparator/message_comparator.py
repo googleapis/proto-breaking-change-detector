@@ -37,7 +37,8 @@ class DescriptorComparator:
         if message_original is None:
             FindingContainer.addFinding(
                 category=FindingCategory.MESSAGE_ADDITION,
-                location=f"{message_update.proto_file_name} Line: {message_update.source_code_line}",
+                proto_file_name=message_update.proto_file_name,
+                source_code_line=message_update.source_code_line,
                 message=f"A new message {message_update.name} is added.",
                 actionable=False,
             )
@@ -46,7 +47,8 @@ class DescriptorComparator:
         if message_update is None:
             FindingContainer.addFinding(
                 category=FindingCategory.MESSAGE_REMOVAL,
-                location=f"{message_original.proto_file_name} Line: {message_original.source_code_line}",
+                proto_file_name=message_original.proto_file_name,
+                source_code_line=message_original.source_code_line,
                 message=f"A message {message_original.name} is removed",
                 actionable=True,
             )
@@ -137,7 +139,8 @@ class DescriptorComparator:
         if not resource_original and resource_update:
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                location="",
+                proto_file_name="",
+                source_code_line=0,
                 message=f"A message-level resource definition {resource_update.type} has been added.",
                 actionable=False,
             )
@@ -152,7 +155,8 @@ class DescriptorComparator:
             if not self.global_resources_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    location="",
+                    proto_file_name="",
+                    source_code_line=0,
                     message=f"A message-level resource definition {resource_original.type} has been removed.",
                     actionable=True,
                 )
@@ -161,7 +165,8 @@ class DescriptorComparator:
             if resource_original.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    location="",
+                    proto_file_name="",
+                    source_code_line=0,
                     message=f"A message-level resource definition {resource_original.type} has been removed.",
                     actionable=True,
                 )
@@ -179,7 +184,8 @@ class DescriptorComparator:
                 ):
                     FindingContainer.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                        location="",
+                        proto_file_name="",
+                        source_code_line=0,
                         message=f"A message-level resource definition {resource_original.type} has been removed.",
                         actionable=True,
                     )
@@ -191,7 +197,8 @@ class DescriptorComparator:
         ):
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                location="",
+                proto_file_name="",
+                source_code_line=0,
                 message=f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
                 actionable=True,
             )
