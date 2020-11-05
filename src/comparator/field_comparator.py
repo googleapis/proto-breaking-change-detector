@@ -94,13 +94,13 @@ class FieldComparator:
                 actionable=True,
             )
         # If field has the same primitive type, then the type is identical.
-        # If field has the same nonn-primitive type like `TYPE_ENUM`.
+        # If field has the same non-primitive type like `TYPE_ENUM`.
         # Check the type_name of the field.
-        # TODO(xiaozhenliu): version update is allowed here. For example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
-        # But from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate` is breaking.
         elif self.field_original.type_name and (
             self.field_original.type_name.value != self.field_update.type_name.value
         ):
+            # TODO(xiaozhenliu): version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
+            # But from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate` is breaking.
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
