@@ -99,13 +99,13 @@ class WrappersTest(unittest.TestCase):
     def test_field_wrapper(self):
         foo_response_message = self._FILE_SET.messages_map["FooResponse"]
         enum_field = foo_response_message.fields[1]
-        self.assertEqual(enum_field.label, "LABEL_OPTIONAL")
+        self.assertEqual(enum_field.label.value, "LABEL_OPTIONAL")
         self.assertEqual(enum_field.required, False)
-        self.assertEqual(enum_field.proto_type, "TYPE_ENUM")
+        self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
         self.assertEqual(enum_field.oneof, False)
         self.assertEqual(enum_field.child_type, True)
         self.assertEqual(
-            enum_field.resource_reference.child_type, "example.googleapis.com/t1"
+            enum_field.resource_reference.value.child_type, "example.googleapis.com/t1"
         )
         # Enum `enum_field` is defined at Line57 in .proto file.
         self.assertEqual(enum_field.source_code_line, 57)

@@ -73,6 +73,8 @@ class DescriptorComparatorTest(unittest.TestCase):
             "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 7)
 
     def test_nested_message_change(self):
         # Field `type` in the nested message `PhoneNumber` is removed.

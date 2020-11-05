@@ -76,25 +76,23 @@ class FieldComparator:
 
         # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
-        # TODO(xiaozhenliu): add location information for field.label
-        if self.field_original.label != self.field_update.label:
+        if self.field_original.label.value != self.field_update.label.value:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
-                proto_file_name="",
-                source_code_line=0,
-                message=f"Repeated state of the Field is changed, the original is {self.field_original.label}, but the updated is {self.field_update.label}",
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.label.source_code_line,
+                message=f"Repeated state of the Field is changed, the original is {self.field_original.label.value}, but the updated is {self.field_update.label.value}",
                 actionable=True,
             )
 
         # 5. If the FieldDescriptors have the same repeated state,
         # check if the type of them stay the same.
-        # TODO(xiaozhenliu): add location information for field.type
         if self.field_original.proto_type != self.field_update.proto_type:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
-                proto_file_name="",
-                source_code_line=0,
-                message=f"Type of the field is changed, the original is {self.field_original.proto_type}, but the updated is {self.field_update.proto_type}",
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.proto_type.source_code_line,
+                message=f"Type of the field is changed, the original is {self.field_original.proto_type.value}, but the updated is {self.field_update.proto_type.value}",
                 actionable=True,
             )
         # 6. Check the oneof_index of the field.
@@ -121,7 +119,6 @@ class FieldComparator:
                 )
 
         # 6. Check `google.api.resource_reference` annotation.
-        # TODO(xiaozhenliu): add location information for field.resource_reference.
         self._compare_resource_reference(self.field_original, self.field_update)
 
     def _compare_resource_reference(self, field_original, field_update):
@@ -134,19 +131,19 @@ class FieldComparator:
         if not resource_ref_original and resource_ref_update:
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
-                proto_file_name="",
-                source_code_line=0,
+                proto_file_name=field_update.proto_file_name,
+                source_code_line=resource_ref_update.source_code_line,
                 message=f"A resource reference option is added to the field {field_original.name}",
                 actionable=False,
             )
             return
         # Resource annotation is removed, check if it is added as a message resource.
         if resource_ref_original and not resource_ref_update:
-            if not self._resource_ref_in_local(resource_ref_original):
+            if not self._resource_ref_in_local(resource_ref_original.value):
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
-                    proto_file_name="",
-                    source_code_line=0,
+                    proto_file_name=field_original.proto_file_name,
+                    source_code_line=resource_ref_original.source_code_line,
                     message=f"A resource reference option of field '{field_original.name}' is removed.",
                     actionable=True,
                 )
@@ -155,14 +152,17 @@ class FieldComparator:
         # They both use `type` or `child_type`.
         if field_original.child_type == field_update.child_type:
             original_type = (
-                resource_ref_original.type or resource_ref_original.child_type
+                resource_ref_original.value.type
+                or resource_ref_original.value.child_type
             )
-            update_type = resource_ref_update.type or resource_ref_update.child_type
+            update_type = (
+                resource_ref_update.value.type or resource_ref_update.value.child_type
+            )
             if original_type != update_type:
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
-                    proto_file_name="",
-                    source_code_line=0,
+                    proto_file_name=field_update.proto_file_name,
+                    source_code_line=resource_ref_update.source_code_line,
                     message=f"The type of resource reference option in field '{field_original.name}' is changed from '{original_type}' to '{update_type}'.",
                     actionabel=True,
                 )
@@ -175,11 +175,17 @@ class FieldComparator:
         self._register_local_resource()
         if field_original.child_type:
             self._is_parent_type(
-                resource_ref_original.child_type, resource_ref_update.type, True
+                resource_ref_original.value.child_type,
+                resource_ref_update.value.type,
+                True,
+                resource_ref_update.source_code_line,
             )
         if field_update.child_type:
             self._is_parent_type(
-                resource_ref_update.child_type, resource_ref_original.type, False
+                resource_ref_update.value.child_type,
+                resource_ref_original.value.type,
+                False,
+                resource_ref_update.source_code_line,
             )
 
     def _resource_ref_in_local(self, resource_ref):
@@ -200,7 +206,9 @@ class FieldComparator:
         self.global_resources_original.register_resource(self.local_resource_original)
         self.global_resources_update.register_resource(self.local_resource_update)
 
-    def _is_parent_type(self, child_type, parent_type, original_is_child):
+    def _is_parent_type(
+        self, child_type, parent_type, original_is_child, source_code_line
+    ):
         if original_is_child:
             parent_resources = (
                 self.global_resources_original.get_parent_resources_by_child_type(
@@ -217,8 +225,8 @@ class FieldComparator:
             # Resulting referenced resource patterns cannot be resolved identical.
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
-                proto_file_name="",
-                source_code_line=0,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=source_code_line,
                 message=f"The child_type '{child_type}' and type '{parent_type}' of "
                 f"resource reference option in field '{self.field_original.name}' "
                 "cannot be resolved to the identical resource.",
