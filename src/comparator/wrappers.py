@@ -63,10 +63,6 @@ class Resource:
         return self.source_code_locations[self.path].span[0] + 1
 
 
-# TODO(xiaozhenliu): parse SourceCode location for properties in each descriptor.
-# For example: during comparison, we will need the source code line number for method.input.
-# The annotations cannot precisely located, because they are customized options, and we
-# use field number to get the location. For extension options, they share the same path [..., 1000].
 @dataclasses.dataclass(frozen=True)
 class EnumValue:
     """Description of an enum value.
