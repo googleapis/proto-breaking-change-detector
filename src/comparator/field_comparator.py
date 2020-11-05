@@ -197,14 +197,20 @@ class FieldComparator:
             raise TypeError(
                 "In a resource_reference annotation, either `type` or `child_type` field should be defined"
             )
-        if self.local_resource_update.type != checked_type:
+        if self.local_resource_update.value.type != checked_type:
             return False
         return True
 
     def _register_local_resource(self):
         # Add message-level resource definition to the global resource database for query.
-        self.global_resources_original.register_resource(self.local_resource_original)
-        self.global_resources_update.register_resource(self.local_resource_update)
+        if self.local_resource_original:
+            self.global_resources_original.register_resource(
+                self.local_resource_original.value
+            )
+        if self.local_resource_update:
+            self.global_resources_update.register_resource(
+                self.local_resource_update.value
+            )
 
     def _is_parent_type(
         self, child_type, parent_type, original_is_child, source_code_line

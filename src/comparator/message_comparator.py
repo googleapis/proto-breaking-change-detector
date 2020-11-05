@@ -139,9 +139,9 @@ class DescriptorComparator:
         if not resource_original and resource_update:
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                proto_file_name="",
-                source_code_line=0,
-                message=f"A message-level resource definition {resource_update.type} has been added.",
+                proto_file_name=self.message_update.proto_file_name,
+                source_code_line=resource_update.source_code_line,
+                message=f"A message-level resource definition {resource_update.value.type} has been added.",
                 actionable=False,
             )
             return
@@ -150,56 +150,56 @@ class DescriptorComparator:
         # 3. Note that the type change of an existing resource definition is like one resource
         # is removed and another one is added.
         if (resource_original and not resource_update) or (
-            resource_original.type != resource_update.type
+            resource_original.value.type != resource_update.value.type
         ):
             if not self.global_resources_update:
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    proto_file_name="",
-                    source_code_line=0,
-                    message=f"A message-level resource definition {resource_original.type} has been removed.",
+                    proto_file_name=self.message_original.proto_file_name,
+                    source_code_line=resource_original.source_code_line,
+                    message=f"A message-level resource definition {resource_original.value.type} has been removed.",
                     actionable=True,
                 )
                 return
             # Check if the removed resource is in the global file-level resource database.
-            if resource_original.type not in self.global_resources_update.types:
+            if resource_original.value.type not in self.global_resources_update.types:
                 FindingContainer.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    proto_file_name="",
-                    source_code_line=0,
-                    message=f"A message-level resource definition {resource_original.type} has been removed.",
+                    proto_file_name=self.message_original.proto_file_name,
+                    source_code_line=resource_original.source_code_line,
+                    message=f"A message-level resource definition {resource_original.value.type} has been removed.",
                     actionable=True,
                 )
             else:
                 # Check the patterns of existing file-level resource are compatible with
                 # the patterns of the removed message-level resource.
                 global_resource_pattern = self.global_resources_update.types[
-                    resource_original.type
+                    resource_original.value.type
                 ].pattern
 
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.
                 if self._compatible_patterns(
-                    resource_original.pattern, global_resource_pattern
+                    resource_original.value.pattern, global_resource_pattern
                 ):
                     FindingContainer.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                        proto_file_name="",
-                        source_code_line=0,
-                        message=f"A message-level resource definition {resource_original.type} has been removed.",
+                        proto_file_name=self.message_original.proto_file_name,
+                        source_code_line=resource_original.source_code_line,
+                        message=f"A message-level resource definition {resource_original.value.type} has been removed.",
                         actionable=True,
                     )
             return
         # Resource is existing in both original and update versions.
         # 3. Patterns of message-level resource definitions have changed.
         if self._compatible_patterns(
-            resource_original.pattern, resource_update.pattern
+            resource_original.value.pattern, resource_update.value.pattern
         ):
             FindingContainer.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                proto_file_name="",
-                source_code_line=0,
-                message=f"The pattern of message-level resource definition has changed from {resource_original.pattern} to {resource_update.pattern}.",
+                proto_file_name=self.message_update.proto_file_name,
+                source_code_line=resource_update.source_code_line,
+                message=f"The pattern of message-level resource definition has changed from {resource_original.value.pattern} to {resource_update.value.pattern}.",
                 actionable=True,
             )
 
