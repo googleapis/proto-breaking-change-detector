@@ -20,9 +20,9 @@ from google.protobuf import descriptor_pb2
 
 
 class EnumComparatorTest(unittest.TestCase):
-
     def setUp(self):
         L = descriptor_pb2.SourceCodeInfo.Location
+        # fmt: off
         locations = [
             L(path=(4, 0,), span=(1, 2, 3, 4)),
             # Enum will add (2, 1) for each EnumValue in the path.
@@ -47,6 +47,7 @@ class EnumComparatorTest(unittest.TestCase):
             locations=locations,
             path=(4, 0,),
         )
+        # fmt: on
 
     def tearDown(self):
         FindingContainer.reset()
