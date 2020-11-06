@@ -43,12 +43,12 @@ class EnumTest(unittest.TestCase):
 
     def test_source_code_properties(self):
         L = descriptor_pb2.SourceCodeInfo.Location
-        location = L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))
+        locations = [L(path=(4, 0,), span=(1, 2, 3, 4))]
         enum = make_enum(
             name="Foo",
             proto_file_name="test.proto",
-            source_code_locations={(4, 0, 2, 0): location},
-            path=(4, 0, 2, 0),
+            locations=locations,
+            path=(4, 0,),
         )
         self.assertEqual(enum.name, "Foo")
         self.assertEqual(enum.values, {})
@@ -57,7 +57,7 @@ class EnumTest(unittest.TestCase):
             enum.source_code_line,
             2,
         )
-        self.assertEqual(enum.path, (4, 0, 2, 0))
+        self.assertEqual(enum.path, (4, 0))
 
 
 if __name__ == "__main__":

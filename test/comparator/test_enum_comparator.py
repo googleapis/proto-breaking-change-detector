@@ -26,7 +26,7 @@ class EnumComparatorTest(unittest.TestCase):
         locations = [
             L(path=(4, 0,), span=(1, 2, 3, 4)),
             # Enum will add (2, 1) for each EnumValue in the path.
-            L(path=(4, 0, 2, 1), span=(1, 2, 3, 4)),
+            L(path=(4, 0, 2, 1), span=(2, 3, 4, 5)),
         ]
         self.enum_foo = make_enum(
             name="Foo",
@@ -73,7 +73,7 @@ class EnumComparatorTest(unittest.TestCase):
         self.assertEqual(finding.message, "A new EnumValue VALUE2 is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
-        self.assertEqual(finding.location.source_code_line, 2)
+        self.assertEqual(finding.location.source_code_line, 3)
 
     def test_no_api_change(self):
         EnumComparator(self.enum_foo, self.enum_foo).compare()
