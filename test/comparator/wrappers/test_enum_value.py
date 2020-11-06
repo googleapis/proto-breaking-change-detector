@@ -31,7 +31,7 @@ class EnumValueTest(unittest.TestCase):
 
     def test_source_code_properties(self):
         L = descriptor_pb2.SourceCodeInfo.Location
-        locations = [L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))
+        locations = [L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))]
         enum_value = make_enum_value(
             name="FOO",
             number=1,
