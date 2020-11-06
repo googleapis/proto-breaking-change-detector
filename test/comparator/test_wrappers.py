@@ -102,6 +102,8 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(enum_field.label.value, "LABEL_OPTIONAL")
         self.assertEqual(enum_field.required, False)
         self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
+        self.assertEqual(enum_field.type_name.value, ".example.Enum1")
+        self.assertEqual(enum_field.is_primitive_type, False)
         self.assertEqual(enum_field.oneof, False)
         self.assertEqual(enum_field.child_type, True)
         self.assertEqual(
