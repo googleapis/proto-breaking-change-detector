@@ -20,7 +20,6 @@ from google.protobuf import descriptor_pb2
 
 
 class EnumComparatorTest(unittest.TestCase):
-
     def setUp(self):
         L = descriptor_pb2.SourceCodeInfo.Location
         # fmt: off
