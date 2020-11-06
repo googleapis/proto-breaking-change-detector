@@ -50,7 +50,7 @@ class WithLocation:
 
     @property
     def source_code_line(self):
-        _get_source_code_line(self.source_code_locations, self.path)
+        return _get_source_code_line(self.source_code_locations, self.path)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -250,7 +250,7 @@ class Field:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        _get_source_code_line(self.source_code_locations, self.path)
+        return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Message:
@@ -357,7 +357,7 @@ class Message:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        _get_source_code_line(self.source_code_locations, self.path)
+        return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Method:
@@ -553,7 +553,7 @@ class Method:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        _get_source_code_line(self.source_code_locations, self.path)
+        return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Service:
@@ -633,7 +633,7 @@ class Service:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        _get_source_code_line(self.source_code_locations, self.path)
+        return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class FileSet:
