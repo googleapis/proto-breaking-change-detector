@@ -35,26 +35,11 @@ from typing import Dict, Sequence, Optional, Tuple
 class WithLocation:
     """Wrap the attribute with location information."""
 
-    def __init__(self, value, source_code_locations, path):
+    def __init__(self, value, source_code_locations, path, proto_file_name=None):
         self.value = value
         self.path = path
         self.source_code_locations = source_code_locations
-
-    @property
-    def source_code_line(self):
-        if self.path not in self.source_code_locations:
-            return f"No source code line can be identified by path {self.path}."
-        return self.source_code_locations[self.path].span[0] + 1
-
-
-class Resource:
-    """Wrap the resource definition with location information and the file name where it exists."""
-
-    def __init__(self, value, proto_file_name, source_code_locations, path):
-        self.value = value
         self.proto_file_name = proto_file_name
-        self.source_code_locations = source_code_locations
-        self.path = path
 
     @property
     def source_code_line(self):
@@ -221,6 +206,25 @@ class Field:
         )
 
     @property
+    def is_primitive_type(self):
+        """Return true if the proto _type is primitive python type like `TYPE_STRING`"""
+        NON_PRIMITIVE_TYPE = ["TYPE_ENUM", "TYPE_MESSAGE", "TYPE_GROUP"]
+        return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
+
+    @property
+    def type_name(self):
+        """Return the type_name if the proto_type is not primitive, return `None` otherwise.
+        For message and enum types, this is the name of the type like `.tutorial.example.Enum`"""
+        # FieldDescriptorProto.type_name has field number 6.
+        return (
+            None
+            if self.is_primitive_type
+            else WithLocation(
+                self.field_pb.type_name, self.source_code_locations, self.path + (6,)
+            )
+        )
+
+    @property
     def oneof(self) -> bool:
         """Return if the field is in oneof"""
         return self.field_pb.HasField("oneof_index")
@@ -346,11 +350,11 @@ class Message:
         resource = self.message_pb.options.Extensions[resource_pb2.resource]
         if not resource.type or not resource.pattern:
             return None
-        return Resource(
+        return WithLocation(
             resource,
-            self.proto_file_name,
             self.source_code_locations,
             self.path + (7, 1053),
+            self.proto_file_name,
         )
 
     @property
@@ -668,7 +672,7 @@ class FileSet:
             ):
                 resource_path = path + (8, 1053, i)
                 self.resources_database.register_resource(
-                    Resource(resource, fd.name, source_code_locations, resource_path)
+                    WithLocation(resource, source_code_locations, resource_path, fd.name)
                 )
             # FileDescriptorProto.message_type has field number 4
             self.messages_map.update(

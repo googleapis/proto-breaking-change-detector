@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package example.v1;
+
+message Message1 {
+    Enum field1 = 1;
+}
+
+enum Enum {
+    enumvalue = 0;
+}
