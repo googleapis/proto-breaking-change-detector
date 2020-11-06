@@ -20,6 +20,7 @@ import src.comparator.wrappers as wrappers
 def make_enum_value_pb2(
     name: str, number: int, **kwargs
 ) -> desc.EnumValueDescriptorProto:
+    """Mock an EnumValueDescriptorProto that is used to create wrappers.EnumValue"""
     return desc.EnumValueDescriptorProto(name=name, number=number)
 
 
@@ -30,6 +31,7 @@ def make_enum_value(
     source_code_locations: Dict[Tuple[int, ...], desc.SourceCodeInfo.Location] = {},
     path: Tuple[int] = (),
 ) -> wrappers.EnumValue:
+    """Mock an EnumValue object."""
     enum_value_pb = make_enum_value_pb2(name, number)
     enum_value = wrappers.EnumValue(
         enum_value_pb, proto_file_name, source_code_locations, path
