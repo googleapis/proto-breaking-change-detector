@@ -26,19 +26,33 @@ class FieldComparatorTest(unittest.TestCase):
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _PROTO_ORIGINAL = "message_v1.proto"
-    _PROTO_UPDATE = "message_v1beta1.proto"
-    _DESCRIPTOR_SET_ORIGINAL = "message_v1_descriptor_set.pb"
-    _DESCRIPTOR_SET_UPDATE = "message_v1beta1_descriptor_set.pb"
-    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
-    _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
-    _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
-    _PB_UPDATE = _INVOKER_UPDATE.run()
+    _INVOKER_MESSAGE_ORIGNAL = UnittestInvoker(
+        ["message_v1.proto"], "message_v1_descriptor_set.pb"
+    )
+    _INVOKER_MESSAGE_UPDATE = UnittestInvoker(
+        ["message_v1beta1.proto"], "message_v1beta1_descriptor_set.pb"
+    )
+    _INVOKER_FIELD_ORIGNAL = UnittestInvoker(
+        ["field_v1.proto"], "field_v1_descriptor_set.pb"
+    )
+    _INVOKER_FIELD_UPDATE = UnittestInvoker(
+        ["field_v1beta1.proto"], "field_v1beta1_descriptor_set.pb"
+    )
+    _PB_ORIGNAL = _INVOKER_MESSAGE_ORIGNAL.run()
+    _PB_UPDATE = _INVOKER_MESSAGE_UPDATE.run()
+    _PB_FIELD_ORIGINAL = _INVOKER_FIELD_ORIGNAL.run()
+    _PB_FIELD_UPDATE = _INVOKER_FIELD_UPDATE.run()
 
     def setUp(self):
         self.person_fields_v1 = FileSet(self._PB_ORIGNAL).messages_map["Person"].fields
         self.person_fields_v1beta1 = (
             FileSet(self._PB_UPDATE).messages_map["Person"].fields
+        )
+        self.field1_v1 = (
+            FileSet(self._PB_FIELD_ORIGINAL).messages_map["Message1"].fields[1]
+        )
+        self.field1_v1beta1 = (
+            FileSet(self._PB_FIELD_UPDATE).messages_map["Message1"].fields[1]
         )
 
     def tearDown(self):
@@ -60,7 +74,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
         self.assertEqual(finding.location.source_code_line, 6)
 
-    def test_type_change(self):
+    def test_primitive_type_change(self):
         # Field `id` is `int32` type in `message_v1.proto`,
         # but updated to `string` in `message_v1beta1.proto`.
         FieldComparator(
@@ -75,6 +89,19 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
         self.assertEqual(finding.location.source_code_line, 7)
+
+    def test_message_type_change(self):
+        # Field `field1` is `Message2` type in `field_v1.proto`,
+        # but updated to `Message3` in `field_v1beta1.proto`.
+        FieldComparator(self.field1_v1, self.field1_v1beta1).compare()
+        finding = FindingContainer.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of the field is changed, the original is `.example.v1.Enum`, but the updated is `.example.v1beta1.EnumUpdate`",
+        )
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "field_v1beta1.proto")
+        self.assertEqual(finding.location.source_code_line, 6)
 
     def test_repeated_label_change(self):
         # Field `phones` in `message_v1.proto` has `repeated` label,
@@ -120,8 +147,10 @@ class FieldComparatorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls._INVOKER_ORIGNAL.cleanup()
-        cls._INVOKER_UPDATE.cleanup()
+        cls._INVOKER_MESSAGE_ORIGNAL.cleanup()
+        cls._INVOKER_MESSAGE_UPDATE.cleanup()
+        cls._INVOKER_FIELD_ORIGNAL.cleanup()
+        cls._INVOKER_FIELD_UPDATE.cleanup()
 
 
 if __name__ == "__main__":
