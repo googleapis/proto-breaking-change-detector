@@ -13,73 +13,71 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+from test.tools.mock_descriptors import make_enum
 from src.comparator.enum_comparator import EnumComparator
 from src.findings.finding_container import FindingContainer
-from src.comparator.wrappers import FileSet
+from google.protobuf import descriptor_pb2
 
 
 class EnumComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.enum_comparator.EnumComparator class.
-    # We use message_v1.proto and message_v1beta1.proto to mimic the original and next
-    # versions of the API definition files (which has only one proto file in this case).
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _PROTO_ORIGINAL = "message_v1.proto"
-    _PROTO_UPDATE = "message_v1beta1.proto"
-    _DESCRIPTOR_SET_ORIGINAL = "message_v1_descriptor_set.pb"
-    _DESCRIPTOR_SET_UPDATE = "message_v1beta1_descriptor_set.pb"
-    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
-    _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
-    _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
-    _PB_UPDATE = _INVOKER_UPDATE.run()
 
     def setUp(self):
-        # We take the enumDescriptorProto `phoneType` and `phoneType` from the original
-        # and updated `_descriptor_set.pb` files for comparison.
-        self.enum_original = (
-            FileSet(self._PB_ORIGNAL).messages_map["Person"].nested_enums["PhoneType"]
+        L = descriptor_pb2.SourceCodeInfo.Location
+        locations = [
+            L(path=(4, 0,), span=(1, 2, 3, 4)),
+            # Enum will add (2, 1) for each EnumValue in the path.
+            L(path=(4, 0, 2, 1), span=(1, 2, 3, 4)),
+        ]
+        self.enum_foo = make_enum(
+            name="Foo",
+            values=(
+                ("VALUE1", 1),
+            ),
+            proto_file_name="test.proto",
+            locations=locations,
+            path=(4, 0,),
         )
-        self.enum_update = (
-            FileSet(self._PB_UPDATE).messages_map["Person"].nested_enums["PhoneType"]
+        self.enum_bar = make_enum(
+            name="Bar",
+            values=(
+                ("VALUE1", 1),
+                ("VALUE2", 2),
+            ),
+            proto_file_name="test_update.proto",
+            locations=locations,
+            path=(4, 0,),
         )
 
     def tearDown(self):
         FindingContainer.reset()
 
     def test_enum_removal(self):
-        EnumComparator(self.enum_original, None).compare()
+        EnumComparator(self.enum_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "An Enum PhoneType is removed")
+        self.assertEqual(finding.message, "An Enum Foo is removed")
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 10)
+        self.assertEqual(finding.location.proto_file_name, "test.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_addition(self):
-        EnumComparator(None, self.enum_update).compare()
+        EnumComparator(None, self.enum_bar).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new Enum PhoneType is added.")
+        self.assertEqual(finding.message, "A new Enum Bar is added.")
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 10)
+        self.assertEqual(finding.location.proto_file_name, "test_update.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_value_change(self):
-        EnumComparator(self.enum_original, self.enum_update).compare()
+        EnumComparator(self.enum_foo, self.enum_bar).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new EnumValue SCHOOL is added.")
+        self.assertEqual(finding.message, "A new EnumValue VALUE2 is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 14)
+        self.assertEqual(finding.location.proto_file_name, "test_update.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_no_api_change(self):
-        EnumComparator(self.enum_update, self.enum_update).compare()
+        EnumComparator(self.enum_foo, self.enum_foo).compare()
         self.assertEqual(len(FindingContainer.getAllFindings()), 0)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER_ORIGNAL.cleanup()
-        cls._INVOKER_UPDATE.cleanup()
 
 
 if __name__ == "__main__":

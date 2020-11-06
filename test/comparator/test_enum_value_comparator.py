@@ -22,19 +22,19 @@ from src.findings.finding_container import FindingContainer
 class EnumValueComparatorTest(unittest.TestCase):
     def setUp(self):
         L = descriptor_pb2.SourceCodeInfo.Location
-        location = L(path=(2, 1), span=(1, 2))
+        locations = [L(path=(2, 1), span=(1, 2))]
         self.enum_foo = make_enum_value(
             name="FOO",
             number=1,
             proto_file_name="test.proto",
-            source_code_locations={(2, 1): location},
+            locations=locations,
             path=(2, 1),
         )
         self.enum_bar = make_enum_value(
             name="BAR",
             number=1,
             proto_file_name="test_update.proto",
-            source_code_locations={(2, 1): location},
+            locations=locations,
             path=(2, 1),
         )
 

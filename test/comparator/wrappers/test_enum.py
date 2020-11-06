@@ -13,40 +13,51 @@
 # limitations under the License.
 
 import unittest
-from test.tools.mock_descriptors import make_enum_value
+from test.tools.mock_descriptors import make_enum
 from google.protobuf import descriptor_pb2
 
 
-class EnumValueTest(unittest.TestCase):
+class EnumTest(unittest.TestCase):
     def test_basic_properties(self):
-        enum_value = make_enum_value("FOO", 1)
-        self.assertEqual(enum_value.name, "FOO")
-        self.assertEqual(enum_value.number, 1)
-        self.assertEqual(enum_value.proto_file_name, "foo")
+        enum = make_enum("Foo")
+        self.assertEqual(enum.name, "Foo")
+        self.assertEqual(enum.proto_file_name, "foo")
+        self.assertEqual(enum.path, ())
         self.assertEqual(
-            enum_value.source_code_line,
+            enum.source_code_line,
             "No source code line can be identified by path ().",
         )
-        self.assertEqual(enum_value.path, ())
+
+    def test_enum_value_properties(self):
+        enum_type = make_enum(
+            name="Irrelevant",
+            values=(
+                ("RED", 1),
+                ("GREEN", 2),
+                ("BLUE", 3),
+            ),
+        )
+        self.assertEqual(len(enum_type.values), 3)
+        for ev, expected in zip(enum_type.values.values(), ("RED", "GREEN", "BLUE")):
+            self.assertEqual(ev.name, expected)
 
     def test_source_code_properties(self):
         L = descriptor_pb2.SourceCodeInfo.Location
         location = L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))
-        enum_value = make_enum_value(
-            name="FOO",
-            number=1,
-            proto_file_name="foo.proto",
+        enum = make_enum(
+            name="Foo",
+            proto_file_name="test.proto",
             source_code_locations={(4, 0, 2, 0): location},
             path=(4, 0, 2, 0),
         )
-        self.assertEqual(enum_value.name, "FOO")
-        self.assertEqual(enum_value.number, 1)
-        self.assertEqual(enum_value.proto_file_name, "foo.proto")
+        self.assertEqual(enum.name, "Foo")
+        self.assertEqual(enum.values, {})
+        self.assertEqual(enum.proto_file_name, "test.proto")
         self.assertEqual(
-            enum_value.source_code_line,
+            enum.source_code_line,
             2,
         )
-        self.assertEqual(enum_value.path, (4, 0, 2, 0))
+        self.assertEqual(enum.path, (4, 0, 2, 0))
 
 
 if __name__ == "__main__":
