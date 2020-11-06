@@ -29,14 +29,14 @@ class EnumValueTest(unittest.TestCase):
         )
         self.assertEqual(enum_value.path, ())
 
-    def test_extra_properties(self):
+    def test_source_code_properties(self):
         L = descriptor_pb2.SourceCodeInfo.Location
-        location = L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))
+        locations = [L(path=(4, 0, 2, 0), span=(1, 2, 3, 4))]
         enum_value = make_enum_value(
             name="FOO",
             number=1,
             proto_file_name="foo.proto",
-            source_code_locations={(4, 0, 2, 0): location},
+            locations=locations,
             path=(4, 0, 2, 0),
         )
         self.assertEqual(enum_value.name, "FOO")
