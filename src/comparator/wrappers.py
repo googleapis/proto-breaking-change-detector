@@ -204,6 +204,25 @@ class Field:
         )
 
     @property
+    def is_primitive_type(self):
+        """Return true if the proto _type is primitive python type like `TYPE_STRING`"""
+        NON_PRIMITIVE_TYPE = ["TYPE_ENUM", "TYPE_MESSAGE", "TYPE_GROUP"]
+        return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
+
+    @property
+    def type_name(self):
+        """Return the type_name if the proto_type is not primitive, return `None` otherwise.
+        For message and enum types, this is the name of the type like `.tutorial.example.Enum`"""
+        # FieldDescriptorProto.type_name has field number 6.
+        return (
+            None
+            if self.is_primitive_type
+            else WithLocation(
+                self.field_pb.type_name, self.source_code_locations, self.path + (6,)
+            )
+        )
+
+    @property
     def oneof(self) -> bool:
         """Return if the field is in oneof"""
         return self.field_pb.HasField("oneof_index")

@@ -84,15 +84,28 @@ class FieldComparator:
                 message=f"Repeated state of the Field is changed, the original is {self.field_original.label.value}, but the updated is {self.field_update.label.value}",
                 actionable=True,
             )
-
-        # 5. If the FieldDescriptors have the same repeated state,
-        # check if the type of them stay the same.
-        if self.field_original.proto_type != self.field_update.proto_type:
+        # 5. Check the type of the field.
+        if self.field_original.proto_type.value != self.field_update.proto_type.value:
             FindingContainer.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.proto_type.source_code_line,
                 message=f"Type of the field is changed, the original is {self.field_original.proto_type.value}, but the updated is {self.field_update.proto_type.value}",
+                actionable=True,
+            )
+        # If field has the same primitive type, then the type is identical.
+        # If field has the same non-primitive type like `TYPE_ENUM`.
+        # Check the type_name of the field.
+        elif self.field_original.type_name and (
+            self.field_original.type_name.value != self.field_update.type_name.value
+        ):
+            # TODO(xiaozhenliu): version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
+            # But from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate` is breaking.
+            FindingContainer.addFinding(
+                category=FindingCategory.FIELD_TYPE_CHANGE,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.type_name.source_code_line,
+                message=f"Type of the field is changed, the original is `{self.field_original.type_name.value}`, but the updated is `{self.field_update.type_name.value}`",
                 actionable=True,
             )
         # 6. Check the oneof_index of the field.
