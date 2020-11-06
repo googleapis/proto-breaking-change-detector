@@ -32,6 +32,13 @@ from src.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional, Tuple
 
 
+def _get_source_code_line(source_code_locations, path):
+    if path not in source_code_locations:
+        return f"No source code line can be identified by path {path}."
+    # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
+    return source_code_locations[path].span[0] + 1
+
+
 class WithLocation:
     """Wrap the attribute with location information."""
 
@@ -42,9 +49,7 @@ class WithLocation:
 
     @property
     def source_code_line(self):
-        if self.path not in self.source_code_locations:
-            return f"No source code line can be identified by path {self.path}."
-        return self.source_code_locations[self.path].span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Resource:
@@ -58,9 +63,7 @@ class Resource:
 
     @property
     def source_code_line(self):
-        if self.path not in self.source_code_locations:
-            return f"No source code line can be identified by path {self.path}."
-        return self.source_code_locations[self.path].span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -84,11 +87,7 @@ class EnumValue:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        if self.path not in self.source_code_locations:
-            return f"No source code line can be identified by path {self.path}."
-        location = self.source_code_locations[self.path]
-        # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -131,10 +130,7 @@ class Enum:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        if self.path not in self.source_code_locations:
-            return f"No source code line can be identified by path {self.path}."
-        location = self.source_code_locations[self.path]
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Field:
@@ -248,8 +244,7 @@ class Field:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        location = self.source_code_locations[self.path]
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Message:
@@ -356,8 +351,7 @@ class Message:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        location = self.source_code_locations[self.path]
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Method:
@@ -553,8 +547,7 @@ class Method:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        location = self.source_code_locations[self.path]
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Service:
@@ -634,8 +627,7 @@ class Service:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
-        location = self.source_code_locations[self.path]
-        return location.span[0] + 1
+        _get_source_code_line(self.source_code_locations, self.path)
 
 
 class FileSet:
