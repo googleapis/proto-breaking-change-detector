@@ -51,6 +51,7 @@ class EnumTest(unittest.TestCase):
             locations=locations,
             path=(4, 0,),
         )
+
         # fmt: on
         self.assertEqual(enum.name, "Foo")
         self.assertEqual(enum.values, {})
