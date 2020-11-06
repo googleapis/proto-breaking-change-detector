@@ -84,6 +84,8 @@ class EnumValue:
     @property
     def source_code_line(self):
         """Return the start line number of source code in the proto file."""
+        if self.path not in self.source_code_locations:
+            return f"No source code line can be identified by path {self.path}."
         location = self.source_code_locations[self.path]
         # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
         return location.span[0] + 1
