@@ -99,6 +99,33 @@ class MessageTest(unittest.TestCase):
         self.assertEqual(len(message.oneof_fields), 2)
         self.assertEqual({x.name for x in message.oneof_fields}, {"field1", "field2"})
 
+    def test_resource_annotation(self):
+        options = descriptor_pb2.MessageOptions()
+        resource = options.Extensions[resource_pb2.resource]
+        resource.pattern.append("foo/{foo}/bar")
+        resource.pattern.append("foo/{foo}/bar/{bar}")
+        resource.type = "example/Bar"
+        message = make_message("Message", options=options)
+        message_without_resource = make_message("Message")
+        self.assertEqual(message_without_resource.resource, None)
+        self.assertEqual(message.resource.value.type, "example/Bar")
+        self.assertEqual(
+            message.resource.value.pattern, ["foo/{foo}/bar", "foo/{foo}/bar/{bar}"]
+        )
+
+    def test_source_code_line(self):
+        L = descriptor_pb2.SourceCodeInfo.Location
+        locations = [
+            L(path=(4, 0, 2, 1), span=(1, 2, 3, 4)),
+        ]
+        message = make_message(
+            proto_file_name="test.proto",
+            locations=locations,
+            path=(4, 0, 2, 1),
+        )
+        self.assertEqual(message.source_code_line, 2)
+        self.assertEqual(message.proto_file_name, "test.proto")
+
 
 if __name__ == "__main__":
     unittest.main()
