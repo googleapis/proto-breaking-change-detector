@@ -281,6 +281,9 @@ class Message:
         self.path = path
         self.file_resources = file_resources
 
+    def __getattr__(self, name):
+        return getattr(self.field_pb, name)
+
     @property
     def name(self) -> str:
         return self.message_pb.name
