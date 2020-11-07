@@ -13,73 +13,34 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+from test.tools.mock_descriptors import make_field
 from src.comparator.field_comparator import FieldComparator
-from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
 
 
 class FieldComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.field_comparator.FieldComparator class.
-    # We use message_v1.proto and message_v1beta1.proto to mimic the original and next
-    # versions of the API definition files (which has only one proto file in this case).
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _INVOKER_MESSAGE_ORIGNAL = UnittestInvoker(
-        ["message_v1.proto"], "message_v1_descriptor_set.pb"
-    )
-    _INVOKER_MESSAGE_UPDATE = UnittestInvoker(
-        ["message_v1beta1.proto"], "message_v1beta1_descriptor_set.pb"
-    )
-    _INVOKER_FIELD_ORIGNAL = UnittestInvoker(
-        ["field_v1.proto"], "field_v1_descriptor_set.pb"
-    )
-    _INVOKER_FIELD_UPDATE = UnittestInvoker(
-        ["field_v1beta1.proto"], "field_v1beta1_descriptor_set.pb"
-    )
-    _PB_ORIGNAL = _INVOKER_MESSAGE_ORIGNAL.run()
-    _PB_UPDATE = _INVOKER_MESSAGE_UPDATE.run()
-    _PB_FIELD_ORIGINAL = _INVOKER_FIELD_ORIGNAL.run()
-    _PB_FIELD_UPDATE = _INVOKER_FIELD_UPDATE.run()
-
-    def setUp(self):
-        self.person_fields_v1 = FileSet(self._PB_ORIGNAL).messages_map["Person"].fields
-        self.person_fields_v1beta1 = (
-            FileSet(self._PB_UPDATE).messages_map["Person"].fields
-        )
-        self.field1_v1 = (
-            FileSet(self._PB_FIELD_ORIGINAL).messages_map["Message1"].fields[1]
-        )
-        self.field1_v1beta1 = (
-            FileSet(self._PB_FIELD_UPDATE).messages_map["Message1"].fields[1]
-        )
-
     def tearDown(self):
         FindingContainer.reset()
 
     def test_field_removal(self):
-        FieldComparator(self.person_fields_v1[1], None).compare()
+        self.field_foo = make_field("Foo")
+        FieldComparator(self.field_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A Field name is removed")
+        self.assertEqual(finding.message, "A Field Foo is removed")
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 6)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_field_addition(self):
-        FieldComparator(None, self.person_fields_v1[1]).compare()
+        self.field_foo = make_field("Foo")
+        FieldComparator(None, self.field_foo).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new Field name is added.")
+        self.assertEqual(finding.message, "A new Field Foo is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 6)
 
     def test_primitive_type_change(self):
-        # Field `id` is `int32` type in `message_v1.proto`,
-        # but updated to `string` in `message_v1beta1.proto`.
-        FieldComparator(
-            self.person_fields_v1[2], self.person_fields_v1beta1[2]
-        ).compare()
+        self.field_int = make_field(proto_type="TYPE_INT32")
+        self.field_string = make_field(proto_type="TYPE_STRING")
+        FieldComparator(self.field_int, self.field_string).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
@@ -87,28 +48,22 @@ class FieldComparatorTest(unittest.TestCase):
             " but the updated is TYPE_STRING",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 7)
 
     def test_message_type_change(self):
-        # Field `field1` is `Message2` type in `field_v1.proto`,
-        # but updated to `Message3` in `field_v1beta1.proto`.
-        FieldComparator(self.field1_v1, self.field1_v1beta1).compare()
+        self.field_message = make_field(type_name=".example.v1.Enum")
+        self.field_message_update = make_field(type_name=".example.v1beta1.EnumUpdate")
+        FieldComparator(self.field_message, self.field_message_update).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
             "Type of the field is changed, the original is `.example.v1.Enum`, but the updated is `.example.v1beta1.EnumUpdate`",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "field_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 6)
 
     def test_repeated_label_change(self):
-        # Field `phones` in `message_v1.proto` has `repeated` label,
-        # but it's removed in the `message_v1beta1.proto`.
-        FieldComparator(
-            self.person_fields_v1[4], self.person_fields_v1beta1[4]
-        ).compare()
+        self.field_repeated = make_field(repeated=True)
+        self.field_non_repeated = make_field(repeated=False)
+        FieldComparator(self.field_repeated, self.field_non_repeated).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
@@ -116,41 +71,25 @@ class FieldComparatorTest(unittest.TestCase):
             " but the updated is LABEL_OPTIONAL",
         )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 21)
 
     def test_name_change(self):
-        # Field `email = 3` in `message_v1.proto` is renamed to
-        # `email_address = 3` in the `message_v1beta1.proto`.
-        FieldComparator(
-            self.person_fields_v1[3], self.person_fields_v1beta1[3]
-        ).compare()
+        self.field_foo = make_field("Foo")
+        self.field_bar = make_field("Bar")
+        FieldComparator(self.field_foo, self.field_bar).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Name of the Field is changed, the original is email, but the updated is email_address",
+            "Name of the Field is changed, the original is Foo, but the updated is Bar",
         )
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 8)
 
     def test_oneof_change(self):
-        # Field `single = 5` in `message_v1.proto` is moved out of One-of.
-        FieldComparator(
-            self.person_fields_v1[5], self.person_fields_v1beta1[5]
-        ).compare()
+        self.field_oneof = make_field(name="Foo", oneof=True)
+        self.field_not_oneof = make_field(name="Foo")
+        FieldComparator(self.field_oneof, self.field_not_oneof).compare()
         findings = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings["The existing field single is moved out of One-of."]
+        finding = findings["The existing field Foo is moved out of One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 22)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER_MESSAGE_ORIGNAL.cleanup()
-        cls._INVOKER_MESSAGE_UPDATE.cleanup()
-        cls._INVOKER_FIELD_ORIGNAL.cleanup()
-        cls._INVOKER_FIELD_UPDATE.cleanup()
 
 
 if __name__ == "__main__":

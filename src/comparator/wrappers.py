@@ -153,6 +153,9 @@ class Field:
         self.file_resources = file_resources
         self.message_resource = message_resource
 
+    def __getattr__(self, name):
+        return getattr(self.field_pb, name)
+
     @property
     def name(self):
         return self.field_pb.name

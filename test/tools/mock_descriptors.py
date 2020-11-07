@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Tuple, Sequence
+from typing import Tuple, Sequence
 from google.protobuf import descriptor_pb2 as desc
 import src.comparator.wrappers as wrappers
+from src.comparator.resource_database import ResourceDatabase
+from google.api import resource_pb2
 
 
 def make_enum_value_pb2(
@@ -60,3 +62,69 @@ def make_enum(
     source_code_locations = {tuple(location.path): location for location in locations}
     enum_pb = make_enum_pb2(name, values)
     return wrappers.Enum(enum_pb, proto_file_name, source_code_locations, path)
+
+
+def make_field_pb2(
+    name: str,
+    number: int,
+    label: int,
+    proto_type: int,
+    type_name: str = None,
+    oneof_index: int = None,
+    options: desc.FieldOptions = None,
+    **kwargs,
+) -> desc.FieldDescriptorProto:
+
+    return desc.FieldDescriptorProto(
+        name=name,
+        number=number,
+        label=label,
+        type=proto_type,
+        type_name=type_name,
+        oneof_index=oneof_index,
+        options=options,
+        **kwargs,
+    )
+
+
+def make_field(
+    name: str = "my_field",
+    number: int = 1,
+    proto_type: str = "TYPE_MESSAGE",
+    type_name: str = None,
+    repeated: bool = False,
+    oneof: bool = False,
+    options: desc.FieldOptions = None,
+    file_resources: ResourceDatabase = None,
+    message_resource: resource_pb2.ResourceDescriptor = None,
+    proto_file_name: str = "foo",
+    locations: Sequence[desc.SourceCodeInfo.Location] = [],
+    path: Tuple[int] = (),
+    **kwargs,
+) -> wrappers.Field:
+    T = desc.FieldDescriptorProto.Type
+    type_value = T.Value(proto_type)
+    label = 3 if repeated else 1
+    oneof_index = 0 if oneof else None
+
+    field_pb = make_field_pb2(
+        name=name,
+        number=number,
+        label=label,
+        proto_type=type_value,
+        type_name=type_name,
+        oneof_index=oneof_index,
+        options=options,
+        **kwargs,
+    )
+
+    source_code_locations = {tuple(location.path): location for location in locations}
+
+    return wrappers.Field(
+        field_pb=field_pb,
+        proto_file_name=proto_file_name,
+        source_code_locations=source_code_locations,
+        path=path,
+        file_resources=file_resources,
+        message_resource=message_resource,
+    )
