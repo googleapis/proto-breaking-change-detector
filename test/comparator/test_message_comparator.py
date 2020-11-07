@@ -15,7 +15,6 @@
 import unittest
 from test.tools.mock_descriptors import make_message, make_field, make_enum
 from src.comparator.message_comparator import DescriptorComparator
-from src.comparator.resource_database import ResourceDatabase
 from src.findings.finding_container import FindingContainer
 from google.protobuf import descriptor_pb2
 from google.api import resource_pb2
