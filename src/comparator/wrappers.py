@@ -455,6 +455,9 @@ class Method:
         # If the output type is `google.longrunning.Operation`, the method is not paginated.
         if self.longrunning:
             return None
+        if not self.messages_map or self.output.value not in self.messages_map:
+            return None
+
         # API should provide a `string next_page_token` field in response messsage.
         # API should provide `int page_size` and `string page_token` fields in request message.
         # If the request field lacks any of the expected pagination fields,

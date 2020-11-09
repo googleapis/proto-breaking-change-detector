@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Tuple, Sequence
+from typing import Tuple, Sequence, Dict
 from google.protobuf import descriptor_pb2 as desc
 import src.comparator.wrappers as wrappers
 from src.comparator.resource_database import ResourceDatabase
-from google.api import resource_pb2
+from google.api import resource_pb2, client_pb2
+from google.longrunning import operations_pb2  # type: ignore
 
 
 def make_enum_value_pb2(
@@ -135,7 +136,7 @@ def make_message_pb2(
     fields: tuple = (),
     nested_type: tuple = (),
     enum_type: tuple = (),
-    options: desc.MethodOptions = None,
+    options: desc.MessageOptions = None,
     **kwargs,
 ) -> desc.DescriptorProto:
     return desc.DescriptorProto(
@@ -157,7 +158,7 @@ def make_message(
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
     file_resources: ResourceDatabase = None,
-    options: desc.MethodOptions = None,
+    options: desc.MessageOptions = None,
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -178,4 +179,75 @@ def make_message(
         path=path,
         file_resources=file_resources,
         **kwargs,
+    )
+
+
+def make_method_pb(
+    name: str,
+    input_type: str,
+    output_type: str,
+    client_streaming: bool = False,
+    server_streaming: bool = False,
+    **kwargs,
+) -> desc.MethodDescriptorProto:
+    # Create the method pb2.
+    return desc.MethodDescriptorProto(
+        name=name,
+        input_type=input_type,
+        output_type=output_type,
+        client_streaming=client_streaming,
+        server_streaming=server_streaming,
+        **kwargs,
+    )
+
+
+def make_method(
+    name: str,
+    input_message: wrappers.Message = None,
+    output_message: wrappers.Message = None,
+    client_streaming: bool = False,
+    server_streaming: bool = False,
+    signatures: Sequence[str] = (),
+    lro_response_type: str = None,
+    lro_metadata_type: str = None,
+    messages_map: Dict[str, wrappers.Message] = {},
+    proto_file_name: str = "foo",
+    locations: Sequence[desc.SourceCodeInfo.Location] = [],
+    path: Tuple[int] = (),
+    **kwargs,
+) -> wrappers.Method:
+    # Use default input and output messages if they are not provided.
+    input_message = input_message or make_message("MethodInput")
+    output_message = output_message or make_message("MethodOutput")
+
+    method_pb = make_method_pb(
+        name=name,
+        input_type=input_message.name,
+        output_type=output_message.name,
+        client_streaming=client_streaming,
+        server_streaming=server_streaming,
+        **kwargs,
+    )
+
+    # If there are signatures, include them.
+    for sig in signatures:
+        ext_key = client_pb2.method_signature
+        method_pb.options.Extensions[ext_key].append(sig)
+
+    # If there are LRO annotations, include them.
+    if lro_response_type and lro_metadata_type:
+        method_pb.options.Extensions[operations_pb2.operation_info].MergeFrom(
+            operations_pb2.OperationInfo(
+                response_type=lro_response_type,
+                metadata_type=lro_metadata_type,
+            )
+        )
+    source_code_locations = {tuple(location.path): location for location in locations}
+    # Instantiate the wrapper class.
+    return wrappers.Method(
+        method_pb=method_pb,
+        messages_map=messages_map,
+        proto_file_name=proto_file_name,
+        source_code_locations=source_code_locations,
+        path=path,
     )
