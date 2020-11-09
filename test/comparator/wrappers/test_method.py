@@ -37,22 +37,7 @@ class MethodTest(unittest.TestCase):
         self.assertEqual(method.input.value, "Input")
         self.assertEqual(method.output.value, "Output")
 
-    def test_method_unary_unary(self):
-        method = make_method("F", client_streaming=False, server_streaming=False)
-        self.assertEqual(method.client_streaming.value, False)
-        self.assertEqual(method.server_streaming.value, False)
-
-    def test_method_unary_stream(self):
-        method = make_method("F", client_streaming=False, server_streaming=True)
-        self.assertEqual(method.client_streaming.value, False)
-        self.assertEqual(method.server_streaming.value, True)
-
-    def test_method_stream_unary(self):
-        method = make_method("F", client_streaming=True, server_streaming=False)
-        self.assertEqual(method.client_streaming.value, True)
-        self.assertEqual(method.server_streaming.value, False)
-
-    def test_method_stream_stream(self):
+    def test_method_streaming(self):
         method = make_method("F", client_streaming=True, server_streaming=True)
         self.assertEqual(method.client_streaming.value, True)
         self.assertEqual(method.server_streaming.value, True)
