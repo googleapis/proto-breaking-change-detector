@@ -16,7 +16,7 @@ from typing import Tuple, Sequence, Dict
 from google.protobuf import descriptor_pb2 as desc
 import src.comparator.wrappers as wrappers
 from src.comparator.resource_database import ResourceDatabase
-from google.api import resource_pb2, client_pb2, annotations_pb2  
+from google.api import resource_pb2, client_pb2, annotations_pb2
 from google.longrunning import operations_pb2  # type: ignore
 
 
@@ -210,7 +210,7 @@ def make_method(
     signatures: Sequence[str] = (),
     lro_response_type: str = None,
     lro_metadata_type: str = None,
-    http_method: str = 'get',
+    http_method: str = "get",
     http_uri: str = None,
     http_body: str = None,
     messages_map: Dict[str, wrappers.Message] = {},
