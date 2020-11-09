@@ -13,91 +13,143 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+from test.tools.mock_descriptors import make_message, make_field, make_enum
 from src.comparator.message_comparator import DescriptorComparator
-from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
+from google.protobuf import descriptor_pb2
+from google.api import resource_pb2
 
 
 class DescriptorComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.message_comparator.DescriptorComparator class.
-    # We use message_v1.proto and message_v1beta1.proto to mimic the original and next
-    # versions of the API definition files (which has only one proto file in this case).
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-    _PROTO_ORIGINAL = "message_v1.proto"
-    _PROTO_UPDATE = "message_v1beta1.proto"
-    _DESCRIPTOR_SET_ORIGINAL = "message_v1_descriptor_set.pb"
-    _DESCRIPTOR_SET_UPDATE = "message_v1beta1_descriptor_set.pb"
-    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
-    _INVOKER_UPDATE = UnittestInvoker([_PROTO_UPDATE], _DESCRIPTOR_SET_UPDATE)
-    _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
-    _PB_UPDATE = _INVOKER_UPDATE.run()
-
     def setUp(self):
-        # Get `Person` and `AddressBook` DescriptoProto from the
-        # original and updated `*_descriptor_set.pb` files.
-        self.person_msg = FileSet(self._PB_ORIGNAL).messages_map["Person"]
-        self.person_msg_update = FileSet(self._PB_UPDATE).messages_map["Person"]
-        self.addressBook_msg = FileSet(self._PB_ORIGNAL).messages_map["AddressBook"]
-        self.addressBook_msg_update = FileSet(self._PB_UPDATE).messages_map[
-            "AddressBook"
-        ]
+        self.message_foo = make_message("Message")
 
     def tearDown(self):
         FindingContainer.reset()
 
     def test_message_removal(self):
-        DescriptorComparator(self.person_msg, None).compare()
+        DescriptorComparator(self.message_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A message Person is removed")
+        self.assertEqual(finding.message, "A message Message is removed")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 5)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_message_addition(self):
-        DescriptorComparator(None, self.addressBook_msg).compare()
+        DescriptorComparator(None, self.message_foo).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new message AddressBook is added.")
+        self.assertEqual(finding.message, "A new message Message is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 27)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_field_change(self):
-        # There is field change in message `Person`. Type of field `id`
-        # is changed from `int32` to `string`.
-        DescriptorComparator(self.person_msg, self.person_msg_update).compare()
+        field_int = make_field(proto_type="TYPE_INT32")
+        field_string = make_field(proto_type="TYPE_STRING")
+        message1 = make_message(fields=[field_int])
+        message2 = make_message(fields=[field_string])
+        DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
             "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 7)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_nested_message_change(self):
-        # Field `type` in the nested message `PhoneNumber` is removed.
-        DescriptorComparator(self.person_msg, self.person_msg_update).compare()
+        nested_field = make_field(name="nested_field")
+        nested_message_with_fields = make_message(
+            name="nested_message", fields=[nested_field]
+        )
+        nested_message_without_fields = make_message(name="nested_message")
+        message1 = make_message(nested_messages=[nested_message_with_fields])
+        message2 = make_message(nested_messages=[nested_message_without_fields])
+        DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["A Field type is removed"]
+        finding = findings_map["A Field nested_field is removed"]
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "message_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 18)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_nested_enum_change(self):
-        # EnumValue `SCHOOL` in the nested enum `PhoneType` is added.
-        DescriptorComparator(self.person_msg, self.person_msg_update).compare()
+        nested_enum1 = make_enum(
+            name="Foo",
+            values=(
+                ("RED", 1),
+                ("GREEN", 2),
+            ),
+        )
+        nested_enum2 = make_enum(
+            name="Foo",
+            values=(
+                ("RED", 1),
+                ("GREEN", 2),
+                ("BLUE", 3),
+            ),
+        )
+        message1 = make_message(nested_enums=[nested_enum1])
+        message2 = make_message(nested_enums=[nested_enum2])
+        DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["A new EnumValue SCHOOL is added."]
+        finding = findings_map["A new EnumValue BLUE is added."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 14)
+        self.assertEqual(finding.location.proto_file_name, "foo")
 
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER_ORIGNAL.cleanup()
-        cls._INVOKER_UPDATE.cleanup()
+    def test_resource_annotation_removal(self):
+        # Message-level resource options.
+        message_options = descriptor_pb2.MessageOptions()
+        resource = message_options.Extensions[resource_pb2.resource]
+        resource.pattern.append("foo/{foo}/bar")
+        resource.type = "example/Bar"
+
+        # The resource annotation is removed.
+        message = make_message("Message", options=message_options)
+        message_without_resource = make_message("Message")
+        DescriptorComparator(message, message_without_resource).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "A message-level resource definition example/Bar has been removed."
+        ]
+        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_REMOVAL")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_resource_annotation_addition(self):
+        options = descriptor_pb2.MessageOptions()
+        resource = options.Extensions[resource_pb2.resource]
+        resource.pattern.append("foo/{foo}/bar")
+        resource.type = "example/Bar"
+        message = make_message("Message", options=options)
+        message_without_resource = make_message("Message")
+        DescriptorComparator(message_without_resource, message).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "A message-level resource definition example/Bar has been added."
+        ]
+        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_ADDITION")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_resource_pattern_change(self):
+        # Message-level resource options.
+        message_options = descriptor_pb2.MessageOptions()
+        resource = message_options.Extensions[resource_pb2.resource]
+        resource.pattern.append("foo/{foo}/bar")
+        resource.type = "example/Bar"
+
+        message_options_change = descriptor_pb2.MessageOptions()
+        resource_two_patterns = message_options_change.Extensions[resource_pb2.resource]
+        resource_two_patterns.pattern.append(
+            "foo/{foo}/bar",
+        )
+        resource_two_patterns.pattern.append(
+            "foo/{foo}/bar/{bar}",
+        )
+        resource_two_patterns.type = "example/Bar"
+        # The resource annotation is removed.
+        message = make_message("Message", options=message_options_change)
+        message_pattern_removal = make_message("Message", options=message_options)
+        DescriptorComparator(message, message_pattern_removal).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        finding = findings_map[
+            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar', 'foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+        ]
+        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
 
 
 if __name__ == "__main__":

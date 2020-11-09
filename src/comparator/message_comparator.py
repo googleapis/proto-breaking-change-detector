@@ -192,7 +192,7 @@ class DescriptorComparator:
             return
         # Resource is existing in both original and update versions.
         # 3. Patterns of message-level resource definitions have changed.
-        if self._compatible_patterns(
+        if not self._compatible_patterns(
             resource_original.value.pattern, resource_update.value.pattern
         ):
             FindingContainer.addFinding(
@@ -206,9 +206,9 @@ class DescriptorComparator:
     def _compatible_patterns(self, patterns_original, patterns_update):
         # An existing pattern is removed.
         if len(patterns_original) > len(patterns_update):
-            return True
+            return False
         # An existing pattern value is changed.
         for old_pattern, new_pattern in zip(patterns_original, patterns_update):
             if old_pattern != new_pattern:
-                return True
-        return False
+                return False
+        return True

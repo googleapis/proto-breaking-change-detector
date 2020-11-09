@@ -128,3 +128,54 @@ def make_field(
         file_resources=file_resources,
         message_resource=message_resource,
     )
+
+
+def make_message_pb2(
+    name: str,
+    fields: tuple = (),
+    nested_type: tuple = (),
+    enum_type: tuple = (),
+    options: desc.MethodOptions = None,
+    **kwargs,
+) -> desc.DescriptorProto:
+    return desc.DescriptorProto(
+        name=name,
+        field=fields,
+        nested_type=nested_type,
+        enum_type=enum_type,
+        options=options,
+        **kwargs,
+    )
+
+
+def make_message(
+    name: str = "my_message",
+    fields: Sequence[wrappers.Field] = (),
+    nested_enums: Sequence[wrappers.Enum] = (),
+    nested_messages: Sequence[wrappers.Message] = (),
+    proto_file_name: str = "foo",
+    locations: Sequence[desc.SourceCodeInfo.Location] = [],
+    path: Tuple[int] = (),
+    file_resources: ResourceDatabase = None,
+    options: desc.MethodOptions = None,
+    **kwargs,
+) -> wrappers.Message:
+    message_pb = make_message_pb2(
+        name=name,
+        fields=[i.field_pb for i in fields],
+        enum_type=[i.enum_pb for i in nested_enums],
+        nested_type=[i.message_pb for i in nested_messages],
+        options=options,
+        **kwargs,
+    )
+
+    source_code_locations = {tuple(location.path): location for location in locations}
+
+    return wrappers.Message(
+        message_pb=message_pb,
+        proto_file_name=proto_file_name,
+        source_code_locations=source_code_locations,
+        path=path,
+        file_resources=file_resources,
+        **kwargs,
+    )
