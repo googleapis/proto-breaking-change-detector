@@ -153,3 +153,32 @@ class MethodTest(unittest.TestCase):
             messages_map=messages_map,
         )
         self.assertEqual(method.paged_result_field, None)
+
+    def test_method_signatures(self):
+        method = make_method("Method", signatures=['sig1', 'sig2'])
+        self.assertEqual(method.method_signatures.value, ['sig1', 'sig2'])
+
+    def test_method_lro_annotationn(self):
+        input_msg = make_message(name="Input")
+        output_msg = make_message(name=".google.longrunning.Operation")
+        method = make_method(
+            name="Method",
+            input_message=input_msg,
+            output_message=output_msg,
+            lro_response_type='response_type',
+            lro_metadata_type='metadata_type',
+        )
+        lro_annotation = method.lro_annotation.value
+        self.assertEqual(lro_annotation["response_type"], "response_type")
+        self.assertEqual(lro_annotation["metadata_type"], "metadata_type")
+
+    def test_method_http_annotationn(self):
+        method = make_method(
+            name="Method",
+            http_uri="http_uri",
+            http_body="*",
+        )
+        http_annotation = method.http_annotation.value
+        self.assertEqual(http_annotation["http_method"], "get")
+        self.assertEqual(http_annotation["http_uri"], "http_uri")
+        self.assertEqual(http_annotation["http_body"], "*")
