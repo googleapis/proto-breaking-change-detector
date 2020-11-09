@@ -182,7 +182,7 @@ def make_message(
     )
 
 
-def make_method_pb(
+def make_method_pb2(
     name: str,
     input_type: str,
     output_type: str,
@@ -223,7 +223,7 @@ def make_method(
     input_message = input_message or make_message("MethodInput")
     output_message = output_message or make_message("MethodOutput")
 
-    method_pb = make_method_pb(
+    method_pb = make_method_pb2(
         name=name,
         input_type=input_message.name,
         output_type=output_message.name,
