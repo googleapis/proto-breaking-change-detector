@@ -283,7 +283,6 @@ def make_service(
     # Define a service descriptor, and set a host and oauth scopes if
     # appropriate.
     service_pb = make_service_pb2(name=name, methods=method_pbs)
-
     if host:
         service_pb.options.Extensions[client_pb2.default_host] = host
     service_pb.options.Extensions[client_pb2.oauth_scopes] = ",".join(scopes)
