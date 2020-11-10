@@ -130,6 +130,15 @@ class ResourceReferenceTest(unittest.TestCase):
             finding.location.proto_file_name, "resource_reference_v1beta1.proto"
         )
         self.assertEqual(finding.location.source_code_line, 25)
+        # Find more details in comments of `resource_reference_v1beta1.proto`
+        # 1. Resource_reference annotation is removed for `string name=1`,
+        # but it is added in message-level. Non-breaking change.
+        # 2. File-level resource definition `t2` is removed, but is added
+        # to message-level resource. Non-breaking change.
+        breaking_changes = [
+            f for f in FindingContainer.getAllFindings() if f.actionable
+        ]
+        self.assertEqual(len(breaking_changes), 1)
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
 
