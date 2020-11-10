@@ -87,7 +87,7 @@ class ResourceReferenceTest(unittest.TestCase):
             message_resource_pattern_change.location.source_code_line,
             26,
         )
-        # A existing message-level resource annotation is removed, and it is not moved to
+        # An existing message-level resource annotation is removed, and it is not moved to
         # file-level resource definition. So it is a breaking change.
         message_resource_removal = findings_map[
             "A message-level resource definition example.googleapis.com/Test has been removed."
@@ -120,8 +120,8 @@ class ResourceReferenceTest(unittest.TestCase):
             FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        # Type of the resource_reference is changed to child_type, and they can not be resoved
-        # to the identical resource. Breaking change.
+        # Type of the resource_reference is changed from type to child_type, but
+        # they can not be resoved to the identical resource. Breaking change.
         finding = findings_map[
             "The child_type 'example.googleapis.com/t1' and type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
         ]
