@@ -84,7 +84,7 @@ class Finding:
 
     def toDict(self):
         return {
-            "category": self.category.value,
+            "category": self.category.name,
             "location": {
                 "proto_file_name": self.location.proto_file_name,
                 "source_code_line": self.location.source_code_line,

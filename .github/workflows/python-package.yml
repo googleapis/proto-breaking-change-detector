@@ -40,3 +40,6 @@ jobs:
     - name: Run unit tests for wrappers
       run: |
         python -m unittest discover test/comparator/wrappers
+    - name: Run unit tests for findings
+      run: |
+        python -m unittest discover test/findings
