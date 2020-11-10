@@ -262,7 +262,7 @@ def make_method(
     )
 
 
-def make_service_ob2(
+def make_service_pb2(
     name: str, methods: Sequence[desc.MethodDescriptorProto] = ()
 ) -> desc.ServiceDescriptorProto:
     return desc.ServiceDescriptorProto(name=name, method=methods)
@@ -282,7 +282,7 @@ def make_service(
     method_pbs = [m.method_pb for m in methods]
     # Define a service descriptor, and set a host and oauth scopes if
     # appropriate.
-    service_pb = make_service_ob2(name=name, methods=method_pbs)
+    service_pb = make_service_pb2(name=name, methods=method_pbs)
     if host:
         service_pb.options.Extensions[client_pb2.default_host] = host
     service_pb.options.Extensions[client_pb2.oauth_scopes] = ",".join(scopes)
