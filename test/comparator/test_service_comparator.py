@@ -108,7 +108,7 @@ class ServiceComparatorTest(unittest.TestCase):
         )
         self.assertEqual(server_streaming_finding.location.proto_file_name, "foo")
 
-    def test_method_pagiated_state_change(self):
+    def test_method_paginated_state_change(self):
         paginated_response_message = make_message(
             name="PaginatedResponseMessage",
             fields=[
