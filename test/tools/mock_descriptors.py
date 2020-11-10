@@ -262,6 +262,12 @@ def make_method(
     )
 
 
+def make_service_pb2(
+    name: str, methods: Sequence[desc.MethodDescriptorProto] = ()
+) -> desc.ServiceDescriptorProto:
+    return desc.ServiceDescriptorProto(name=name, method=methods)
+
+
 def make_service(
     name: str = "Placeholder",
     host: str = "",
@@ -276,7 +282,8 @@ def make_service(
     method_pbs = [m.method_pb for m in methods]
     # Define a service descriptor, and set a host and oauth scopes if
     # appropriate.
-    service_pb = desc.ServiceDescriptorProto(name=name, method=method_pbs)
+    service_pb = make_service_pb2(name=name, methods=method_pbs)
+
     if host:
         service_pb.options.Extensions[client_pb2.default_host] = host
     service_pb.options.Extensions[client_pb2.oauth_scopes] = ",".join(scopes)
@@ -290,3 +297,30 @@ def make_service(
         source_code_locations=source_code_locations,
         path=path,
     )
+
+
+def make_file_pb2(
+    name: str = "my_proto.proto",
+    package: str = "example.v1",
+    messages: Sequence[wrappers.Message] = (),
+    enums: Sequence[wrappers.Enum] = (),
+    services: Sequence[wrappers.Service] = (),
+    locations: Sequence[desc.SourceCodeInfo.Location] = (),
+    options: desc.FileOptions = None,
+    **kwargs,
+) -> desc.FileDescriptorProto:
+    return desc.FileDescriptorProto(
+        name=name,
+        package=package,
+        message_type=[m.message_pb for m in messages],
+        enum_type=[e.enum_pb for e in enums],
+        service=[s.service_pb for s in services],
+        source_code_info=desc.SourceCodeInfo(location=locations),
+        options=options,
+    )
+
+
+def make_file_set(
+    files: Sequence[desc.FileDescriptorProto] = (),
+) -> wrappers.FileSet:
+    return wrappers.FileSet(file_set_pb=desc.FileDescriptorSet(file=files))

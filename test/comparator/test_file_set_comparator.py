@@ -13,176 +13,146 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+from test.tools.mock_descriptors import (
+    make_service,
+    make_method,
+    make_file_set,
+    make_file_pb2,
+    make_message,
+    make_field,
+    make_enum,
+)
 from src.comparator.file_set_comparator import FileSetComparator
 from src.findings.finding_container import FindingContainer
-from src.comparator.wrappers import FileSet
+from google.protobuf import descriptor_pb2
+from google.api import resource_pb2
 
 
 class FileSetComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.service_comparator.ServiceComparator class.
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
-
     def tearDown(self):
         FindingContainer.reset()
 
     def test_service_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["service_v1.proto"], "service_v1_descriptor_set.pb"
-        )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["service_v1beta1.proto"], "service_v1beta1_descriptor_set.pb"
-        )
+        service_original = make_service(methods=(make_method(name="DoThing"),))
+        service_update = make_service()
         FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+            make_file_set(files=[make_file_pb2(services=[service_original])]),
+            make_file_set(files=[make_file_pb2(services=[service_update])]),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map[
-            "The paginated response of method paginatedMethod is changed"
-        ]
-        self.assertEqual(finding.category.name, "METHOD_PAGINATED_RESPONSE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "service_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 11)
-
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
+        finding = findings_map["An rpc method DoThing is removed"]
+        self.assertEqual(finding.category.name, "METHOD_REMOVAL")
+        self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
     def test_message_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["message_v1.proto"], "message_v1_descriptor_set.pb"
+        message_original = make_message(
+            fields=(make_field(name="field_one", number=1),)
         )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["message_v1beta1.proto"], "message_v1beta1_descriptor_set.pb"
-        )
+        message_update = make_message(fields=(make_field(name="field_two", number=1),))
         FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+            make_file_set(files=[make_file_pb2(messages=[message_original])]),
+            make_file_set(files=[make_file_pb2(messages=[message_update])]),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
+            "Name of the Field is changed, the original is field_one, but the updated is field_two"
         ]
-        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "message_v1beta1.proto")
-        self.assertEqual(finding.location.source_code_line, 7)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
+        self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
     def test_enum_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["enum_v1.proto"], "enum_v1_descriptor_set.pb"
+        enum_original = make_enum(
+            name="Irrelevant",
+            values=(
+                ("RED", 1),
+                ("GREEN", 2),
+                ("BLUE", 3),
+            ),
         )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["enum_v1beta1.proto"], "enum_v1beta1_descriptor_set.pb"
+        enum_update = make_enum(
+            name="Irrelevant",
+            values=(
+                ("RED", 1),
+                ("GREEN", 2),
+            ),
         )
         FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+            make_file_set(files=[make_file_pb2(enums=[enum_original])]),
+            make_file_set(files=[make_file_pb2(enums=[enum_update])]),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["An Enum BookType is removed"]
-        self.assertEqual(finding.category.name, "ENUM_REMOVAL")
-        self.assertEqual(finding.location.proto_file_name, "enum_v1.proto")
-        self.assertEqual(finding.location.source_code_line, 5)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
+        finding = findings_map["An EnumValue BLUE is removed"]
+        self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
+        self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
-    def test_resources_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["resource_database_v1.proto"],
-            "resource_database_v1_descriptor_set.pb",
-            True,
+    def test_resources_existing_pattern_change(self):
+        options_original = descriptor_pb2.FileOptions()
+        options_original.Extensions[resource_pb2.resource_definition].append(
+            resource_pb2.ResourceDescriptor(
+                type=".example.v1.Bar",
+                pattern=[
+                    "foo/{foo}/bar/{bar}",
+                ],
+            )
         )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["resource_database_v1beta1.proto"],
-            "resource_database_v1beta1_descriptor_set.pb",
-            True,
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_original
         )
-        FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
-        ).compare()
+        file_set_original = make_file_set(files=[file_pb2])
+        options_update = descriptor_pb2.FileOptions()
+        options_update.Extensions[resource_pb2.resource_definition].append(
+            resource_pb2.ResourceDescriptor(
+                type=".example.v1.Bar",
+                pattern=["foo/{foo}/bar/"],
+            )
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+
+        FileSetComparator(file_set_original, file_set_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         file_resource_pattern_change = findings_map[
-            "Pattern value of the resource definition 'example.googleapis.com/t2' is updated from 'foo/{foo}/bar/{bar}/t2' to 'foo/{foo}/bar/{bar}/t2_update'."
+            "Pattern value of the resource definition '.example.v1.Bar' is updated from 'foo/{foo}/bar/{bar}' to 'foo/{foo}/bar/'."
         ]
         self.assertEqual(
             file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
         )
         self.assertEqual(
             file_resource_pattern_change.location.proto_file_name,
-            "resource_database_v1beta1.proto",
+            "foo.proto",
         )
-        self.assertEqual(file_resource_pattern_change.location.source_code_line, 13)
+
+    def test_resources_addition(self):
+        file_set_original = make_file_set(
+            files=[make_file_pb2(name="foo.proto", package=".example.v1")]
+        )
+
+        options_update = descriptor_pb2.FileOptions()
+        options_update.Extensions[resource_pb2.resource_definition].append(
+            resource_pb2.ResourceDescriptor(
+                type=".example.v1.Bar",
+                pattern=["foo/{foo}/bar/{bar}"],
+            )
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+        FileSetComparator(file_set_original, file_set_update).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         file_resource_addition = findings_map[
-            "A file-level resource definition 'example.googleapis.com/t3' has been added."
+            "A file-level resource definition '.example.v1.Bar' has been added."
         ]
         self.assertEqual(
             file_resource_addition.category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
-        message_resource_pattern_change = findings_map[
-            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
-        ]
         self.assertEqual(
             file_resource_addition.location.proto_file_name,
-            "resource_database_v1beta1.proto",
+            "foo.proto",
         )
-        self.assertEqual(file_resource_addition.location.source_code_line, 19)
-        message_resource_pattern_change = findings_map[
-            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
-        ]
-        self.assertEqual(
-            message_resource_pattern_change.category.name,
-            "RESOURCE_DEFINITION_CHANGE",
-        )
-        self.assertEqual(
-            message_resource_pattern_change.location.proto_file_name,
-            "resource_database_v1beta1.proto",
-        )
-        self.assertEqual(
-            message_resource_pattern_change.location.source_code_line,
-            26,
-        )
-        message_resource_removal = findings_map[
-            "A message-level resource definition example.googleapis.com/Test has been removed."
-        ]
-        self.assertEqual(
-            message_resource_removal.category.name,
-            "RESOURCE_DEFINITION_REMOVAL",
-        )
-        self.assertEqual(
-            message_resource_removal.location.proto_file_name,
-            "resource_database_v1.proto",
-        )
-        self.assertEqual(message_resource_removal.location.source_code_line, 34)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
-
-    def test_resource_reference_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["resource_reference_v1.proto"],
-            "resource_reference_v1_descriptor_set.pb",
-            True,
-        )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["resource_reference_v1beta1.proto"],
-            "resource_reference_v1beta1_descriptor_set.pb",
-            True,
-        )
-        FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
-        ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map[
-            "The child_type 'example.googleapis.com/t1' and type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
-        ]
-        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
-        self.assertEqual(
-            finding.location.proto_file_name, "resource_reference_v1beta1.proto"
-        )
-        self.assertEqual(finding.location.source_code_line, 25)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
 
 
 if __name__ == "__main__":
