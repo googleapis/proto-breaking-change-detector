@@ -46,6 +46,10 @@ class FindingContainer:
         return cls._finding_results
 
     @classmethod
+    def getActionableFindings(cls):
+        return [finding for finding in cls._finding_results if finding.actionable]
+
+    @classmethod
     def toJson(cls):
         findingDictArr = []
         for finding in cls._finding_results:

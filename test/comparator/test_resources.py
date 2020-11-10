@@ -135,9 +135,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # but it is added in message-level. Non-breaking change.
         # 2. File-level resource definition `t2` is removed, but is added
         # to message-level resource. Non-breaking change.
-        breaking_changes = [
-            f for f in FindingContainer.getAllFindings() if f.actionable
-        ]
+        breaking_changes = FindingContainer.getActionableFindings()
         self.assertEqual(len(breaking_changes), 1)
         _INVOKER_ORIGNAL.cleanup()
         _INVOKER_UPDATE.cleanup()
