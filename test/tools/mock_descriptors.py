@@ -182,7 +182,7 @@ def make_message(
     )
 
 
-def make_method_pb(
+def make_method_pb2(
     name: str,
     input_type: str,
     output_type: str,
@@ -223,7 +223,7 @@ def make_method(
     input_message = input_message or make_message("MethodInput")
     output_message = output_message or make_message("MethodOutput")
 
-    method_pb = make_method_pb(
+    method_pb = make_method_pb2(
         name=name,
         input_type=input_message.name,
         output_type=output_message.name,
@@ -255,6 +255,36 @@ def make_method(
     # Instantiate the wrapper class.
     return wrappers.Method(
         method_pb=method_pb,
+        messages_map=messages_map,
+        proto_file_name=proto_file_name,
+        source_code_locations=source_code_locations,
+        path=path,
+    )
+
+
+def make_service(
+    name: str = "Placeholder",
+    host: str = "",
+    methods: Tuple[wrappers.Method] = (),
+    scopes: Tuple[str] = (),
+    messages_map: Dict[str, wrappers.Message] = {},
+    proto_file_name: str = "foo",
+    locations: Sequence[desc.SourceCodeInfo.Location] = [],
+    path: Tuple[int] = (),
+    **kwargs,
+) -> wrappers.Service:
+    method_pbs = [m.method_pb for m in methods]
+    # Define a service descriptor, and set a host and oauth scopes if
+    # appropriate.
+    service_pb = desc.ServiceDescriptorProto(name=name, method=method_pbs)
+    if host:
+        service_pb.options.Extensions[client_pb2.default_host] = host
+    service_pb.options.Extensions[client_pb2.oauth_scopes] = ",".join(scopes)
+
+    source_code_locations = {tuple(location.path): location for location in locations}
+    # Return a service object to test.
+    return wrappers.Service(
+        service_pb=service_pb,
         messages_map=messages_map,
         proto_file_name=proto_file_name,
         source_code_locations=source_code_locations,

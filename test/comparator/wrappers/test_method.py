@@ -13,9 +13,6 @@
 
 import unittest
 from test.tools.mock_descriptors import make_method, make_message, make_field
-from src.comparator import wrappers
-from google.protobuf import descriptor_pb2
-from google.api import resource_pb2
 
 
 class MethodTest(unittest.TestCase):
