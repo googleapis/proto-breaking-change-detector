@@ -20,10 +20,6 @@ from src.comparator.wrappers import FileSet
 
 
 class FileSetComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.service_comparator.ServiceComparator class.
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
-    # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
 
     def tearDown(self):
         FindingContainer.reset()
