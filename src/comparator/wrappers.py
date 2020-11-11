@@ -681,9 +681,7 @@ class FileSet:
             for location in fd.source_code_info.location:
                 source_code_locations[tuple(location.path)] = location
             # Create packaging options map and duplicate the per-language rules for namespaces.
-            self.packaging_options_map = self._get_packaging_options_map(
-                fd.options, is_dependency
-            )
+            self._get_packaging_options_map(fd.options, is_dependency)
             # fmt: off
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
@@ -743,10 +741,46 @@ class FileSet:
         # but only the services, messages that are used in the API definition files.
         if is_dependency:
             return
-        # TODO(xiaozhenliu): check with One-platform about the version naming.
-        # We should allow minor version updates, then the packaging options like
-        # `java_package = "com.pubsub.v1"` will always be changed. But versions
-        # update between two stable versions (e.g. v1 to v2) is not permitted.
+        language_packaging_options = [
+            "java_package",
+            "java_outer_classname",
+            "csharp_namespace",
+            "go_package",
+            "swift_prefix",
+            "php_namespace",
+            "php_metadata_namespace",
+            "php_class_prefix",
+            "ruby_package",
+        ]
+        # Put default empty set for every packaging options.
+        for option in language_packaging_options:
+            self.packaging_options_map[option] = set()
+        if file_options.java_package:
+            self.packaging_options_map["java_package"].add(file_options.java_package)
+        if file_options.java_outer_classname:
+            self.packaging_options_map["java_outer_classname"].add(
+                file_options.java_outer_classname
+            )
+        if file_options.go_package:
+            self.packaging_options_map["go_package"].add(file_options.go_package)
+        if file_options.csharp_namespace:
+            self.packaging_options_map["csharp_namespace"].add(
+                file_options.csharp_namespace
+            )
+        if file_options.swift_prefix:
+            self.packaging_options_map["swift_prefix"].add(file_options.swift_prefix)
+        if file_options.php_class_prefix:
+            self.packaging_options_map["php_class_prefix"].add(
+                file_options.php_class_prefix
+            )
+        if file_options.php_namespace:
+            self.packaging_options_map["php_namespace"].add(file_options.php_namespace)
+        if file_options.php_metadata_namespace:
+            self.packaging_options_map["php_metadata_namespace"].add(
+                file_options.php_metadata_namespace
+            )
+        if file_options.ruby_package:
+            self.packaging_options_map["ruby_package"].add(file_options.ruby_package)
 
     def _is_imported_dependency(
         self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
@@ -756,5 +790,5 @@ class FileSet:
             return False
         for prefix in prefixes:
             if fd.package.startswith(prefix):
-                return True
-        return False
+                return False
+        return True

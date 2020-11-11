@@ -72,7 +72,7 @@ class FileSetTest(unittest.TestCase):
             name="bar.proto", package=".example.v1", messages=messages
         )
         file_set = make_file_set(files=[file_bar, file_foo])
-        self.assertEqual(file_set.packaging_options_map, None)
+        self.assertTrue(file_set.packaging_options_map)
         self.assertEqual(list(file_set.messages_map.keys()), ["InnerMessage"])
         self.assertEqual(list(file_set.enums_map.keys()), ["Irrelevant"])
         self.assertEqual(list(file_set.services_map.keys()), ["ThingDoer"])
@@ -160,6 +160,37 @@ class FileSetTest(unittest.TestCase):
             .source_code_line,
             10,
         )
+
+    def test_file_set_packaging_options(self):
+        file_pb2_options = descriptor_pb2.FileOptions()
+        file_pb2_options.java_package = "com.google.example.v1"
+        file_pb2_options.php_namespace = "Google\\Cloud\\Example\\V1"
+        # Two proto files have the same packging options.
+        file1 = make_file_pb2(name="proto1", options=file_pb2_options)
+        file2 = make_file_pb2(name="proto2", options=file_pb2_options)
+        file_set = make_file_set(files=[file1, file2])
+        self.assertTrue(file_set.packaging_options_map)
+        self.assertEqual(
+            file_set.packaging_options_map["java_package"], {"com.google.example.v1"}
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["php_namespace"],
+            {"Google\\Cloud\\Example\\V1"},
+        )
+
+    def test_file_set_package_prefix(self):
+        file_pb2_options = descriptor_pb2.FileOptions()
+        file_pb2_options.java_package = "com.google.common.v1"
+        file_pb2_options.php_namespace = "Google\\Cloud\\Common\\V1"
+        # The packaging options of imported proto dependency should not put
+        # into the packaging_options_map.
+        file_pb2 = make_file_pb2(
+            name="imported_proto.proto",
+            package="google.common.v1",
+            options=file_pb2_options,
+        )
+        file_set = make_file_set(files=[file_pb2], package_prefixes=[".example"])
+        self.assertFalse(file_set.packaging_options_map)
 
 
 if __name__ == "__main__":
