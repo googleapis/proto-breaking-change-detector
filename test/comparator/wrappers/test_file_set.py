@@ -182,7 +182,7 @@ class FileSetTest(unittest.TestCase):
         file_pb2_options = descriptor_pb2.FileOptions()
         file_pb2_options.java_package = "com.google.common.v1"
         file_pb2_options.php_namespace = "Google\\Cloud\\Common\\V1"
-        # The packaging options of imported proto dependency should not put
+        # The packaging options of the imported proto dependency should not put
         # into the packaging_options_map.
         file_pb2 = make_file_pb2(
             name="imported_proto.proto",

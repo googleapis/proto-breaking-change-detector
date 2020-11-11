@@ -741,6 +741,10 @@ class FileSet:
         # but only the services, messages that are used in the API definition files.
         if is_dependency:
             return
+        # TODO(xiaozhenliu): check with One-platform about the version naming.
+        # We should allow minor version updates, then the packaging options like
+        # `java_package = "com.pubsub.v1"` will always be changed. But versions
+        # update between two stable versions (e.g. v1 to v2) is not permitted.
         language_packaging_options = [
             "java_package",
             "java_outer_classname",
