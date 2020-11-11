@@ -648,8 +648,8 @@ class Service:
 class FileSet:
     """Description of a fileSet.
 
-    file_set_pb: The FileDescriptorSet object that is obtained by proto compiler
-    package_prefixes: the prefixes of package name for the API definition files.
+    file_set_pb: The FileDescriptorSet object that is obtained by proto compiler.
+    package_prefixes: the prefixes of package names for the API definition files.
                     The FileDescriptorSet object also contains imported dependencies if any.
                     So we use the prefix to identify the API definition source files.
                     None if no external dependencies are needed for the API.
@@ -667,7 +667,7 @@ class FileSet:
         self.resources_database = ResourceDatabase()
         path = ()
         for fd in file_set_pb.file:
-            # Check whether this file is imported dependency.
+            # Check whether this file is an imported dependency.
             is_dependency = self._is_imported_dependency(fd, package_prefixes)
             # Iterate over the source_code_info and place it into a dictionary.
             #
