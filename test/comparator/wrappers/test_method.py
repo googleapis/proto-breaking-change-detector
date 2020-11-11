@@ -179,3 +179,7 @@ class MethodTest(unittest.TestCase):
         self.assertEqual(http_annotation["http_method"], "get")
         self.assertEqual(http_annotation["http_uri"], "http_uri")
         self.assertEqual(http_annotation["http_body"], "*")
+
+
+if __name__ == "__main__":
+    unittest.main()

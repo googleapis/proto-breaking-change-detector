@@ -160,3 +160,7 @@ class FileSetTest(unittest.TestCase):
             .source_code_line,
             10,
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
