@@ -681,9 +681,7 @@ class FileSet:
             for location in fd.source_code_info.location:
                 source_code_locations[tuple(location.path)] = location
             # Create packaging options map and duplicate the per-language rules for namespaces.
-            self.packaging_options_map = self._get_packaging_options_map(
-                fd.options, is_dependency
-            )
+            self._get_packaging_options_map(fd.options, is_dependency)
             # fmt: off
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
@@ -747,6 +745,23 @@ class FileSet:
         # We should allow minor version updates, then the packaging options like
         # `java_package = "com.pubsub.v1"` will always be changed. But versions
         # update between two stable versions (e.g. v1 to v2) is not permitted.
+        language_packaging_options = [
+            "java_package",
+            "java_outer_classname",
+            "csharp_namespace",
+            "go_package",
+            "swift_prefix",
+            "php_namespace",
+            "php_metadata_namespace",
+            "php_class_prefix",
+            "ruby_package",
+        ]
+        # Put default empty set for every packaging options.
+        for option in language_packaging_options:
+            if hasattr(file_options, option):
+                if option not in self.packaging_options_map:
+                    self.packaging_options_map[option] = set()
+                self.packaging_options_map[option].add(getattr(file_options, option))
 
     def _is_imported_dependency(
         self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
@@ -756,5 +771,5 @@ class FileSet:
             return False
         for prefix in prefixes:
             if fd.package.startswith(prefix):
-                return True
-        return False
+                return False
+        return True
