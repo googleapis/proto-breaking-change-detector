@@ -758,33 +758,10 @@ class FileSet:
         ]
         # Put default empty set for every packaging options.
         for option in language_packaging_options:
-            self.packaging_options_map[option] = set()
-        if file_options.java_package:
-            self.packaging_options_map["java_package"].add(file_options.java_package)
-        if file_options.java_outer_classname:
-            self.packaging_options_map["java_outer_classname"].add(
-                file_options.java_outer_classname
-            )
-        if file_options.go_package:
-            self.packaging_options_map["go_package"].add(file_options.go_package)
-        if file_options.csharp_namespace:
-            self.packaging_options_map["csharp_namespace"].add(
-                file_options.csharp_namespace
-            )
-        if file_options.swift_prefix:
-            self.packaging_options_map["swift_prefix"].add(file_options.swift_prefix)
-        if file_options.php_class_prefix:
-            self.packaging_options_map["php_class_prefix"].add(
-                file_options.php_class_prefix
-            )
-        if file_options.php_namespace:
-            self.packaging_options_map["php_namespace"].add(file_options.php_namespace)
-        if file_options.php_metadata_namespace:
-            self.packaging_options_map["php_metadata_namespace"].add(
-                file_options.php_metadata_namespace
-            )
-        if file_options.ruby_package:
-            self.packaging_options_map["ruby_package"].add(file_options.ruby_package)
+            if hasattr(file_options, option):
+                if option not in self.packaging_options_map:
+                    self.packaging_options_map[option] = set()
+                self.packaging_options_map[option].add(getattr(file_options, option))
 
     def _is_imported_dependency(
         self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
