@@ -21,6 +21,7 @@ describe descriptors).
 """
 
 import dataclasses
+from collections import defaultdict
 from google.api import field_behavior_pb2
 from google.api import resource_pb2
 from google.api import client_pb2
@@ -660,7 +661,10 @@ class FileSet:
         file_set_pb: descriptor_pb2.FileDescriptorSet,
         package_prefixes: Sequence[str] = None,
     ):
-        self.packaging_options_map = {}
+        # The default value for every language package option is a dict.
+        # whose key is the option str, and value is the WithLocation object with
+        # sourec code information.
+        self.packaging_options_map = defaultdict(dict)
         self.services_map: Dict[str, Service] = {}
         self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
@@ -681,7 +685,9 @@ class FileSet:
             for location in fd.source_code_info.location:
                 source_code_locations[tuple(location.path)] = location
             # Create packaging options map and duplicate the per-language rules for namespaces.
-            self._get_packaging_options_map(fd.options, is_dependency)
+            self._get_packaging_options_map(
+                fd.options, is_dependency, fd.name, source_code_locations, path + (8,)
+            )
             # fmt: off
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
@@ -734,7 +740,14 @@ class FileSet:
             # fmt: on
 
     def _get_packaging_options_map(
-        self, file_options: descriptor_pb2.FileOptions, is_dependency: bool
+        self,
+        file_options: descriptor_pb2.FileOptions,
+        is_dependency: bool,
+        proto_file_name: str,
+        source_code_locations: Dict[
+            Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
+        ],
+        path: Tuple[int],
     ):
         # If the file is an imported dependency, we will not include the packaging options
         # of it in the map. Since we do not care about the packaging options of dependencies,
@@ -745,46 +758,86 @@ class FileSet:
         # We should allow minor version updates, then the packaging options like
         # `java_package = "com.pubsub.v1"` will always be changed. But versions
         # update between two stable versions (e.g. v1 to v2) is not permitted.
-        language_packaging_options = [
-            "java_package",
-            "java_outer_classname",
-            "csharp_namespace",
-            "go_package",
-            "swift_prefix",
-            "php_namespace",
-            "php_metadata_namespace",
-            "php_class_prefix",
-            "ruby_package",
-        ]
-        # Put default empty set for every packaging options.
-        for option in language_packaging_options:
-            self.packaging_options_map[option] = set()
         if file_options.java_package:
-            self.packaging_options_map["java_package"].add(file_options.java_package)
+            java_package_map = self.packaging_options_map["java_package"]
+            java_package_map[file_options.java_package] = WithLocation(
+                file_options.java_package,
+                source_code_locations,
+                path + (1,),
+                proto_file_name,
+            )
         if file_options.java_outer_classname:
-            self.packaging_options_map["java_outer_classname"].add(
+            self.packaging_options_map["java_outer_classname"][
                 file_options.java_outer_classname
+            ] = WithLocation(
+                file_options.java_outer_classname,
+                source_code_locations,
+                path + (8,),
+                proto_file_name,
             )
         if file_options.go_package:
-            self.packaging_options_map["go_package"].add(file_options.go_package)
+            self.packaging_options_map["go_package"][
+                file_options.go_package
+            ] = WithLocation(
+                file_options.go_package,
+                source_code_locations,
+                path + (11,),
+                proto_file_name,
+            )
         if file_options.csharp_namespace:
-            self.packaging_options_map["csharp_namespace"].add(
+            self.packaging_options_map["csharp_namespace"][
                 file_options.csharp_namespace
+            ] = WithLocation(
+                file_options.csharp_namespace,
+                source_code_locations,
+                path + (37,),
+                proto_file_name,
             )
         if file_options.swift_prefix:
-            self.packaging_options_map["swift_prefix"].add(file_options.swift_prefix)
+            self.packaging_options_map["swift_prefix"][
+                file_options.swift_prefix
+            ] = WithLocation(
+                file_options.swift_prefix,
+                source_code_locations,
+                path + (39,),
+                proto_file_name,
+            )
         if file_options.php_class_prefix:
-            self.packaging_options_map["php_class_prefix"].add(
+            self.packaging_options_map["php_class_prefix"][
                 file_options.php_class_prefix
+            ] = WithLocation(
+                file_options.php_class_prefix,
+                source_code_locations,
+                path + (40,),
+                proto_file_name,
             )
         if file_options.php_namespace:
-            self.packaging_options_map["php_namespace"].add(file_options.php_namespace)
+            self.packaging_options_map["php_namespace"][
+                file_options.php_namespace
+            ] = WithLocation(
+                file_options.php_namespace,
+                source_code_locations,
+                path + (41,),
+                proto_file_name,
+            )
         if file_options.php_metadata_namespace:
-            self.packaging_options_map["php_metadata_namespace"].add(
+            self.packaging_options_map["php_metadata_namespace"][
                 file_options.php_metadata_namespace
+            ] = WithLocation(
+                file_options.php_metadata_namespace,
+                source_code_locations,
+                path + (44,),
+                proto_file_name,
             )
         if file_options.ruby_package:
-            self.packaging_options_map["ruby_package"].add(file_options.ruby_package)
+            self.packaging_options_map["ruby_package"][
+                file_options.ruby_package
+            ] = WithLocation(
+                file_options.ruby_package,
+                source_code_locations,
+                path + (45,),
+                proto_file_name,
+            )
 
     def _is_imported_dependency(
         self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
