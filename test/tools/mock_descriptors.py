@@ -321,5 +321,9 @@ def make_file_pb2(
 
 def make_file_set(
     files: Sequence[desc.FileDescriptorProto] = (),
+    package_prefixes: Sequence[str] = [],
 ) -> wrappers.FileSet:
-    return wrappers.FileSet(file_set_pb=desc.FileDescriptorSet(file=files))
+    return wrappers.FileSet(
+        file_set_pb=desc.FileDescriptorSet(file=files),
+        package_prefixes=package_prefixes,
+    )

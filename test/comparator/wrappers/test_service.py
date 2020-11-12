@@ -87,3 +87,7 @@ class ServiceTest(unittest.TestCase):
         )
         self.assertEqual(service.source_code_line, 2)
         self.assertEqual(service.proto_file_name, "test.proto")
+
+
+if __name__ == "__main__":
+    unittest.main()
