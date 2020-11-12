@@ -50,6 +50,13 @@ class FindingContainer:
         return [finding for finding in cls._finding_results if finding.actionable]
 
     @classmethod
+    def toHumanReadableMessage(cls):
+        output_message = ""
+        for finding in cls.getActionableFindings():
+            output_message += f"{finding.location.proto_file_name} L{finding.location.source_code_line}: {finding.message}"
+        return output_message
+
+    @classmethod
     def toJson(cls):
         findingDictArr = []
         for finding in cls._finding_results:

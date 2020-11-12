@@ -49,7 +49,13 @@ class FindingContainerTest(unittest.TestCase):
         self.assertEqual(items[0]["category"], "ENUM_NAME_CHANGE")
         self.assertEqual(items[1]["category"], "FIELD_ADDITION")
 
-    def test4_reset(self):
+    def test4_toHumanReadableMessage(self):
+        self.assertEqual(
+            FindingContainer.toHumanReadableMessage(),
+            "my_proto.proto L12: Breaking change.",
+        )
+
+    def test5_reset(self):
         FindingContainer.reset()
         self.assertEqual(len(FindingContainer.getAllFindings()), 0)
 
