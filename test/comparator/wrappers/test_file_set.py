@@ -72,7 +72,7 @@ class FileSetTest(unittest.TestCase):
             name="bar.proto", package=".example.v1", messages=messages
         )
         file_set = make_file_set(files=[file_bar, file_foo])
-        self.assertFalse(file_set.packaging_options_map)
+        self.assertTrue(file_set.packaging_options_map)
         self.assertEqual(list(file_set.messages_map.keys()), ["InnerMessage"])
         self.assertEqual(list(file_set.enums_map.keys()), ["Irrelevant"])
         self.assertEqual(list(file_set.services_map.keys()), ["ThingDoer"])

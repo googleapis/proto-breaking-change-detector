@@ -758,86 +758,28 @@ class FileSet:
         # We should allow minor version updates, then the packaging options like
         # `java_package = "com.pubsub.v1"` will always be changed. But versions
         # update between two stable versions (e.g. v1 to v2) is not permitted.
-        if file_options.java_package:
-            java_package_map = self.packaging_options_map["java_package"]
-            java_package_map[file_options.java_package] = WithLocation(
-                file_options.java_package,
-                source_code_locations,
-                path + (1,),
-                proto_file_name,
-            )
-        if file_options.java_outer_classname:
-            self.packaging_options_map["java_outer_classname"][
-                file_options.java_outer_classname
-            ] = WithLocation(
-                file_options.java_outer_classname,
-                source_code_locations,
-                path + (8,),
-                proto_file_name,
-            )
-        if file_options.go_package:
-            self.packaging_options_map["go_package"][
-                file_options.go_package
-            ] = WithLocation(
-                file_options.go_package,
-                source_code_locations,
-                path + (11,),
-                proto_file_name,
-            )
-        if file_options.csharp_namespace:
-            self.packaging_options_map["csharp_namespace"][
-                file_options.csharp_namespace
-            ] = WithLocation(
-                file_options.csharp_namespace,
-                source_code_locations,
-                path + (37,),
-                proto_file_name,
-            )
-        if file_options.swift_prefix:
-            self.packaging_options_map["swift_prefix"][
-                file_options.swift_prefix
-            ] = WithLocation(
-                file_options.swift_prefix,
-                source_code_locations,
-                path + (39,),
-                proto_file_name,
-            )
-        if file_options.php_class_prefix:
-            self.packaging_options_map["php_class_prefix"][
-                file_options.php_class_prefix
-            ] = WithLocation(
-                file_options.php_class_prefix,
-                source_code_locations,
-                path + (40,),
-                proto_file_name,
-            )
-        if file_options.php_namespace:
-            self.packaging_options_map["php_namespace"][
-                file_options.php_namespace
-            ] = WithLocation(
-                file_options.php_namespace,
-                source_code_locations,
-                path + (41,),
-                proto_file_name,
-            )
-        if file_options.php_metadata_namespace:
-            self.packaging_options_map["php_metadata_namespace"][
-                file_options.php_metadata_namespace
-            ] = WithLocation(
-                file_options.php_metadata_namespace,
-                source_code_locations,
-                path + (44,),
-                proto_file_name,
-            )
-        if file_options.ruby_package:
-            self.packaging_options_map["ruby_package"][
-                file_options.ruby_package
-            ] = WithLocation(
-                file_options.ruby_package,
-                source_code_locations,
-                path + (45,),
-                proto_file_name,
-            )
+        packaging_options_path = {
+            "java_package": (1,),
+            "java_outer_classname": (8,),
+            "csharp_namespace": (11,),
+            "go_package": (37,),
+            "swift_prefix": (39,),
+            "php_namespace": (40,),
+            "php_metadata_namespace": (41,),
+            "php_class_prefix": (44,),
+            "ruby_package": (45,),
+        }
+        # Put default empty set for every packaging options.
+        for option in packaging_options_path.keys():
+            if hasattr(file_options, option):
+                self.packaging_options_map[option][
+                    getattr(file_options, option)
+                ] = WithLocation(
+                    getattr(file_options, option),
+                    source_code_locations,
+                    path + packaging_options_path[option],
+                    proto_file_name,
+                )
 
     def _is_imported_dependency(
         self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
