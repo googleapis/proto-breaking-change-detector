@@ -52,8 +52,22 @@ class FindingContainer:
     @classmethod
     def toHumanReadableMessage(cls):
         output_message = ""
+        file_to_findings = {}
         for finding in cls.getActionableFindings():
-            output_message += f"{finding.location.proto_file_name} L{finding.location.source_code_line}: {finding.message}"
+            # Create a map to summarize the findings based on proto file name.
+            if finding.location.proto_file_name not in file_to_findings:
+                file_to_findings[finding.location.proto_file_name] = []
+            file_to_findings[finding.location.proto_file_name].append(finding)
+        # Add each finding to the output message.
+        for file_name in file_to_findings:
+            # Customize sort key function to output the findings in the same
+            # file based on the source code line number.
+            def _get_line_number(finding):
+                return finding.location.source_code_line
+
+            file_to_findings[file_name].sort(key=_get_line_number)
+            for finding in file_to_findings[file_name]:
+                output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
 
     @classmethod

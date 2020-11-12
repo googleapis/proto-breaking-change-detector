@@ -25,10 +25,10 @@ class FindingContainerTest(unittest.TestCase):
     # the steps and also ensure the execution orders.
     def test1_add_findings(self):
         FindingContainer.addFinding(
-            category=FindingCategory.ENUM_NAME_CHANGE,
+            category=FindingCategory.METHOD_REMOVAL,
             proto_file_name="my_proto.proto",
             source_code_line=12,
-            message="Breaking change.",
+            message="An rpc method bar is removed.",
             actionable=True,
         )
         self.assertEqual(len(FindingContainer.getAllFindings()), 1)
@@ -46,13 +46,21 @@ class FindingContainerTest(unittest.TestCase):
     def test3_toJson(self):
         json_output = FindingContainer.toJson()
         items = json.loads(json_output)
-        self.assertEqual(items[0]["category"], "ENUM_NAME_CHANGE")
+        self.assertEqual(items[0]["category"], "METHOD_REMOVAL")
         self.assertEqual(items[1]["category"], "FIELD_ADDITION")
 
     def test4_toHumanReadableMessage(self):
+        FindingContainer.addFinding(
+            category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+            proto_file_name="my_proto.proto",
+            source_code_line=5,
+            message="An existing file-level resource definition has changed.",
+            actionable=True,
+        )
         self.assertEqual(
             FindingContainer.toHumanReadableMessage(),
-            "my_proto.proto L12: Breaking change.",
+            "my_proto.proto L5: An existing file-level resource definition has changed.\n"
+            + "my_proto.proto L12: An rpc method bar is removed.\n",
         )
 
     def test5_reset(self):
