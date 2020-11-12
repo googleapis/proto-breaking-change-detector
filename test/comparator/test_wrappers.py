@@ -35,6 +35,11 @@ class WrappersTest(unittest.TestCase):
             resources_database.types["example.googleapis.com/t1"].value.pattern,
             ["foo/{foo}", "foo/{foo}/bar/{bar}/t1"],
         )
+        # The service from imported dependency `google/longrunning/operations`
+        # is included in the file set.
+        self.assertEqual(
+            list(self._FILE_SET.services_map.keys()), ["Operations", "Example"]
+        )
 
     def test_service_wrapper(self):
         service = self._FILE_SET.services_map["Example"]
