@@ -68,3 +68,15 @@ class OptionsTest(unittest.TestCase):
                 human_readable_message=True,
                 package_prefixes="prefix1, prefix2, prefix3",
             )
+
+    def test_options_json_file_not_existing(self):
+        with self.assertRaises(TypeError):
+            with mock.patch("os.path.isdir") as mocked_isdir:
+                mocked_isdir.return_value = True
+                # The output json file is not existing, raise TypeError.
+                Options(
+                    proto_dirs_original="c,d",
+                    proto_dirs_update="a,b",
+                    human_readable_message=True,
+                    output_json_path="not_existing",
+                )

@@ -16,7 +16,24 @@ import os
 
 
 class Options:
-    # Build the options for protoc command arguments.
+    """Build the options for protoc command arguments.
+
+    proto_dirs: Required. The directories where we should find the proto files,
+                including proto definition files and their dependencies.
+                Comma separated string.
+    proto_files: Optional. Proto files list to pass in the protoc command.
+                 If not specify, we will look up all the protos in the `proto_dirs`.
+                 Comma separated string.
+    package_prefixes: Optional.The package prefixes of the proto definition files,
+                      so that in the comparators, we can safely skip the
+                      dependency protos if needed. Comma separated string.
+    human_readable_message: Optional flag. Enable printing the human-readable
+                            messages if true. Default value if false.
+    output_json_path: Optional. The path of the findings json file. If not specify,
+                      we will create a json for the users which is in
+                      `$root/detected_breaking_changes.json`.
+    """
+
     def __init__(
         self,
         proto_dirs_original: str,
@@ -43,12 +60,11 @@ class Options:
     def _get_package_prefixes(self, prefixes):
         if not prefixes:
             return None
-
         return [prefix.strip() for prefix in prefixes.split(",")]
 
     def _get_output_json_path(self, path):
         if not path:
             return os.path.join(os.getcwd(), "detected_breaking_changes.json")
-        elif not os.isfile(path):
+        elif not os.path.isfile(path):
             raise TypeError(f"The output_json_path {path} is not existing.")
         return path
