@@ -15,6 +15,7 @@
 import json
 from src.findings.utils import Finding
 from src.findings.utils import FindingCategory
+from collections import defaultdict
 
 
 class FindingContainer:
@@ -52,21 +53,16 @@ class FindingContainer:
     @classmethod
     def toHumanReadableMessage(cls):
         output_message = ""
-        file_to_findings = {}
+        file_to_findings = defaultdict(list)
         for finding in cls.getActionableFindings():
-            # Create a map to summarize the findings based on proto file name.
-            if finding.location.proto_file_name not in file_to_findings:
-                file_to_findings[finding.location.proto_file_name] = []
+            # Create a map to summarize the findings based on proto file name.s
             file_to_findings[finding.location.proto_file_name].append(finding)
         # Add each finding to the output message.
-        for file_name in file_to_findings:
+        for file_name, findings in file_to_findings.items():
             # Customize sort key function to output the findings in the same
             # file based on the source code line number.
-            def _get_line_number(finding):
-                return finding.location.source_code_line
-
-            file_to_findings[file_name].sort(key=_get_line_number)
-            for finding in file_to_findings[file_name]:
+            findings.sort(key=lambda f: f.location.source_code_line)
+            for finding in findings:
                 output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
 
