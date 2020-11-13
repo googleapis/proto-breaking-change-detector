@@ -50,11 +50,8 @@ class FindingContainer:
         return [finding for finding in cls._finding_results if finding.actionable]
 
     @classmethod
-    def toJson(cls):
-        findingDictArr = []
-        for finding in cls._finding_results:
-            findingDictArr.append(finding.toDict())
-        return json.dumps(findingDictArr)
+    def toDictArr(cls):
+        return [finding.toDict() for finding in cls._finding_results]
 
     @classmethod
     def reset(cls):
