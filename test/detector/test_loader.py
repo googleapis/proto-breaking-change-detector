@@ -14,7 +14,9 @@
 
 import unittest
 import os
+import sys
 from src.detector.loader import Loader
+from src.detector.loader import _ProtocInvokerException
 from google.protobuf import descriptor_pb2
 
 

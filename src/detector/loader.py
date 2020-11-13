@@ -43,10 +43,9 @@ class Loader:
                     f"The directory {path} passed in is not existing. Please check the path."
                 )
         self.proto_dirs = [dir for dir in proto_dirs]
-        if not proto_files:
-            self.proto_files = self._get_proto_files(self.proto_dirs)
-        else:
-            self.proto_files = proto_files
+        self.proto_files = (
+            proto_files if proto_files else self._get_proto_files(self.proto_dirs)
+        )
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         # Construct the protoc command with proper argument prefix.
@@ -82,7 +81,7 @@ class Loader:
         for directory in proto_dirs:
             files = os.listdir(directory)
             for file_name in files:
-                if file_name.endsWith(".proto"):
+                if file_name.endswith(".proto"):
                     proto_files.append(file_name)
         return proto_files
 
