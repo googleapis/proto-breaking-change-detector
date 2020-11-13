@@ -21,9 +21,6 @@ class Options:
     proto_dirs: Required. The directories where we should find the proto files,
                 including proto definition files and their dependencies.
                 Comma separated string.
-    proto_files: Optional. Proto files list to pass in the protoc command.
-                 If not specify, we will look up all the protos in the `proto_dirs`.
-                 Comma separated string.
     package_prefixes: Optional.The package prefixes of the proto definition files,
                       so that in the comparators, we can safely skip the
                       dependency protos if needed. Comma separated string.
