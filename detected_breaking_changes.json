@@ -1,1 +1,0 @@
-[{"category": "METHOD_REMOVAL", "location": {"proto_file_name": "my_proto.proto", "source_code_line": "No source code line can be identified by path (6, 0, 2, 0)."}, "message": "An rpc method DoThing is removed", "actionable": true, "extra_info": null}]

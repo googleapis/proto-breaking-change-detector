@@ -43,9 +43,8 @@ class Detector:
         ).compare()
         # Output json file of findings and human-readable messages if the
         # command line option is enabled.
-        if not os.path.exists(self.opts.output_json_path):
-            with open(self.opts.output_json_path, "w") as write_json_file:
-                json.dump(FindingContainer.toDictArr(), write_json_file)
+        with open(self.opts.output_json_path, "w") as write_json_file:
+            json.dump(FindingContainer.toDictArr(), write_json_file)
 
         if self.opts.human_readable_message:
             sys.stdout.write(FindingContainer.toHumanReadableMessage())
