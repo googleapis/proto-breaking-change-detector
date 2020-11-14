@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import subprocess
+from subprocess import PIPE
 import os
 from typing import Sequence
 from google.protobuf import descriptor_pb2 as desc
@@ -29,7 +30,6 @@ class Loader:
     PROTOC_BINARY = os.path.join(_CURRENT_DIR, "test/tools/protoc")
     COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
     PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
-    DESCRIPTOR_SET = "generated_descriptor_set.pb"
 
     def __init__(
         self,
@@ -54,7 +54,7 @@ class Loader:
             protoc_command.append(f"--proto_path={directory}")
         protoc_command.append(f"--proto_path={self.COMMON_PROTOS_DIR}")
         protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
-        protoc_command.append(f"-o{self.DESCRIPTOR_SET}")
+        protoc_command.append("-o/dev/stdout")
         protoc_command.append("--include_source_info")
         # Include the imported dependencies.
         protoc_command.append("--include_imports")
@@ -62,27 +62,24 @@ class Loader:
 
         # Run protoc command to get pb file that contains serialized data of
         # the proto files.
-        process = subprocess.run(protoc_command)
+        process = subprocess.run(protoc_command, stdout=PIPE)
         if process.returncode != 0:
             raise _ProtocInvokerException(
                 f"Protoc command to load the descriptor set fails: {protoc_command}"
             )
         # Create FileDescriptorSet from the serialized data.
         desc_set = desc.FileDescriptorSet()
-        with open(self.DESCRIPTOR_SET, "rb") as f:
-            desc_set.ParseFromString(f.read())
-        # Clean up the generated descriptor set file.
-        if os.path.exists(self.DESCRIPTOR_SET):
-            os.remove(self.DESCRIPTOR_SET)
+        desc_set.ParseFromString(process.stdout)
         return desc_set
 
     def _get_proto_files(self, proto_dirs: Sequence[str]):
-        proto_files = []
-        for directory in proto_dirs:
-            files = os.listdir(directory)
-            for file_name in files:
-                if file_name.endswith(".proto"):
-                    proto_files.append(file_name)
+        # Get all the files that have extension `.proto` in proto_dirs.
+        proto_files = [
+            fname
+            for directory in proto_dirs
+            for fname in os.list_dir(directory)
+            if os.path.splitext(fname)[1] == ".proto"
+        ]
         return proto_files
 
 
