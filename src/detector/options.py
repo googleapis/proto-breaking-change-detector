@@ -47,8 +47,6 @@ class Options:
 
     def _get_proto_dirs(self, proto_dirs):
         proto_dirs_arr = proto_dirs.split(",")
-        if not proto_dirs_arr:
-            return []
         for directory in proto_dirs_arr:
             if not os.path.isdir(directory):
                 raise TypeError(f"The directory {directory} is not existing.")
