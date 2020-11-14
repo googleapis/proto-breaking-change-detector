@@ -13,19 +13,22 @@
 # limitations under the License.
 
 import unittest
+import os
 from google.api import resource_pb2
-from test.tools.invoker import UnittestInvoker
+from src.detector.loader import Loader
 from src.comparator.resource_database import ResourceDatabase
 from src.comparator.wrappers import WithLocation
 
 
 class ResourceDatabaseTest(unittest.TestCase):
-    _INVOKER = UnittestInvoker(
-        ["resource_database_v1.proto"], "resource_database_v1_descriptor_set.pb", True
+    PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
+    INVOKER = Loader(
+        [PROTO_DIR],
+        [os.path.join(PROTO_DIR, "resource_database_v1.proto")],
     )
 
     def setUp(self):
-        self.descriptor_set = self._INVOKER.run()
+        self.descriptor_set = self.INVOKER.get_descriptor_set()
         self.resource_database = ResourceDatabase()
 
     def test_resource_database(self):
@@ -59,10 +62,6 @@ class ResourceDatabaseTest(unittest.TestCase):
         return WithLocation(
             resource, source_code_locations={}, path=(), proto_file_name=""
         )
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER.cleanup()
 
 
 if __name__ == "__main__":
