@@ -56,6 +56,9 @@ class FindingCategory(enum.Enum):
     RESOURCE_REFERENCE_REMOVAL = 37
     RESOURCE_REFERENCE_ADDITION = 38
     RESOURCE_REFERENCE_CHANGE = 39
+    # Packaging options
+    PACKAGING_OPTION_REMOVAL = 40
+    PACKAGING_OPTION_ADDITION = 41
 
 
 class Finding:
