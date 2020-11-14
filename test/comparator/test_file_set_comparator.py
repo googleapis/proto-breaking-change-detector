@@ -154,6 +154,36 @@ class FileSetComparatorTest(unittest.TestCase):
             "foo.proto",
         )
 
+    def test_packaging_options_change(self):
+        file_options_original = descriptor_pb2.FileOptions()
+        file_options_original.php_namespace = "example_php_namespace"
+        file_original = make_file_pb2(
+            name="original.proto", options=file_options_original
+        )
+
+        file_options_update = descriptor_pb2.FileOptions()
+        file_options_update.php_namespace = "example_php_namespace_update"
+        file_update = make_file_pb2(name="update.proto", options=file_options_update)
+
+        FileSetComparator(
+            make_file_set(files=[file_original]),
+            make_file_set(files=[file_update]),
+        ).compare()
+        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        go_package_option_removal = findings_map[
+            "An exisiting packaging option for php_namespace is removed."
+        ]
+        self.assertEqual(
+            go_package_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"
+        )
+
+        ruby_package_option_removal = findings_map[
+            "An exisiting packaging option for php_namespace is added."
+        ]
+        self.assertEqual(
+            ruby_package_option_removal.category.name, "PACKAGING_OPTION_ADDITION"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

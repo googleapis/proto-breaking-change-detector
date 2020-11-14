@@ -171,11 +171,12 @@ class FileSetTest(unittest.TestCase):
         file_set = make_file_set(files=[file1, file2])
         self.assertTrue(file_set.packaging_options_map)
         self.assertEqual(
-            file_set.packaging_options_map["java_package"], {"com.google.example.v1"}
+            list(file_set.packaging_options_map["java_package"].keys()),
+            ["com.google.example.v1"],
         )
         self.assertEqual(
-            file_set.packaging_options_map["php_namespace"],
-            {"Google\\Cloud\\Example\\V1"},
+            list(file_set.packaging_options_map["php_namespace"].keys()),
+            ["Google\\Cloud\\Example\\V1"],
         )
 
     def test_file_set_package_prefix(self):
