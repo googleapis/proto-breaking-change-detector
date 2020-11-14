@@ -31,7 +31,8 @@ class FileSetComparator:
         self.fs_update = file_set_update
 
     def compare(self):
-        # 1.TODO(xiaozhenliu) Compare the per-language packaging options.
+        # 1.Compare the per-language packaging options.
+        self._compare_packaging_options(self.fs_original, self.fs_update)
         # 2. Check the services map.
         self._compare_services(self.fs_original, self.fs_update)
         # 3. Check the messages map.
@@ -40,6 +41,31 @@ class FileSetComparator:
         self._compare_enums(self.fs_original, self.fs_update)
         # 5. Check the file-level resource definitions.
         self._compare_resources(self.fs_original, self.fs_update)
+
+    def _compare_packaging_options(self, fs_original, fs_update):
+        packaging_options_original = fs_original.packaging_options_map
+        packaging_options_update = fs_update.packaging_options_map
+        for option in packaging_options_original.keys():
+            language_option_original = set(packaging_options_original[option].keys())
+            language_option_update = set(packaging_options_update[option].keys())
+            for language_option in language_option_original - language_option_update:
+                removed_option = packaging_options_original[option][language_option]
+                FindingContainer.addFinding(
+                    category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                    proto_file_name=removed_option.proto_file_name,
+                    source_code_line=removed_option.source_code_line,
+                    message=f"An exisiting packaging option for {option} is removed.",
+                    actionable=True,
+                )
+            for language_option in language_option_update - language_option_original:
+                added_option = packaging_options_update[option][language_option]
+                FindingContainer.addFinding(
+                    category=FindingCategory.PACKAGING_OPTION_ADDITION,
+                    proto_file_name=added_option.proto_file_name,
+                    source_code_line=added_option.source_code_line,
+                    message=f"An exisiting packaging option for {option} is added.",
+                    actionable=True,
+                )
 
     def _compare_services(self, fs_original, fs_update):
         keys_original = set(fs_original.services_map.keys())
