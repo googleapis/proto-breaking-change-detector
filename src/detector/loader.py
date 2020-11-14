@@ -70,7 +70,6 @@ class Loader:
         # Create FileDescriptorSet from the serialized data.
         desc_set = desc.FileDescriptorSet()
         desc_set.ParseFromString(process.stdout)
-        # Clean up the generated descriptor set file.
         return desc_set
 
     def _get_proto_files(self, proto_dirs: Sequence[str]):
