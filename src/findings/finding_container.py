@@ -53,6 +53,7 @@ class FindingContainer:
     def toDictArr(cls):
         return [finding.toDict() for finding in cls._finding_results]
 
+    @classmethod
     def toHumanReadableMessage(cls):
         output_message = ""
         file_to_findings = defaultdict(list)

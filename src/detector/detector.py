@@ -31,17 +31,21 @@ class Detector:
         descriptor_set_update: desc.FileDescriptorSet,
         opts: Options,
     ):
+        self.descriptor_set_original = descriptor_set_original
+        self.descriptor_set_update = descriptor_set_update
+        self.opts = opts
+
+    def detect_breaking_changes(self):
         # Init FileSetComparator and compare the two FileDescriptorSet.
         FileSetComparator(
-            FileSet(descriptor_set_original, opts.package_prefixes),
-            FileSet(descriptor_set_update, opts.package_prefixes),
+            FileSet(self.descriptor_set_original, self.opts.package_prefixes),
+            FileSet(self.descriptor_set_update, self.opts.package_prefixes),
         ).compare()
         # Output json file of findings and human-readable messages if the
         # command line option is enabled.
-        if not os.path.exists(opts.output_json_path):
-            with open(opts.output_json_path, "w") as write_json_file:
+        if not os.path.exists(self.opts.output_json_path):
+            with open(self.opts.output_json_path, "w") as write_json_file:
                 json.dump(FindingContainer.toDictArr(), write_json_file)
 
-        if opts.human_readable_message:
-            # Call toHumanReadableMessage() method once it is merged in.
-            sys.stdout.write("Human Readable Message.")
+        if self.opts.human_readable_message:
+            sys.stdout.write(FindingContainer.toHumanReadableMessage())
