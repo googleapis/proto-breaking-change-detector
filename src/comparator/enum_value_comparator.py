@@ -33,7 +33,7 @@ class EnumValueComparator:
                 category=FindingCategory.ENUM_VALUE_ADDITION,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
-                message=f"A new EnumValue {self.enum_value_update.name} is added.",
+                message=f"A new EnumValue `{self.enum_value_update.name}` is added.",
                 actionable=False,
             )
         # 2. If updated EnumValue is None, then the original EnumValue is removed.
@@ -42,7 +42,7 @@ class EnumValueComparator:
                 category=FindingCategory.ENUM_VALUE_REMOVAL,
                 proto_file_name=self.enum_value_original.proto_file_name,
                 source_code_line=self.enum_value_original.source_code_line,
-                message=f"An EnumValue {self.enum_value_original.name} is removed",
+                message=f"An EnumValue `{self.enum_value_original.name}` is removed.",
                 actionable=True,
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is changed.
@@ -51,6 +51,6 @@ class EnumValueComparator:
                 category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
-                message=f"Name of the EnumValue is changed, the original is {self.enum_value_original.name}, but the updated is {self.enum_value_update.name}",
+                message=f"Name of the EnumValue is changed from `{self.enum_value_original.name}` to `{self.enum_value_update.name}`.",
                 actionable=True,
             )

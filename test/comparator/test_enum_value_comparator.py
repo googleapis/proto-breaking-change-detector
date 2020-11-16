@@ -44,7 +44,7 @@ class EnumValueComparatorTest(unittest.TestCase):
     def test_enum_value_removal(self):
         EnumValueComparator(self.enum_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "An EnumValue FOO is removed")
+        self.assertEqual(finding.message, "An EnumValue `FOO` is removed.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
@@ -52,7 +52,7 @@ class EnumValueComparatorTest(unittest.TestCase):
     def test_enum_value_addition(self):
         EnumValueComparator(None, self.enum_foo).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new EnumValue FOO is added.")
+        self.assertEqual(finding.message, "A new EnumValue `FOO` is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
@@ -61,9 +61,7 @@ class EnumValueComparatorTest(unittest.TestCase):
         EnumValueComparator(self.enum_foo, self.enum_bar).compare()
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
-            finding.message,
-            "Name of the EnumValue is changed, the original "
-            "is FOO, but the updated is BAR",
+            finding.message, "Name of the EnumValue is changed from `FOO` to `BAR`."
         )
         self.assertEqual(finding.category.name, "ENUM_VALUE_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")

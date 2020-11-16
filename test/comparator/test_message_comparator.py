@@ -88,7 +88,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         message2 = make_message(nested_enums=[nested_enum2])
         DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["A new EnumValue BLUE is added."]
+        finding = findings_map["A new EnumValue `BLUE` is added."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
