@@ -44,7 +44,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
+            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`.",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
@@ -66,7 +66,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Repeated state of an existing field `my_field` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`."
+            "Repeated state of an existing field `my_field` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`.",
         )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
 
