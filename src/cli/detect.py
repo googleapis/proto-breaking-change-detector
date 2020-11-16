@@ -44,7 +44,7 @@ def detect(
     human_readable_message: bool,
 ):
     """Detect the breaking changes of the original and updated versions of API definition files. """
-    # 1. Readin the stdin options and create the Options object for all the command args.
+    # 1. Read the stdin options and create the Options object for all the command args.
     options = Options(
         original_api_definition_dirs,
         update_api_definition_dirs,
@@ -52,12 +52,12 @@ def detect(
         human_readable_message,
         output_json_path,
     )
-    # 3. Create protoc command (back up solution) to load the FileDescriptorSet.(loader.py)
+    # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
     # It takes options, returns fileDescriptorSet.
     file_set_original = Loader(options.proto_dirs_original).get_descriptor_set()
     file_set_update = Loader(options.proto_dirs_update).get_descriptor_set()
-    # 4. Create detector with two FileDescriptorSet and options.
-    # It returns output_json file and human-readable message based on options.
+    # 4. Create the detector with two FileDescriptorSet and options.
+    # It creates output_json file and prints human-readable message if the option is enabled.
     Detector(file_set_original, file_set_update, options).detect_breaking_changes()
 
 
