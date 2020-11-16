@@ -140,14 +140,20 @@ class ServiceComparator:
                     actionable=True,
                 )
             # 3.7 The paginated response of an RPC method is changed.
-            if method_original.paged_result_field != method_update.paged_result_field:
-                FindingContainer.addFinding(
-                    category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
-                    proto_file_name=method_update.proto_file_name,
-                    source_code_line=method_update.source_code_line,
-                    message=f"The paginated response of method {name} is changed",
-                    actionable=True,
-                )
+            if method_original.paged_result_field or method_update.paged_result_field:
+                if (
+                    not method_original.paged_result_field
+                    or not method_update.paged_result_field
+                    or method_original.paged_result_field.name
+                    != method_update.paged_result_field.name
+                ):
+                    FindingContainer.addFinding(
+                        category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
+                        proto_file_name=method_update.proto_file_name,
+                        source_code_line=method_update.source_code_line,
+                        message=f"The paginated response of method {name} is changed",
+                        actionable=True,
+                    )
             # TODO(xiaozhenliu): add source code information for annotations.
             # The customized annotation options share the same field number (1000)
             # in MethodDescriptorProto.options.
