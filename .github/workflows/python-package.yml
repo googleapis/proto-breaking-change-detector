@@ -46,3 +46,6 @@ jobs:
     - name: Run unit tests for detector
       run: |
         python -m unittest discover test/detector
+    - name: Run unit tests for CLI
+      run: |
+        python -m unittest discover test/cli
