@@ -1,4 +1,0 @@
-
-        [console_scripts]
-        proto-breaking-change-detector=src.cli.detect:detect
-    
