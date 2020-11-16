@@ -31,7 +31,7 @@ class EnumComparator:
                 category=FindingCategory.ENUM_ADDITION,
                 proto_file_name=self.enum_update.proto_file_name,
                 source_code_line=self.enum_update.source_code_line,
-                message=f"A new Enum {self.enum_update.name} is added.",
+                message=f"A new Enum `{self.enum_update.name}` is added.",
                 actionable=False,
             )
 
@@ -42,7 +42,7 @@ class EnumComparator:
                 category=FindingCategory.ENUM_REMOVAL,
                 proto_file_name=self.enum_original.proto_file_name,
                 source_code_line=self.enum_original.source_code_line,
-                message=f"An Enum {self.enum_original.name} is removed",
+                message=f"An Enum `{self.enum_original.name}` is removed.",
                 actionable=True,
             )
 
