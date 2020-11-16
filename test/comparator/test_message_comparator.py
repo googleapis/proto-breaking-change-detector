@@ -49,7 +49,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING"
+            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -64,7 +64,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         message2 = make_message(nested_messages=[nested_message_without_fields])
         DescriptorComparator(message1, message2).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["A Field nested_field is removed"]
+        finding = findings_map["An existing field `nested_field` is removed."]
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 

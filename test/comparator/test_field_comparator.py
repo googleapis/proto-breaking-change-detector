@@ -26,7 +26,7 @@ class FieldComparatorTest(unittest.TestCase):
         field_foo = make_field("Foo")
         FieldComparator(field_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A Field Foo is removed")
+        self.assertEqual(finding.message, "An existing field `Foo` is removed.")
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -34,7 +34,7 @@ class FieldComparatorTest(unittest.TestCase):
         field_foo = make_field("Foo")
         FieldComparator(None, field_foo).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new Field Foo is added.")
+        self.assertEqual(finding.message, "A new field `Foo` is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
 
     def test_primitive_type_change(self):
@@ -44,8 +44,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of the field is changed, the original is TYPE_INT32,"
-            " but the updated is TYPE_STRING",
+            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
@@ -56,7 +55,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of the field is changed, the original is `.example.v1.Enum`, but the updated is `.example.v1beta1.EnumUpdate`",
+            "Type of an existing field `my_field` is changed from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate`.",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
@@ -67,8 +66,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Repeated state of the Field is changed, the original is LABEL_REPEATED,"
-            " but the updated is LABEL_OPTIONAL",
+            "Repeated state of an existing field `my_field` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`."
         )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
 
@@ -79,7 +77,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = FindingContainer.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Name of the Field is changed, the original is Foo, but the updated is Bar",
+            "Name of an existing field is changed from `Foo` to `Bar`.",
         )
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
 
@@ -88,7 +86,7 @@ class FieldComparatorTest(unittest.TestCase):
         field_not_oneof = make_field(name="Foo")
         FieldComparator(field_oneof, field_not_oneof).compare()
         findings = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings["The existing field Foo is moved out of One-of."]
+        finding = findings["An existing field `Foo` is moved out of One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
 
 

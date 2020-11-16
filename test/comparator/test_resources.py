@@ -121,7 +121,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # Type of the resource_reference is changed from type to child_type, but
         # they can not be resoved to the identical resource. Breaking change.
         finding = findings_map[
-            "The child_type 'example.googleapis.com/t1' and type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
+            "The child_type `example.googleapis.com/t1` and type `example.googleapis.com/t1` of resource reference option in field `topic` cannot be resolved to the identical resource."
         ]
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
         self.assertEqual(

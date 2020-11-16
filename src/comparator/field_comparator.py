@@ -40,7 +40,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_ADDITION,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
-                message=f"A new Field {self.field_update.name} is added.",
+                message=f"A new field `{self.field_update.name}` is added.",
                 actionable=False,
             )
             return
@@ -52,7 +52,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REMOVAL,
                 proto_file_name=self.field_original.proto_file_name,
                 source_code_line=self.field_original.source_code_line,
-                message=f"A Field {self.field_original.name} is removed",
+                message=f"An existing field `{self.field_original.name}` is removed.",
                 actionable=True,
             )
             return
@@ -69,7 +69,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_NAME_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
-                message=f"Name of the Field is changed, the original is {self.field_original.name}, but the updated is {self.field_update.name}",
+                message=f"Name of an existing field is changed from `{self.field_original.name}` to `{self.field_update.name}`.",
                 actionable=True,
             )
             return
@@ -81,7 +81,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.label.source_code_line,
-                message=f"Repeated state of the Field is changed, the original is {self.field_original.label.value}, but the updated is {self.field_update.label.value}",
+                message=f"Repeated state of an existing field `{self.field_original.name}` is changed from `{self.field_original.label.value}` to `{self.field_update.label.value}`.",
                 actionable=True,
             )
         # 5. Check the type of the field.
@@ -90,7 +90,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.proto_type.source_code_line,
-                message=f"Type of the field is changed, the original is {self.field_original.proto_type.value}, but the updated is {self.field_update.proto_type.value}",
+                message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.proto_type.value}` to `{self.field_update.proto_type.value}`.",
                 actionable=True,
             )
         # If field has the same primitive type, then the type is identical.
@@ -105,7 +105,7 @@ class FieldComparator:
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.type_name.source_code_line,
-                message=f"Type of the field is changed, the original is `{self.field_original.type_name.value}`, but the updated is `{self.field_update.type_name.value}`",
+                message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
                 actionable=True,
             )
         # 6. Check the oneof_index of the field.
@@ -113,7 +113,7 @@ class FieldComparator:
             proto_file_name = self.field_update.proto_file_name
             source_code_line = self.field_update.source_code_line
             if self.field_original.oneof:
-                msg = f"The existing field {self.field_original.name} is moved out of One-of."
+                msg = f"An existing field `{self.field_original.name}` is moved out of One-of."
                 FindingContainer.addFinding(
                     category=FindingCategory.FIELD_ONEOF_REMOVAL,
                     proto_file_name=proto_file_name,
@@ -122,7 +122,7 @@ class FieldComparator:
                     actionable=True,
                 )
             else:
-                msg = f"The existing field {self.field_original.name} is moved into One-of."
+                msg = f"An existing field `{self.field_original.name}` is moved into One-of."
                 FindingContainer.addFinding(
                     category=FindingCategory.FIELD_ONEOF_ADDITION,
                     proto_file_name=proto_file_name,
@@ -146,7 +146,7 @@ class FieldComparator:
                 category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                 proto_file_name=field_update.proto_file_name,
                 source_code_line=resource_ref_update.source_code_line,
-                message=f"A resource reference option is added to the field {field_original.name}",
+                message=f"A resource reference option is added to the field `{field_original.name}`.",
                 actionable=False,
             )
             return
@@ -157,7 +157,7 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
-                    message=f"A resource reference option of field '{field_original.name}' is removed.",
+                    message=f"A resource reference option of the field `{field_original.name}` is removed.",
                     actionable=True,
                 )
             return
@@ -176,7 +176,7 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
-                    message=f"The type of resource reference option in field '{field_original.name}' is changed from '{original_type}' to '{update_type}'.",
+                    message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}`` to `{update_type}`.",
                     actionabel=True,
                 )
             return
@@ -244,8 +244,8 @@ class FieldComparator:
                 category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=source_code_line,
-                message=f"The child_type '{child_type}' and type '{parent_type}' of "
-                f"resource reference option in field '{self.field_original.name}' "
+                message=f"The child_type `{child_type}` and type `{parent_type}` of "
+                f"resource reference option in field `{self.field_original.name}` "
                 "cannot be resolved to the identical resource.",
                 actionable=True,
             )
