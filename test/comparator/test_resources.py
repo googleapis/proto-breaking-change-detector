@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+import os
+from src.detector.loader import Loader
 from src.comparator.file_set_comparator import FileSetComparator
 from src.findings.finding_container import FindingContainer
 from src.comparator.wrappers import FileSet
@@ -27,23 +28,23 @@ class ResourceReferenceTest(unittest.TestCase):
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
+    PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
 
     def tearDown(self):
         FindingContainer.reset()
 
     def test_resources_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["resource_database_v1.proto"],
-            "resource_database_v1_descriptor_set.pb",
-            True,
+        _INVOKER_ORIGNAL = Loader(
+            [self.PROTO_DIR],
+            [os.path.join(self.PROTO_DIR, "resource_database_v1.proto")],
         )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["resource_database_v1beta1.proto"],
-            "resource_database_v1beta1_descriptor_set.pb",
-            True,
+        _INVOKER_UPDATE = Loader(
+            [self.PROTO_DIR],
+            [os.path.join(self.PROTO_DIR, "resource_database_v1beta1.proto")],
         )
         FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+            FileSet(_INVOKER_ORIGNAL.get_descriptor_set()),
+            FileSet(_INVOKER_UPDATE.get_descriptor_set()),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         # An existing pattern of a file-level resource definition is changed.
@@ -102,22 +103,19 @@ class ResourceReferenceTest(unittest.TestCase):
         )
         self.assertEqual(message_resource_removal.location.source_code_line, 34)
         self.assertEqual(message_resource_removal.actionable, True)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
 
     def test_resource_reference_change(self):
-        _INVOKER_ORIGNAL = UnittestInvoker(
-            ["resource_reference_v1.proto"],
-            "resource_reference_v1_descriptor_set.pb",
-            True,
+        _INVOKER_ORIGNAL = Loader(
+            [self.PROTO_DIR],
+            [os.path.join(self.PROTO_DIR, "resource_reference_v1.proto")],
         )
-        _INVOKER_UPDATE = UnittestInvoker(
-            ["resource_reference_v1beta1.proto"],
-            "resource_reference_v1beta1_descriptor_set.pb",
-            True,
+        _INVOKER_UPDATE = Loader(
+            [self.PROTO_DIR],
+            [os.path.join(self.PROTO_DIR, "resource_reference_v1beta1.proto")],
         )
         FileSetComparator(
-            FileSet(_INVOKER_ORIGNAL.run()), FileSet(_INVOKER_UPDATE.run())
+            FileSet(_INVOKER_ORIGNAL.get_descriptor_set()),
+            FileSet(_INVOKER_UPDATE.get_descriptor_set()),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         # Type of the resource_reference is changed from type to child_type, but
@@ -137,8 +135,6 @@ class ResourceReferenceTest(unittest.TestCase):
         # to message-level resource. Non-breaking change.
         breaking_changes = FindingContainer.getActionableFindings()
         self.assertEqual(len(breaking_changes), 1)
-        _INVOKER_ORIGNAL.cleanup()
-        _INVOKER_UPDATE.cleanup()
 
 
 if __name__ == "__main__":

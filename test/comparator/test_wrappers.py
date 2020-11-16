@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+import os
+from src.detector.loader import Loader
 from src.comparator.wrappers import FileSet
 
 
@@ -22,9 +23,12 @@ class WrappersTest(unittest.TestCase):
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet out of it.
-
-    _INVOKER = UnittestInvoker(["wrappers.proto"], "wrappers_descriptor_set.pb", True)
-    _FILE_SET = FileSet(_INVOKER.run())
+    _CURRENT_DIR = os.getcwd()
+    _INVOKER = Loader(
+        [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")],
+        [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/wrappers.proto")],
+    )
+    _FILE_SET = FileSet(_INVOKER.get_descriptor_set())
 
     def test_file_set_wrapper(self):
         self.assertTrue(self._FILE_SET.messages_map)
@@ -126,10 +130,6 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(enum.values[0].source_code_line, 65)
         self.assertEqual(enum.values[1].source_code_line, 66)
         self.assertEqual(enum.values[0].proto_file_name, "wrappers.proto")
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER.cleanup()
 
 
 if __name__ == "__main__":

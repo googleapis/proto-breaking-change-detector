@@ -43,3 +43,6 @@ jobs:
     - name: Run unit tests for findings
       run: |
         python -m unittest discover test/findings
+    - name: Run unit tests for detector
+      run: |
+        python -m unittest discover test/detector
