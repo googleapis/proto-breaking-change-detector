@@ -77,7 +77,7 @@ class Loader:
         proto_files = [
             fname
             for directory in proto_dirs
-            for fname in os.list_dir(directory)
+            for fname in os.listdir(directory)
             if os.path.splitext(fname)[1] == ".proto"
         ]
         return proto_files
