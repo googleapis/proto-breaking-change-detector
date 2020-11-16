@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from src.findings.utils import Finding
 from src.findings.utils import FindingCategory
 from collections import defaultdict
@@ -51,6 +50,10 @@ class FindingContainer:
         return [finding for finding in cls._finding_results if finding.actionable]
 
     @classmethod
+    def toDictArr(cls):
+        return [finding.toDict() for finding in cls._finding_results]
+
+    @classmethod
     def toHumanReadableMessage(cls):
         output_message = ""
         file_to_findings = defaultdict(list)
@@ -65,13 +68,6 @@ class FindingContainer:
             for finding in findings:
                 output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
-
-    @classmethod
-    def toJson(cls):
-        findingDictArr = []
-        for finding in cls._finding_results:
-            findingDictArr.append(finding.toDict())
-        return json.dumps(findingDictArr)
 
     @classmethod
     def reset(cls):

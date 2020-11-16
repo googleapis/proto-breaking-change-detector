@@ -80,3 +80,7 @@ class OptionsTest(unittest.TestCase):
                     human_readable_message=True,
                     output_json_path="not_existing",
                 )
+
+
+if __name__ == "__main__":
+    unittest.main()
