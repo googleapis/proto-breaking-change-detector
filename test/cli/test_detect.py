@@ -35,7 +35,7 @@ class CliDetectTest(unittest.TestCase):
             )
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
-                result.output, "enum_v1.proto L5: An Enum BookType is removed\n"
+                result.output, "enum_v1.proto L5: An Enum `BookType` is removed.\n"
             )
 
     def test_mutiple_directories(self):
@@ -59,7 +59,7 @@ class CliDetectTest(unittest.TestCase):
                 + "message_v1beta1.proto L21: Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL\n"
                 + "message_v1beta1.proto L22: The existing field single is moved out of One-of.\n"
                 + "message_v1.proto L18: A Field type is removed\n"
-                + "enum_v1.proto L5: An Enum BookType is removed\n",
+                + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
 
 
