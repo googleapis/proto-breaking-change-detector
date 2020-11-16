@@ -19,7 +19,7 @@ class ServiceComparatorTest(unittest.TestCase):
     def test_service_removal(self):
         ServiceComparator(self.service_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A service Foo is removed")
+        self.assertEqual(finding.message, "An existing service `Foo` is removed.")
         self.assertEqual(finding.category.name, "SERVICE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -29,7 +29,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.service_foo,
         ).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new service Foo is added.")
+        self.assertEqual(finding.message, "A new service `Foo` is added.")
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -40,7 +40,7 @@ class ServiceComparatorTest(unittest.TestCase):
         service_update = make_service(methods=(method_foo,))
         ServiceComparator(service_original, service_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["An rpc method bar is removed"]
+        finding = findings_map["An existing rpc method `bar` is removed."]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -56,7 +56,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(service_original, service_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Input type of method Foo is changed from FooRequest to BarRequest"
+            "Input type of an existing method `Foo` is changed from `FooRequest` to `BarRequest`."
         ]
         self.assertEqual(finding.category.name, "METHOD_INPUT_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -79,7 +79,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(service_original, service_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Output type of method Foo is changed from FooResponse to BarResponse"
+            "Output type of an existing method `Foo` is changed from `FooResponse` to `BarResponse`."
         ]
         self.assertEqual(finding.category.name, "METHOD_RESPONSE_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -94,14 +94,14 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(service_original, service_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         client_streaming_finding = findings_map[
-            "The request streaming type of method Bar is changed"
+            "The request streaming type of an existing method `Bar` is changed."
         ]
         self.assertEqual(
             client_streaming_finding.category.name, "METHOD_CLIENT_STREAMING_CHANGE"
         )
         self.assertEqual(client_streaming_finding.location.proto_file_name, "foo")
         server_streaming_finding = findings_map[
-            "The response streaming type of method Bar is changed"
+            "The response streaming type of an existing method `Bar` is changed."
         ]
         self.assertEqual(
             server_streaming_finding.category.name, "METHOD_SERVER_STREAMING_CHANGE"
@@ -163,7 +163,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(service_original, service_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "The paginated response of method notInteresting is changed"
+            "The paginated response of an existing method `notInteresting` is changed."
         ]
         self.assertEqual(finding.category.name, "METHOD_PAGINATED_RESPONSE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -183,7 +183,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "An existing method_signature is changed from 'sig1' to 'sig2'."
+            "An existing method_signature for method `notInteresting` is changed from `sig1` to `sig2`."
         ]
         self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -208,7 +208,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "The metadata_type of LRO operation_info annotation is changed from FooMetadata to FooMetadataUpdate"
+            "The metadata_type of an existing LRO operation_info annotation for method `Method` is changed from `FooMetadata` to `FooMetadataUpdate`."
         ]
         self.assertEqual(finding.category.name, "LRO_METADATA_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -232,8 +232,12 @@ class ServiceComparatorTest(unittest.TestCase):
         # TODO(xiaozhenliu): This should be removed once we have version updates
         # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
         # is allowed.
-        uri_change_finding = findings_map["An existing http method URI is changed."]
-        body_change_finding = findings_map["An existing http method body is changed."]
+        uri_change_finding = findings_map[
+            "An existing http method URI of google.api.http annotation is changed for method `Method`."
+        ]
+        body_change_finding = findings_map[
+            "An existing http method body of google.api.http annotation is changed for method `Method`."
+        ]
 
         self.assertEqual(uri_change_finding.category.name, "HTTP_ANNOTATION_CHANGE")
         self.assertEqual(

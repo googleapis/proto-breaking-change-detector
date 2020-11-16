@@ -40,7 +40,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(services=[service_update])]),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["An rpc method DoThing is removed"]
+        finding = findings_map["An existing rpc method `DoThing` is removed."]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
