@@ -30,14 +30,14 @@ class DescriptorComparatorTest(unittest.TestCase):
     def test_message_removal(self):
         DescriptorComparator(self.message_foo, None).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A message Message is removed")
+        self.assertEqual(finding.message, "An existing message `Message` is removed.")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_message_addition(self):
         DescriptorComparator(None, self.message_foo).compare()
         finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new message Message is added.")
+        self.assertEqual(finding.message, "A new message `Message` is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -105,7 +105,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(message, message_without_resource).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "A message-level resource definition example/Bar has been removed."
+            "An existing message-level resource definition `example/Bar` has been removed."
         ]
         self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -120,7 +120,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(message_without_resource, message).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "A message-level resource definition example/Bar has been added."
+            "A message-level resource definition `example/Bar` has been added."
         ]
         self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -147,7 +147,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(message, message_pattern_removal).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar', 'foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+            "The pattern of an existing message-level resource definition `example/Bar` has changed from `['foo/{foo}/bar', 'foo/{foo}/bar/{bar}']` to `['foo/{foo}/bar']`."
         ]
         self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
 
