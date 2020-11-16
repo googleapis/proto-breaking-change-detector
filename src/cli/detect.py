@@ -19,12 +19,8 @@ from src.detector.detector import Detector
 
 
 @click.command()
-@click.argument(
-    "original_api_definition_dirs"
-)
-@click.argument(
-    "update_api_definition_dirs"
-)
+@click.argument("original_api_definition_dirs")
+@click.argument("update_api_definition_dirs")
 @click.option(
     "--output_json_path",
     help="The file path for json output which contains all the breaking change findings. The default path is the current folder.",
@@ -50,7 +46,11 @@ def detect(
     """Detect the breaking changes of the original and updated versions of API definition files. """
     # 1. Readin the stdin options and create the Options object for all the command args.
     options = Options(
-        original_api_definition_dirs, update_api_definition_dirs, package_prefixes, human_readable_message, output_json_path
+        original_api_definition_dirs,
+        update_api_definition_dirs,
+        package_prefixes,
+        human_readable_message,
+        output_json_path,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.(loader.py)
     # It takes options, returns fileDescriptorSet.
