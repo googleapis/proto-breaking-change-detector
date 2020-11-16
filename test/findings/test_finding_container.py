@@ -43,11 +43,10 @@ class FindingContainerTest(unittest.TestCase):
         )
         self.assertEqual(len(FindingContainer.getActionableFindings()), 1)
 
-    def test3_toJson(self):
-        json_output = FindingContainer.toJson()
-        items = json.loads(json_output)
-        self.assertEqual(items[0]["category"], "METHOD_REMOVAL")
-        self.assertEqual(items[1]["category"], "FIELD_ADDITION")
+    def test3_toDictArr(self):
+        dict_arr_output = FindingContainer.toDictArr()
+        self.assertEqual(dict_arr_output[0]["category"], "METHOD_REMOVAL")
+        self.assertEqual(dict_arr_output[1]["category"], "FIELD_ADDITION")
 
     def test4_toHumanReadableMessage(self):
         FindingContainer.addFinding(
