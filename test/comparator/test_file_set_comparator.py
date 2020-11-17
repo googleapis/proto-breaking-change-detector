@@ -55,7 +55,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Name of the Field is changed, the original is field_one, but the updated is field_two"
+            "Name of an existing field is changed from `field_one` to `field_two`."
         ]
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
