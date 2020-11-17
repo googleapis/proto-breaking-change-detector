@@ -8,3 +8,4 @@ detected_breaking_changes.json
 env/
 coverage.xml
 pip-wheel-metadata
+*.egg-info
