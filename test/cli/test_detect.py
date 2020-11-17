@@ -116,8 +116,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/example/enum_v1,test/testdata/protos/example/message_v1",
-                    "test/testdata/protos/example/enum_v1beta1,test/testdata/protos/example/message_v1beta1",
+                    "test/testdata/protos/enum/v1,test/testdata/protos/message/v1",
+                    "test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1",
                     "--human_readable_message",
                 ],
             )
