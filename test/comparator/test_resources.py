@@ -74,7 +74,7 @@ class ResourceReferenceTest(unittest.TestCase):
         self.assertEqual(file_resource_addition.location.source_code_line, 19)
         # An existing pattern of a message-level resource annotation is changed.
         message_resource_pattern_change = findings_map[
-            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+            "The pattern of an existing message-level resource definition `example.googleapis.com/Foo` has changed from `['foo/{foo}/bar/{bar}']` to `['foo/{foo}/bar']`."
         ]
         self.assertEqual(
             message_resource_pattern_change.category.name,
@@ -91,7 +91,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # An existing message-level resource annotation is removed, and it is not moved to
         # file-level resource definition. So it is a breaking change.
         message_resource_removal = findings_map[
-            "A message-level resource definition example.googleapis.com/Test has been removed."
+            "An existing message-level resource definition `example.googleapis.com/Test` has been removed."
         ]
         self.assertEqual(
             message_resource_removal.category.name,
