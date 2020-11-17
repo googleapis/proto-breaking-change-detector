@@ -124,11 +124,11 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1beta1.proto L7: Type of the field is changed, the original is TYPE_INT32, but the updated is TYPE_STRING\n"
-                + "message_v1beta1.proto L8: Name of the Field is changed, the original is email, but the updated is email_address\n"
-                + "message_v1beta1.proto L21: Repeated state of the Field is changed, the original is LABEL_REPEATED, but the updated is LABEL_OPTIONAL\n"
-                + "message_v1beta1.proto L22: The existing field single is moved out of One-of.\n"
-                + "message_v1.proto L18: A Field type is removed\n"
+                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
+                + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
+                + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`.\n"
+                + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
+                + "message_v1.proto L18: An existing field `type` is removed.\n"
                 + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
 

@@ -16,8 +16,6 @@ from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from src.comparator.wrappers import Service
 
-from typing import Dict, Optional
-
 
 class ServiceComparator:
     def __init__(
@@ -35,7 +33,7 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_ADDITION,
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
-                message=f"A new service {self.service_update.name} is added.",
+                message=f"A new service `{self.service_update.name}` is added.",
                 actionable=False,
             )
             return
@@ -45,7 +43,7 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
-                message=f"A service {self.service_original.name} is removed",
+                message=f"An existing service `{self.service_original.name}` is removed.",
                 actionable=True,
             )
             return
@@ -77,7 +75,7 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_REMOVAL,
                 proto_file_name=removed_method.proto_file_name,
                 source_code_line=removed_method.source_code_line,
-                message=f"An rpc method {name} is removed",
+                message=f"An existing rpc method `{name}` is removed.",
                 actionable=True,
             )
         # 3.2 An RPC method is added.
@@ -87,7 +85,7 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_ADDTION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
-                message=f"An rpc method {name} is added",
+                message=f"An rpc method `{name}` is added.",
                 actionable=False,
             )
         for name in methods_update_keys & methods_original_keys:
@@ -101,7 +99,7 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.input.source_code_line,
-                    message=f"Input type of method {name} is changed from {input_type_original} to {input_type_update}",
+                    message=f"Input type of an existing method `{name}` is changed from `{input_type_original}` to `{input_type_update}`.",
                     actionable=True,
                 )
             # 3.4 The response type of an RPC method is changed.
@@ -112,7 +110,7 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.output.source_code_line,
-                    message=f"Output type of method {name} is changed from {response_type_original} to {response_type_update}",
+                    message=f"Output type of an existing method `{name}` is changed from `{response_type_original}` to `{response_type_update}`.",
                     actionable=True,
                 )
             # 3.5 The request streaming state of an RPC method is changed.
@@ -124,7 +122,7 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.client_streaming.source_code_line,
-                    message=f"The request streaming type of method {name} is changed",
+                    message=f"The request streaming type of an existing method `{name}` is changed.",
                     actionable=True,
                 )
             # 3.6 The response streaming state of an RPC method is changed.
@@ -136,7 +134,7 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.server_streaming.source_code_line,
-                    message=f"The response streaming type of method {name} is changed",
+                    message=f"The response streaming type of an existing method `{name}` is changed.",
                     actionable=True,
                 )
             # 3.7 The paginated response of an RPC method is changed.
@@ -154,9 +152,6 @@ class ServiceComparator:
                         message=f"The paginated response of method {name} is changed",
                         actionable=True,
                     )
-            # TODO(xiaozhenliu): add source code information for annotations.
-            # The customized annotation options share the same field number (1000)
-            # in MethodDescriptorProto.options.
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)
 
@@ -180,7 +175,7 @@ class ServiceComparator:
                     category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
                     proto_file_name=method_original.proto_file_name,
                     source_code_line=method_original.http_annotation.source_code_line,
-                    message="A google.api.http annotation is removed.",
+                    message=f"The google.api.http annotation for existing method `{method_original.name}` is removed.",
                     actionable=True,
                 )
             if not http_annotation_original and http_annotation_update:
@@ -188,14 +183,26 @@ class ServiceComparator:
                     category=FindingCategory.HTTP_ANNOTATION_ADDITION,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
-                    message="A google.api.http annotation is added.",
+                    message=f"A google.api.http annotation is added to method `{method_update.name}`.",
                     actionable=False,
                 )
             return
         for annotation in (
-            ("http_method", "None", "An existing http method is changed."),
-            ("http_uri", "None", "An existing http method URI is changed."),
-            ("http_body", "None", "An existing http method body is changed."),
+            (
+                "http_method",
+                "None",
+                f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
+            ),
+            (
+                "http_uri",
+                "None",
+                f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
+            ),
+            (
+                "http_body",
+                "None",
+                f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
+            ),
         ):
             # TODO (xiaozhenliu): this should allow version updates. For example,
             # from `v1/example:foo` to `v1beta1/example:foo` is not a breaking change.
@@ -221,7 +228,7 @@ class ServiceComparator:
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.lro_annotation.source_code_line,
-                message="A LRO operation_info annotation is added.",
+                message=f"A LRO operation_info annotation is added to method `{method_update.name}`.",
                 actionable=False,
             )
             return
@@ -231,7 +238,7 @@ class ServiceComparator:
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.lro_annotation.source_code_line,
-                message="A LRO operation_info annotation is removed.",
+                message=f"An existing LRO operation_info annotation is removed from method `{method_update.name}`.",
                 actionable=False,
             )
             return
@@ -241,7 +248,7 @@ class ServiceComparator:
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
-                message=f"The response_type of LRO operation_info annotation is changed from {lro_original.value['response_type']} to {lro_update.value['response_type']}",
+                message=f"The response_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['response_type']}` to `{lro_update.value['response_type']}`.",
                 actionable=True,
             )
         # The metadata_type value of LRO operation_info is changed.
@@ -250,7 +257,7 @@ class ServiceComparator:
                 category=FindingCategory.LRO_METADATA_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
-                message=f"The metadata_type of LRO operation_info annotation is changed from {lro_original.value['metadata_type']} to {lro_update.value['metadata_type']}",
+                message=f"The metadata_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['metadata_type']}` to `{lro_update.value['metadata_type']}`.",
                 actionable=True,
             )
 
@@ -262,7 +269,7 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_SIGNATURE_CHANGE,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
-                message="An existing method_signature is removed.",
+                message=f"An existing method_signature is removed from method `{method_original.name}`.",
                 actionable=True,
             )
         for old_sig, new_sig in zip(signatures_original, signatures_update):
@@ -271,6 +278,6 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_SIGNATURE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.method_signatures.source_code_line,
-                    message=f"An existing method_signature is changed from '{old_sig}' to '{new_sig}'.",
+                    message=f"An existing method_signature for method `{method_update.name}` is changed from `{old_sig}` to `{new_sig}`.",
                     actionable=True,
                 )

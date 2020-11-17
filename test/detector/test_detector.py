@@ -44,7 +44,7 @@ class DectetorTest(unittest.TestCase):
             Detector(file_set_original, file_set_update, opts).detect_breaking_changes()
             self.assertEqual(
                 fakeOutput.getvalue(),
-                "my_proto.proto L2: An rpc method DoThing is removed\n",
+                "my_proto.proto L2: An existing rpc method `DoThing` is removed.\n",
             )
 
 

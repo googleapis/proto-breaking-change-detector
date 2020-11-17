@@ -39,7 +39,7 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_ADDITION,
                 proto_file_name=message_update.proto_file_name,
                 source_code_line=message_update.source_code_line,
-                message=f"A new message {message_update.name} is added.",
+                message=f"A new message `{message_update.name}` is added.",
                 actionable=False,
             )
             return
@@ -49,7 +49,7 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
                 source_code_line=message_original.source_code_line,
-                message=f"A message {message_original.name} is removed",
+                message=f"An existing message `{message_original.name}` is removed.",
                 actionable=True,
             )
             return
@@ -141,7 +141,7 @@ class DescriptorComparator:
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,
-                message=f"A message-level resource definition {resource_update.value.type} has been added.",
+                message=f"A message-level resource definition `{resource_update.value.type}` has been added.",
                 actionable=False,
             )
             return
@@ -157,7 +157,7 @@ class DescriptorComparator:
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
-                    message=f"A message-level resource definition {resource_original.value.type} has been removed.",
+                    message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
                     actionable=True,
                 )
                 return
@@ -167,7 +167,7 @@ class DescriptorComparator:
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
-                    message=f"A message-level resource definition {resource_original.value.type} has been removed.",
+                    message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
                     actionable=True,
                 )
             else:
@@ -186,7 +186,7 @@ class DescriptorComparator:
                         category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                         proto_file_name=self.message_original.proto_file_name,
                         source_code_line=resource_original.source_code_line,
-                        message=f"A message-level resource definition {resource_original.value.type} has been removed.",
+                        message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
                         actionable=True,
                     )
             return
@@ -199,7 +199,7 @@ class DescriptorComparator:
                 category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,
-                message=f"The pattern of message-level resource definition has changed from {resource_original.value.pattern} to {resource_update.value.pattern}.",
+                message=f"The pattern of an existing message-level resource definition `{resource_original.value.type}` has changed from `{resource_original.value.pattern}` to `{resource_update.value.pattern}`.",
                 actionable=True,
             )
 

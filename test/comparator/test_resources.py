@@ -49,7 +49,7 @@ class ResourceReferenceTest(unittest.TestCase):
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         # An existing pattern of a file-level resource definition is changed.
         file_resource_pattern_change = findings_map[
-            "Pattern value of the resource definition 'example.googleapis.com/t2' is updated from 'foo/{foo}/bar/{bar}/t2' to 'foo/{foo}/bar/{bar}/t2_update'."
+            "An existing pattern value of the resource definition `example.googleapis.com/t2` is updated from `foo/{foo}/bar/{bar}/t2` to `foo/{foo}/bar/{bar}/t2_update`."
         ]
         self.assertEqual(
             file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
@@ -61,7 +61,7 @@ class ResourceReferenceTest(unittest.TestCase):
         self.assertEqual(file_resource_pattern_change.location.source_code_line, 13)
         # A new file-level resource definition is added.
         file_resource_addition = findings_map[
-            "A file-level resource definition 'example.googleapis.com/t3' has been added."
+            "A file-level resource definition `example.googleapis.com/t3` has been added."
         ]
         self.assertEqual(
             file_resource_addition.category.name,
@@ -74,7 +74,7 @@ class ResourceReferenceTest(unittest.TestCase):
         self.assertEqual(file_resource_addition.location.source_code_line, 19)
         # An existing pattern of a message-level resource annotation is changed.
         message_resource_pattern_change = findings_map[
-            "The pattern of message-level resource definition has changed from ['foo/{foo}/bar/{bar}'] to ['foo/{foo}/bar']."
+            "The pattern of an existing message-level resource definition `example.googleapis.com/Foo` has changed from `['foo/{foo}/bar/{bar}']` to `['foo/{foo}/bar']`."
         ]
         self.assertEqual(
             message_resource_pattern_change.category.name,
@@ -91,7 +91,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # An existing message-level resource annotation is removed, and it is not moved to
         # file-level resource definition. So it is a breaking change.
         message_resource_removal = findings_map[
-            "A message-level resource definition example.googleapis.com/Test has been removed."
+            "An existing message-level resource definition `example.googleapis.com/Test` has been removed."
         ]
         self.assertEqual(
             message_resource_removal.category.name,
@@ -121,7 +121,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # Type of the resource_reference is changed from type to child_type, but
         # they can not be resoved to the identical resource. Breaking change.
         finding = findings_map[
-            "The child_type 'example.googleapis.com/t1' and type 'example.googleapis.com/t1' of resource reference option in field 'topic' cannot be resolved to the identical resource."
+            "The child_type `example.googleapis.com/t1` and type `example.googleapis.com/t1` of resource reference option in field `topic` cannot be resolved to the identical resource."
         ]
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
         self.assertEqual(

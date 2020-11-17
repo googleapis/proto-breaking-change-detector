@@ -40,7 +40,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(services=[service_update])]),
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
-        finding = findings_map["An rpc method DoThing is removed"]
+        finding = findings_map["An existing rpc method `DoThing` is removed."]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
@@ -55,7 +55,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         finding = findings_map[
-            "Name of the Field is changed, the original is field_one, but the updated is field_two"
+            "Name of an existing field is changed from `field_one` to `field_two`."
         ]
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -114,7 +114,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(file_set_original, file_set_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         file_resource_pattern_change = findings_map[
-            "Pattern value of the resource definition '.example.v1.Bar' is updated from 'foo/{foo}/bar/{bar}' to 'foo/{foo}/bar/'."
+            "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`."
         ]
         self.assertEqual(
             file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
@@ -143,7 +143,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(file_set_original, file_set_update).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         file_resource_addition = findings_map[
-            "A file-level resource definition '.example.v1.Bar' has been added."
+            "A file-level resource definition `.example.v1.Bar` has been added."
         ]
         self.assertEqual(
             file_resource_addition.category.name,
@@ -171,14 +171,14 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
         go_package_option_removal = findings_map[
-            "An exisiting packaging option for php_namespace is removed."
+            "An exisiting packaging option for `php_namespace` is removed."
         ]
         self.assertEqual(
             go_package_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"
         )
 
         ruby_package_option_removal = findings_map[
-            "An exisiting packaging option for php_namespace is added."
+            "An exisiting packaging option for `php_namespace` is added."
         ]
         self.assertEqual(
             ruby_package_option_removal.category.name, "PACKAGING_OPTION_ADDITION"
