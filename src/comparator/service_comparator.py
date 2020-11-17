@@ -138,14 +138,20 @@ class ServiceComparator:
                     actionable=True,
                 )
             # 3.7 The paginated response of an RPC method is changed.
-            if method_original.paged_result_field != method_update.paged_result_field:
-                FindingContainer.addFinding(
-                    category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
-                    proto_file_name=method_update.proto_file_name,
-                    source_code_line=method_update.source_code_line,
-                    message=f"The paginated response of an existing method `{name}` is changed.",
-                    actionable=True,
-                )
+            if method_original.paged_result_field or method_update.paged_result_field:
+                if (
+                    not method_original.paged_result_field
+                    or not method_update.paged_result_field
+                    or method_original.paged_result_field.name
+                    != method_update.paged_result_field.name
+                ):
+                    FindingContainer.addFinding(
+                        category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
+                        proto_file_name=method_update.proto_file_name,
+                        source_code_line=method_update.source_code_line,
+                        message=f"The paginated response of an existing method `{name}` is changed.",
+                        actionable=True,
+                    )
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)
 
