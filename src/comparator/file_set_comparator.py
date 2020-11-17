@@ -54,7 +54,7 @@ class FileSetComparator:
                     category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                     proto_file_name=removed_option.proto_file_name,
                     source_code_line=removed_option.source_code_line,
-                    message=f"An exisiting packaging option for {option} is removed.",
+                    message=f"An exisiting packaging option for `{option}` is removed.",
                     actionable=True,
                 )
             for language_option in language_option_update - language_option_original:
@@ -63,7 +63,7 @@ class FileSetComparator:
                     category=FindingCategory.PACKAGING_OPTION_ADDITION,
                     proto_file_name=added_option.proto_file_name,
                     source_code_line=added_option.source_code_line,
-                    message=f"An exisiting packaging option for {option} is added.",
+                    message=f"An exisiting packaging option for `{option}` is added.",
                     actionable=True,
                 )
 
@@ -124,7 +124,7 @@ class FileSetComparator:
                     source_code_line=resources_original.types[
                         resource_type
                     ].source_code_line,
-                    message=f"An existing pattern value of the resource definition '{resource_type}' is removed.",
+                    message=f"An existing pattern value of the resource definition `{resource_type}` is removed.",
                     actionable=True,
                 )
             # An existing pattern value is changed.
@@ -139,7 +139,7 @@ class FileSetComparator:
                         source_code_line=resources_update.types[
                             resource_type
                         ].source_code_line,
-                        message=f"Pattern value of the resource definition '{resource_type}' is updated from '{old_pattern}' to '{new_pattern}'.",
+                        message=f"An existing pattern value of the resource definition `{resource_type}` is updated from `{old_pattern}` to `{new_pattern}`.",
                         actionable=True,
                     )
 
@@ -149,7 +149,7 @@ class FileSetComparator:
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
-                message=f"A file-level resource definition '{resource_type}' has been added.",
+                message=f"A file-level resource definition `{resource_type}` has been added.",
                 actionable=False,
             )
         # 3. File-level resource definitions removal may not be breaking change since
