@@ -14,7 +14,7 @@ You generally only need to submit a CLA once, so if you've already submitted one
 (even if it was for a different project), you probably don't need to do it
 again.
 
-## Code reviews
+## Code Reviews
 
 All submissions, including submissions by project members, require review. We
 use GitHub pull requests for this purpose. Consult
@@ -23,9 +23,49 @@ information on using pull requests.
 
 ## Source Code
 
-The comparators in each level are in the `src/comparator` folder, for example: `sec/comparator/messageComparator.py `and `src/findings` define the structure of our findings.
+The comparators in each level are in the `src/comparator` folder, for example: `src/comparator/messageComparator.py `and `src/findings` define the structure of our findings.
+The entry point is `src/cli/detect.py`.
 
-## Unit tests
+## Set Up
+1. Clone the repo
+2. Copy the Git pre-commit hooks. This will automatically check the code, run tests, and perform linting before each commit.
+
+```.sh
+cp .githooks/pre-commit .git/hooks/pre-commit
+```
+
+## Running the tool
+
+1. Create and activate a virtual environment
+
+```.sh
+python3 -m venv env
+source env/bin/activate
+```
+
+2. Install the tool in the root directoty
+
+```.sh
+python3 -m pip install --editable .
+```
+
+3. Run proto-breaking-change-detector
+
+```.sh
+proto-breaking-change-detector --help
+# Example usage1:
+# Detect breaking changes for two versions proto API definition files in test/testdata/protos/enum
+proto-breaking-change-detector test/testdata/protos/enum/v1 test/testdata/protos/enum/v1beta1 --human_readable_message
+
+# Example usage2:
+# Detect breaking changes for two versions proto API definition files defined in two directories.
+# Custom the output Json file path and output human-readable messages to console.
+touch breaking_changes.json
+
+proto-breaking-change-detector test/testdata/protos/enum/v1,test/testdata/protos/message/v1 test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1 --human_readable_message --output_json_path=breaking_changes.json
+```
+
+## Unit Tests
 
 A single unit test can be run by this command: 
 
@@ -33,8 +73,23 @@ A single unit test can be run by this command:
 python -m unittest test.comparator.test_enum_comparator
 ```
 
-All unit tests can be run by this command: 
+All unit tests can be run by the following commands, we have all components covered by unit tests: 
 
 ```sh
 python -m unittest discover test/comparator/
+python -m unittest discover test/comparator/wrappers
+python -m unittest discover test/detector
+python -m unittest discover test/findings
+python -m unittest discover test/cli
+```
+
+## Format Source Code
+
+The source code can be format by `black` module:
+
+```.sh
+# Format source code
+python -m black .
+# Check without modifying the source code.
+python -m black . --check
 ```

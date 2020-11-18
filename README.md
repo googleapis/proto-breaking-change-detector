@@ -9,3 +9,9 @@ Contributing Contributions to this library are always welcome and highly encoura
 See the CONTRIBUTING documentation for more information on how to get started.
 
 Versioning This library is currently a preview with no guarantees of stability or support. Please get involved and let us know if you find it useful and we'll work towards a stable version.
+
+## Disclaimer
+This tool is currently experimental. Please don't use it for anything mission-critical.
+
+## Usage
+Find more details in CONTRIBUTING.md
