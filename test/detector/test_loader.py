@@ -32,7 +32,7 @@ class LoaderTest(unittest.TestCase):
         )
         self.assertTrue(loader)
         self.assertEqual(
-            loader.proto_dirs,
+            loader.proto_defintion,
             [os.path.join(self._CURRENT_DIR, "test/testdata/protos/example/")],
         )
         self.assertEqual(

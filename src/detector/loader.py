@@ -33,24 +33,31 @@ class Loader:
 
     def __init__(
         self,
-        proto_dirs: Sequence[str],
+        proto_defintion: Sequence[str],
         proto_files: Sequence[str] = None,
     ):
         # Check the passing in proto directory is existing or not.
-        for path in proto_dirs:
-            if not os.path.isdir(path):
+        for path in proto_defintion:
+            if not os.path.isdir(path) and not os.path.isfile(path):
                 raise TypeError(
                     f"The directory {path} passed in is not existing. Please check the path."
                 )
-        self.proto_dirs = [dir for dir in proto_dirs]
+        self.proto_defintion = proto_defintion
         self.proto_files = (
-            proto_files if proto_files else self._get_proto_files(self.proto_dirs)
+            proto_files if proto_files else self._get_proto_files(self.proto_defintion)
         )
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
+        desc_set = desc.FileDescriptorSet()
+        # If users pass in descriptor set file directly, we
+        # can skip running the protoc command.
+        if type(self.proto_defintion) is str:
+            with open(self.proto_defintion, "rb") as f:
+                desc_set.ParseFromString(f.read())
+            return desc_set
         # Construct the protoc command with proper argument prefix.
         protoc_command = [self.PROTOC_BINARY]
-        for directory in self.proto_dirs:
+        for directory in self.proto_defintion:
             protoc_command.append(f"--proto_path={directory}")
         protoc_command.append(f"--proto_path={self.COMMON_PROTOS_DIR}")
         protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
@@ -68,7 +75,6 @@ class Loader:
                 f"Protoc command to load the descriptor set fails: {protoc_command}"
             )
         # Create FileDescriptorSet from the serialized data.
-        desc_set = desc.FileDescriptorSet()
         desc_set.ParseFromString(process.stdout)
         return desc_set
 

@@ -23,11 +23,11 @@ class OptionsTest(unittest.TestCase):
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
             opts = Options(
-                proto_dirs_original="c,d",
-                proto_dirs_update="a,b",
+                proto_definition_original="c,d",
+                proto_definition_update="a,b",
             )
-        self.assertEqual(opts.proto_dirs_original, ["c", "d"])
-        self.assertEqual(opts.proto_dirs_update, ["a", "b"])
+        self.assertEqual(opts.proto_definition_original, ["c", "d"])
+        self.assertEqual(opts.proto_definition_update, ["a", "b"])
         # Default value for human_readable_message is False.
         self.assertFalse(opts.human_readable_message)
         # Package_prefixes should be None if not set, no
@@ -43,13 +43,13 @@ class OptionsTest(unittest.TestCase):
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
             opts = Options(
-                proto_dirs_original="c,d",
-                proto_dirs_update="a,b",
+                proto_definition_original="c,d",
+                proto_definition_update="a,b",
                 human_readable_message=True,
                 package_prefixes="prefix1, prefix2, prefix3",
             )
-        self.assertEqual(opts.proto_dirs_original, ["c", "d"])
-        self.assertEqual(opts.proto_dirs_update, ["a", "b"])
+        self.assertEqual(opts.proto_definition_original, ["c", "d"])
+        self.assertEqual(opts.proto_definition_update, ["a", "b"])
         self.assertTrue(opts.human_readable_message)
         # Strip the unneeded whitespaces.
         self.assertEqual(opts.package_prefixes, ["prefix1", "prefix2", "prefix3"])
@@ -63,8 +63,8 @@ class OptionsTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             # The directory is not existing, raise TypeError.
             Options(
-                proto_dirs_original="c,d",
-                proto_dirs_update="a,b",
+                proto_definition_original="c,d",
+                proto_definition_update="a,b",
                 human_readable_message=True,
                 package_prefixes="prefix1, prefix2, prefix3",
             )
@@ -75,8 +75,8 @@ class OptionsTest(unittest.TestCase):
                 mocked_isdir.return_value = True
                 # The output json file is not existing, raise TypeError.
                 Options(
-                    proto_dirs_original="c,d",
-                    proto_dirs_update="a,b",
+                    proto_definition_original="c,d",
+                    proto_definition_update="a,b",
                     human_readable_message=True,
                     output_json_path="not_existing",
                 )
