@@ -48,9 +48,20 @@ class LoaderTest(unittest.TestCase):
             isinstance(loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet)
         )
 
-    def test_loader_proto_dirs_not_existing(self):
-        with self.assertRaises(TypeError):
-            Loader(proto_dirs=["not_existing_dir_path"])
+    def test_loader_descriptor_set(self):
+        loader = Loader(
+            os.path.join(self._CURRENT_DIR, "test/testdata/protos/enum/v1/enum_descriptor_set.pb")
+        )
+        self.assertTrue(loader)
+        self.assertEqual(
+            loader.proto_defintion,
+            os.path.join(self._CURRENT_DIR, "test/testdata/protos/enum/v1/enum_descriptor_set.pb"),
+        )
+        self.assertFalse(loader.proto_files)
+        self.assertTrue(loader.get_descriptor_set())
+        self.assertTrue(
+            isinstance(loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet)
+        )
 
 
 if __name__ == "__main__":

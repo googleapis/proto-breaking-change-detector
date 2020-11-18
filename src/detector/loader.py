@@ -33,15 +33,9 @@ class Loader:
 
     def __init__(
         self,
-        proto_defintion: Sequence[str],
-        proto_files: Sequence[str] = None,
+        proto_defintion,
+        proto_files=None,
     ):
-        # Check the passing in proto directory is existing or not.
-        for path in proto_defintion:
-            if not os.path.isdir(path) and not os.path.isfile(path):
-                raise TypeError(
-                    f"The directory {path} passed in is not existing. Please check the path."
-                )
         self.proto_defintion = proto_defintion
         self.proto_files = (
             proto_files if proto_files else self._get_proto_files(self.proto_defintion)
@@ -78,11 +72,13 @@ class Loader:
         desc_set.ParseFromString(process.stdout)
         return desc_set
 
-    def _get_proto_files(self, proto_dirs: Sequence[str]):
+    def _get_proto_files(self, proto_definition):
         # Get all the files that have extension `.proto` in proto_dirs.
+        if type(proto_definition) is not list:
+            return None
         proto_files = [
             fname
-            for directory in proto_dirs
+            for directory in proto_definition
             for fname in os.listdir(directory)
             if os.path.splitext(fname)[1] == ".proto"
         ]

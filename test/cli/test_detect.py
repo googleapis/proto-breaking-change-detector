@@ -20,6 +20,24 @@ class CliDetectTest(unittest.TestCase):
     def tearDown(self):
         FindingContainer.reset()
 
+    def test_descriptor_set_enum(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "test/testdata/protos/enum/v1/enum_descriptor_set.pb",
+                    "test/testdata/protos/enum/v1beta1/enum_descriptor_set.pb",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output, "enum_v1.proto L5: An Enum `BookType` is removed.\n"
+            )
+
     def test_single_directory_enum(self):
         # Mock the stdout so that the unit test does not
         # print anything to the console.

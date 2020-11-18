@@ -39,7 +39,7 @@ class OptionsTest(unittest.TestCase):
             os.path.join(os.getcwd(), "detected_breaking_changes.json"),
         )
 
-    def test_options_basic(self):
+    def test_options_proto_dirs(self):
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
             opts = Options(
@@ -50,6 +50,26 @@ class OptionsTest(unittest.TestCase):
             )
         self.assertEqual(opts.proto_definition_original, ["c", "d"])
         self.assertEqual(opts.proto_definition_update, ["a", "b"])
+        self.assertTrue(opts.human_readable_message)
+        # Strip the unneeded whitespaces.
+        self.assertEqual(opts.package_prefixes, ["prefix1", "prefix2", "prefix3"])
+        # Use default json path if not set.
+        self.assertEqual(
+            opts.output_json_path,
+            os.path.join(os.getcwd(), "detected_breaking_changes.json"),
+        )
+
+    def test_options_descriptor_set_file(self):
+        with mock.patch("os.path.isfile") as mocked_isfile:
+            mocked_isfile.return_value = True
+            opts = Options(
+                proto_definition_original="descriptor_set_original.pb",
+                proto_definition_update="descriptor_set_udpate.pb",
+                human_readable_message=True,
+                package_prefixes="prefix1, prefix2, prefix3",
+            )
+        self.assertEqual(opts.proto_definition_original, "descriptor_set_original.pb")
+        self.assertEqual(opts.proto_definition_update, "descriptor_set_udpate.pb")
         self.assertTrue(opts.human_readable_message)
         # Strip the unneeded whitespaces.
         self.assertEqual(opts.package_prefixes, ["prefix1", "prefix2", "prefix3"])
