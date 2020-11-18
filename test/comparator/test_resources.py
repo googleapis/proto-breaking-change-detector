@@ -30,8 +30,8 @@ class ResourceReferenceTest(unittest.TestCase):
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
     PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
 
-    def tearDown(self):
-        FindingContainer.reset()
+    def setUp(self):
+        self.finding_container = FindingContainer()
 
     def test_resources_change(self):
         _INVOKER_ORIGNAL = Loader(
@@ -45,8 +45,9 @@ class ResourceReferenceTest(unittest.TestCase):
         FileSetComparator(
             FileSet(_INVOKER_ORIGNAL.get_descriptor_set()),
             FileSet(_INVOKER_UPDATE.get_descriptor_set()),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         # An existing pattern of a file-level resource definition is changed.
         file_resource_pattern_change = findings_map[
             "An existing pattern value of the resource definition `example.googleapis.com/t2` is updated from `foo/{foo}/bar/{bar}/t2` to `foo/{foo}/bar/{bar}/t2_update`."
@@ -116,8 +117,9 @@ class ResourceReferenceTest(unittest.TestCase):
         FileSetComparator(
             FileSet(_INVOKER_ORIGNAL.get_descriptor_set()),
             FileSet(_INVOKER_UPDATE.get_descriptor_set()),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         # Type of the resource_reference is changed from type to child_type, but
         # they can not be resoved to the identical resource. Breaking change.
         finding = findings_map[
@@ -133,7 +135,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # but it is added in message-level. Non-breaking change.
         # 2. File-level resource definition `t2` is removed, but is added
         # to message-level resource. Non-breaking change.
-        breaking_changes = FindingContainer.getActionableFindings()
+        breaking_changes = self.finding_container.getActionableFindings()
         self.assertEqual(len(breaking_changes), 1)
 
 

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf.descriptor_pb2 import FileDescriptorSet
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
@@ -26,9 +25,11 @@ class FileSetComparator:
         self,
         file_set_original: FileSet,
         file_set_update: FileSet,
+        finding_container: FindingContainer,
     ):
         self.fs_original = file_set_original
         self.fs_update = file_set_update
+        self.finding_container = finding_container
 
     def compare(self):
         # 1.Compare the per-language packaging options.
@@ -50,7 +51,7 @@ class FileSetComparator:
             language_option_update = set(packaging_options_update[option].keys())
             for language_option in language_option_original - language_option_update:
                 removed_option = packaging_options_original[option][language_option]
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                     proto_file_name=removed_option.proto_file_name,
                     source_code_line=removed_option.source_code_line,
@@ -59,7 +60,7 @@ class FileSetComparator:
                 )
             for language_option in language_option_update - language_option_original:
                 added_option = packaging_options_update[option][language_option]
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.PACKAGING_OPTION_ADDITION,
                     proto_file_name=added_option.proto_file_name,
                     source_code_line=added_option.source_code_line,
@@ -78,31 +79,51 @@ class FileSetComparator:
             ServiceComparator(
                 fs_original.services_map.get(name),
                 fs_update.services_map.get(name),
+                self.finding_container,
             ).compare()
 
     def _compare_messages(self, fs_original, fs_update):
         keys_original = set(fs_original.messages_map.keys())
         keys_update = set(fs_update.messages_map.keys())
         for name in keys_original - keys_update:
-            DescriptorComparator(fs_original.messages_map.get(name), None).compare()
+            DescriptorComparator(
+                fs_original.messages_map.get(name),
+                None,
+                self.finding_container,
+            ).compare()
         for name in keys_update - keys_original:
-            DescriptorComparator(None, fs_update.messages_map.get(name)).compare()
+            DescriptorComparator(
+                None,
+                fs_update.messages_map.get(name),
+                self.finding_container,
+            ).compare()
         for name in keys_update & keys_original:
             DescriptorComparator(
                 fs_original.messages_map.get(name),
                 fs_update.messages_map.get(name),
+                self.finding_container,
             ).compare()
 
     def _compare_enums(self, fs_original, fs_update):
         keys_original = set(fs_original.enums_map.keys())
         keys_update = set(fs_update.enums_map.keys())
         for name in keys_original - keys_update:
-            EnumComparator(fs_original.enums_map.get(name), None).compare()
+            EnumComparator(
+                fs_original.enums_map.get(name),
+                None,
+                self.finding_container,
+            ).compare()
         for name in keys_update - keys_original:
-            EnumComparator(None, fs_update.enums_map.get(name)).compare()
+            EnumComparator(
+                None,
+                fs_update.enums_map.get(name),
+                self.finding_container,
+            ).compare()
         for name in keys_update & keys_original:
             EnumComparator(
-                fs_original.enums_map.get(name), fs_update.enums_map.get(name)
+                fs_original.enums_map.get(name),
+                fs_update.enums_map.get(name),
+                self.finding_container,
             ).compare()
 
     def _compare_resources(self, fs_original, fs_update):
@@ -116,7 +137,7 @@ class FileSetComparator:
             patterns_update = resources_update.types[resource_type].value.pattern
             # An existing pattern is removed.
             if len(patterns_original) > len(patterns_update):
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
                     proto_file_name=resources_original.types[
                         resource_type
@@ -131,7 +152,7 @@ class FileSetComparator:
             # A new pattern value appended to the pattern list is not consider breaking change.
             for old_pattern, new_pattern in zip(patterns_original, patterns_update):
                 if old_pattern != new_pattern:
-                    FindingContainer.addFinding(
+                    self.finding_container.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
                         proto_file_name=resources_update.types[
                             resource_type
@@ -145,7 +166,7 @@ class FileSetComparator:
 
         # 2. File-level resource definitions addition.
         for resource_type in resources_types_update - resources_types_original:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,

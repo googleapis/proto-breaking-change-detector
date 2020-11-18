@@ -12,13 +12,11 @@ from src.findings.finding_container import FindingContainer
 class ServiceComparatorTest(unittest.TestCase):
     def setUp(self):
         self.service_foo = make_service(name="Foo")
-
-    def tearDown(self):
-        FindingContainer.reset()
+        self.finding_container = FindingContainer()
 
     def test_service_removal(self):
-        ServiceComparator(self.service_foo, None).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        ServiceComparator(self.service_foo, None, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "An existing service `Foo` is removed.")
         self.assertEqual(finding.category.name, "SERVICE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -27,8 +25,9 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             None,
             self.service_foo,
+            self.finding_container,
         ).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new service `Foo` is added.")
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -38,8 +37,10 @@ class ServiceComparatorTest(unittest.TestCase):
         method_bar = make_method(name="bar")
         service_original = make_service(methods=(method_foo, method_bar))
         service_update = make_service(methods=(method_foo,))
-        ServiceComparator(service_original, service_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["An existing rpc method `bar` is removed."]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -53,8 +54,10 @@ class ServiceComparatorTest(unittest.TestCase):
         service_update = make_service(
             methods=(make_method(name="Foo", input_message=message_bar_request),)
         )
-        ServiceComparator(service_original, service_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "Input type of an existing method `Foo` is changed from `FooRequest` to `BarRequest`."
         ]
@@ -76,8 +79,10 @@ class ServiceComparatorTest(unittest.TestCase):
                 ),
             )
         )
-        ServiceComparator(service_original, service_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "Output type of an existing method `Foo` is changed from `FooResponse` to `BarResponse`."
         ]
@@ -91,8 +96,10 @@ class ServiceComparatorTest(unittest.TestCase):
         service_update = make_service(
             methods=(make_method(name="Bar", server_streaming=True),)
         )
-        ServiceComparator(service_original, service_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         client_streaming_finding = findings_map[
             "The request streaming type of an existing method `Bar` is changed."
         ]
@@ -160,8 +167,10 @@ class ServiceComparatorTest(unittest.TestCase):
         service_update = make_service(
             methods=(non_paged_method,), messages_map=messages_map_update
         )
-        ServiceComparator(service_original, service_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "The paginated response of an existing method `notInteresting` is changed."
         ]
@@ -180,8 +189,9 @@ class ServiceComparatorTest(unittest.TestCase):
                     make_method(name="notInteresting", signatures=["sig2", "sig1"]),
                 )
             ),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "An existing method_signature for method `notInteresting` is changed from `sig1` to `sig2`."
         ]
@@ -205,8 +215,9 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             make_service(methods=(method_original,)),
             make_service(methods=(method_update,)),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "The metadata_type of an existing LRO operation_info annotation for method `Method` is changed from `FooMetadata` to `FooMetadataUpdate`."
         ]
@@ -227,8 +238,9 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             make_service(methods=(method_original,)),
             make_service(methods=(method_update,)),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         # TODO(xiaozhenliu): This should be removed once we have version updates
         # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
         # is allowed.

@@ -22,14 +22,16 @@ class EnumValueComparator:
         self,
         enum_value_original: EnumValue,
         enum_value_update: EnumValue,
+        finding_container: FindingContainer,
     ):
         self.enum_value_original = enum_value_original
         self.enum_value_update = enum_value_update
+        self.finding_container = finding_container
 
     def compare(self):
         # 1. If original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.ENUM_VALUE_ADDITION,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
@@ -38,7 +40,7 @@ class EnumValueComparator:
             )
         # 2. If updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.ENUM_VALUE_REMOVAL,
                 proto_file_name=self.enum_value_original.proto_file_name,
                 source_code_line=self.enum_value_original.source_code_line,
@@ -47,7 +49,7 @@ class EnumValueComparator:
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is changed.
         elif self.enum_value_original.name != self.enum_value_update.name:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,

@@ -19,15 +19,21 @@ from src.comparator.wrappers import Enum
 
 
 class EnumComparator:
-    def __init__(self, enum_original: Enum, enum_update: Enum):
+    def __init__(
+        self,
+        enum_original: Enum,
+        enum_update: Enum,
+        finding_container: FindingContainer,
+    ):
         self.enum_original = enum_original
         self.enum_update = enum_update
+        self.finding_container = finding_container
 
     def compare(self):
         # 1. If original EnumDescriptor is None, then a new
         # EnumDescriptor is added.
         if self.enum_original is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.ENUM_ADDITION,
                 proto_file_name=self.enum_update.proto_file_name,
                 source_code_line=self.enum_update.source_code_line,
@@ -38,7 +44,7 @@ class EnumComparator:
         # 2. If updated EnumDescriptor is None, then the original
         # EnumDescriptor is removed.
         elif self.enum_update is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.ENUM_REMOVAL,
                 proto_file_name=self.enum_original.proto_file_name,
                 source_code_line=self.enum_original.source_code_line,
@@ -56,12 +62,22 @@ class EnumComparator:
             enum_values_keys_set_update = set(enum_values_dict_update.keys())
             # Compare Enum values that only exist in original version
             for number in enum_values_keys_set_original - enum_values_keys_set_update:
-                EnumValueComparator(enum_values_dict_original[number], None).compare()
+                EnumValueComparator(
+                    enum_values_dict_original[number],
+                    None,
+                    self.finding_container,
+                ).compare()
             # Compare Enum values that only exist in update version
             for number in enum_values_keys_set_update - enum_values_keys_set_original:
-                EnumValueComparator(None, enum_values_dict_update[number]).compare()
+                EnumValueComparator(
+                    None,
+                    enum_values_dict_update[number],
+                    self.finding_container,
+                ).compare()
             # Compare Enum values that exist both in original and update versions
             for number in enum_values_keys_set_original & enum_values_keys_set_update:
                 EnumValueComparator(
-                    enum_values_dict_original[number], enum_values_dict_update[number]
+                    enum_values_dict_original[number],
+                    enum_values_dict_update[number],
+                    self.finding_container,
                 ).compare()

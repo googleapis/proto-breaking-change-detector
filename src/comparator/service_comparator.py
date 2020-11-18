@@ -22,14 +22,16 @@ class ServiceComparator:
         self,
         service_original: Service,
         service_update: Service,
+        finding_container: FindingContainer,
     ):
         self.service_original = service_original
         self.service_update = service_update
+        self.finding_container = finding_container
 
     def compare(self):
         # 1. If original service is None, then a new service is added.
         if self.service_original is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.SERVICE_ADDITION,
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
@@ -39,7 +41,7 @@ class ServiceComparator:
             return
         # 2. If updated service is None, then the original service is removed.
         if self.service_update is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.SERVICE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
@@ -71,7 +73,7 @@ class ServiceComparator:
         # 3.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
             removed_method = methods_original[name]
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.METHOD_REMOVAL,
                 proto_file_name=removed_method.proto_file_name,
                 source_code_line=removed_method.source_code_line,
@@ -81,7 +83,7 @@ class ServiceComparator:
         # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
             added_method = methods_update[name]
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.METHOD_ADDTION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
@@ -95,7 +97,7 @@ class ServiceComparator:
             input_type_original = method_original.input.value
             input_type_update = method_update.input.value
             if input_type_original != input_type_update:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.input.source_code_line,
@@ -106,7 +108,7 @@ class ServiceComparator:
             response_type_original = method_original.output.value
             response_type_update = method_update.output.value
             if response_type_original != response_type_update:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.output.source_code_line,
@@ -118,7 +120,7 @@ class ServiceComparator:
                 method_original.client_streaming.value
                 != method_update.client_streaming.value
             ):
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.client_streaming.source_code_line,
@@ -130,7 +132,7 @@ class ServiceComparator:
                 method_original.server_streaming.value
                 != method_update.server_streaming.value
             ):
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.server_streaming.source_code_line,
@@ -145,7 +147,7 @@ class ServiceComparator:
                     or method_original.paged_result_field.name
                     != method_update.paged_result_field.name
                 ):
-                    FindingContainer.addFinding(
+                    self.finding_container.addFinding(
                         category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
                         proto_file_name=method_update.proto_file_name,
                         source_code_line=method_update.source_code_line,
@@ -171,7 +173,7 @@ class ServiceComparator:
             # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
             # streaming state changes of the RPC, which is a breaking change.
             if http_annotation_original and not http_annotation_update:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
                     proto_file_name=method_original.proto_file_name,
                     source_code_line=method_original.http_annotation.source_code_line,
@@ -179,7 +181,7 @@ class ServiceComparator:
                     actionable=True,
                 )
             if not http_annotation_original and http_annotation_update:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_ADDITION,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
@@ -209,7 +211,7 @@ class ServiceComparator:
             if http_annotation_original.get(
                 annotation[0], annotation[1]
             ) != http_annotation_update.get(annotation[0], annotation[1]):
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
@@ -224,7 +226,7 @@ class ServiceComparator:
             return
         # LRO operation_info annotation addition.
         if not lro_original and lro_update:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.lro_annotation.source_code_line,
@@ -234,7 +236,7 @@ class ServiceComparator:
             return
         # LRO operation_info annotation removal.
         if lro_original and not lro_update:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.lro_annotation.source_code_line,
@@ -244,7 +246,7 @@ class ServiceComparator:
             return
         # The response_type value of LRO operation_info is changed.
         if lro_original.value["response_type"] != lro_update.value["response_type"]:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
@@ -253,7 +255,7 @@ class ServiceComparator:
             )
         # The metadata_type value of LRO operation_info is changed.
         if lro_original.value["metadata_type"] != lro_update.value["metadata_type"]:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.LRO_METADATA_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
@@ -265,7 +267,7 @@ class ServiceComparator:
         signatures_original = method_original.method_signatures.value
         signatures_update = method_update.method_signatures.value
         if len(signatures_original) > len(signatures_update):
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.METHOD_SIGNATURE_CHANGE,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
@@ -274,7 +276,7 @@ class ServiceComparator:
             )
         for old_sig, new_sig in zip(signatures_original, signatures_update):
             if old_sig != new_sig:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.METHOD_SIGNATURE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.method_signatures.source_code_line,
