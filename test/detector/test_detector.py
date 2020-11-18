@@ -36,8 +36,8 @@ class DectetorTest(unittest.TestCase):
         with mock.patch("os.path.isdir") as mocked_isdir:
             mocked_isdir.return_value = True
             opts = Options(
-                proto_dirs_original="c,d",
-                proto_dirs_update="a,b",
+                proto_definition_original="c,d",
+                proto_definition_update="a,b",
                 human_readable_message=True,
             )
         with mock.patch("sys.stdout", new=StringIO()) as fakeOutput:
