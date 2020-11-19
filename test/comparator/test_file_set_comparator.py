@@ -29,8 +29,8 @@ from google.api import resource_pb2
 
 
 class FileSetComparatorTest(unittest.TestCase):
-    def tearDown(self):
-        FindingContainer.reset()
+    def setUp(self):
+        self.finding_container = FindingContainer()
 
     def test_service_change(self):
         service_original = make_service(methods=(make_method(name="DoThing"),))
@@ -38,8 +38,9 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             make_file_set(files=[make_file_pb2(services=[service_original])]),
             make_file_set(files=[make_file_pb2(services=[service_update])]),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["An existing rpc method `DoThing` is removed."]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -52,8 +53,9 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             make_file_set(files=[make_file_pb2(messages=[message_original])]),
             make_file_set(files=[make_file_pb2(messages=[message_update])]),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "Name of an existing field is changed from `field_one` to `field_two`."
         ]
@@ -79,8 +81,9 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             make_file_set(files=[make_file_pb2(enums=[enum_original])]),
             make_file_set(files=[make_file_pb2(enums=[enum_update])]),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["An EnumValue `BLUE` is removed."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -111,8 +114,10 @@ class FileSetComparatorTest(unittest.TestCase):
         )
         file_set_update = make_file_set(files=[file_pb2])
 
-        FileSetComparator(file_set_original, file_set_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         file_resource_pattern_change = findings_map[
             "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`."
         ]
@@ -140,8 +145,10 @@ class FileSetComparatorTest(unittest.TestCase):
             name="foo.proto", package=".example.v1", options=options_update
         )
         file_set_update = make_file_set(files=[file_pb2])
-        FileSetComparator(file_set_original, file_set_update).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         file_resource_addition = findings_map[
             "A file-level resource definition `.example.v1.Bar` has been added."
         ]
@@ -168,8 +175,9 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             make_file_set(files=[file_original]),
             make_file_set(files=[file_update]),
+            self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         go_package_option_removal = findings_map[
             "An exisiting packaging option for `php_namespace` is removed."
         ]

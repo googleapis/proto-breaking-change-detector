@@ -37,29 +37,33 @@ class EnumValueComparatorTest(unittest.TestCase):
             locations=locations,
             path=(2, 1),
         )
-
-    def tearDown(self):
-        FindingContainer.reset()
+        self.finding_container = FindingContainer()
 
     def test_enum_value_removal(self):
-        EnumValueComparator(self.enum_foo, None).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumValueComparator(
+            self.enum_foo,
+            None,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "An EnumValue `FOO` is removed.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_value_addition(self):
-        EnumValueComparator(None, self.enum_foo).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumValueComparator(None, self.enum_foo, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new EnumValue `FOO` is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_name_change(self):
-        EnumValueComparator(self.enum_foo, self.enum_bar).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumValueComparator(
+            self.enum_foo, self.enum_bar, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
             finding.message, "Name of the EnumValue is changed from `FOO` to `BAR`."
         )
@@ -68,8 +72,10 @@ class EnumValueComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_no_api_change(self):
-        EnumValueComparator(self.enum_foo, self.enum_foo).compare()
-        self.assertEqual(len(FindingContainer.getAllFindings()), 0)
+        EnumValueComparator(
+            self.enum_foo, self.enum_foo, self.finding_container
+        ).compare()
+        self.assertEqual(len(self.finding_container.getAllFindings()), 0)
 
 
 if __name__ == "__main__":

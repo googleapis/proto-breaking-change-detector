@@ -33,17 +33,19 @@ class Detector:
         self.descriptor_set_original = descriptor_set_original
         self.descriptor_set_update = descriptor_set_update
         self.opts = opts
+        self.finding_container = FindingContainer()
 
     def detect_breaking_changes(self):
         # Init FileSetComparator and compare the two FileDescriptorSet.
         FileSetComparator(
             FileSet(self.descriptor_set_original, self.opts.package_prefixes),
             FileSet(self.descriptor_set_update, self.opts.package_prefixes),
+            self.finding_container,
         ).compare()
         # Output json file of findings and human-readable messages if the
         # command line option is enabled.
         with open(self.opts.output_json_path, "w") as write_json_file:
-            json.dump(FindingContainer.toDictArr(), write_json_file)
+            json.dump(self.finding_container.toDictArr(), write_json_file)
 
         if self.opts.human_readable_message:
-            sys.stdout.write(FindingContainer.toHumanReadableMessage())
+            sys.stdout.write(self.finding_container.toHumanReadableMessage())

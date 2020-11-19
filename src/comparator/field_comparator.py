@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.api import resource_pb2
-from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.findings.finding_container import FindingContainer
 from src.findings.utils import FindingCategory
 from src.comparator.wrappers import Field
@@ -28,15 +26,17 @@ class FieldComparator:
         self,
         field_original: Field,
         field_update: Field,
+        finding_container: FindingContainer,
     ):
         self.field_original = field_original
         self.field_update = field_update
+        self.finding_container = finding_container
 
     def compare(self):
         # 1. If original FieldDescriptor is None, then a
         # new FieldDescriptor is added.
         if self.field_original is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_ADDITION,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
@@ -48,7 +48,7 @@ class FieldComparator:
         # 2. If updated FieldDescriptor is None, then
         # the original FieldDescriptor is removed.
         if self.field_update is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_REMOVAL,
                 proto_file_name=self.field_original.proto_file_name,
                 source_code_line=self.field_original.source_code_line,
@@ -65,7 +65,7 @@ class FieldComparator:
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
         if self.field_original.name != self.field_update.name:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_NAME_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
@@ -77,7 +77,7 @@ class FieldComparator:
         # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
         if self.field_original.label.value != self.field_update.label.value:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.label.source_code_line,
@@ -86,7 +86,7 @@ class FieldComparator:
             )
         # 5. Check the type of the field.
         if self.field_original.proto_type.value != self.field_update.proto_type.value:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.proto_type.source_code_line,
@@ -101,7 +101,7 @@ class FieldComparator:
         ):
             # TODO(xiaozhenliu): version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
             # But from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate` is breaking.
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.type_name.source_code_line,
@@ -114,7 +114,7 @@ class FieldComparator:
             source_code_line = self.field_update.source_code_line
             if self.field_original.oneof:
                 msg = f"An existing field `{self.field_original.name}` is moved out of One-of."
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.FIELD_ONEOF_REMOVAL,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
@@ -123,7 +123,7 @@ class FieldComparator:
                 )
             else:
                 msg = f"An existing field `{self.field_original.name}` is moved into One-of."
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.FIELD_ONEOF_ADDITION,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
@@ -142,7 +142,7 @@ class FieldComparator:
             return
         # A `google.api.resource_reference` annotation is added.
         if not resource_ref_original and resource_ref_update:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                 proto_file_name=field_update.proto_file_name,
                 source_code_line=resource_ref_update.source_code_line,
@@ -153,7 +153,7 @@ class FieldComparator:
         # Resource annotation is removed, check if it is added as a message resource.
         if resource_ref_original and not resource_ref_update:
             if not self._resource_ref_in_local(resource_ref_original.value):
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
@@ -172,7 +172,7 @@ class FieldComparator:
                 resource_ref_update.value.type or resource_ref_update.value.child_type
             )
             if original_type != update_type:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
@@ -240,7 +240,7 @@ class FieldComparator:
             )
         if parent_type not in [parent.type for parent in parent_resources]:
             # Resulting referenced resource patterns cannot be resolved identical.
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=source_code_line,

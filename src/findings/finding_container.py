@@ -18,11 +18,11 @@ from collections import defaultdict
 
 
 class FindingContainer:
-    _finding_results = []
+    def __init__(self):
+        self.finding_results = []
 
-    @classmethod
     def addFinding(
-        cls,
+        self,
         category: FindingCategory,
         proto_file_name: str,
         source_code_line: int,
@@ -30,7 +30,7 @@ class FindingContainer:
         actionable: bool,
         extra_info=None,
     ):
-        cls._finding_results.append(
+        self.finding_results.append(
             Finding(
                 category,
                 proto_file_name,
@@ -41,23 +41,19 @@ class FindingContainer:
             )
         )
 
-    @classmethod
-    def getAllFindings(cls):
-        return cls._finding_results
+    def getAllFindings(self):
+        return self.finding_results
 
-    @classmethod
-    def getActionableFindings(cls):
-        return [finding for finding in cls._finding_results if finding.actionable]
+    def getActionableFindings(self):
+        return [finding for finding in self.finding_results if finding.actionable]
 
-    @classmethod
-    def toDictArr(cls):
-        return [finding.toDict() for finding in cls._finding_results]
+    def toDictArr(self):
+        return [finding.toDict() for finding in self.finding_results]
 
-    @classmethod
-    def toHumanReadableMessage(cls):
+    def toHumanReadableMessage(self):
         output_message = ""
         file_to_findings = defaultdict(list)
-        for finding in cls.getActionableFindings():
+        for finding in self.getActionableFindings():
             # Create a map to summarize the findings based on proto file name.s
             file_to_findings[finding.location.proto_file_name].append(finding)
         # Add each finding to the output message.
@@ -68,7 +64,3 @@ class FindingContainer:
             for finding in findings:
                 output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
-
-    @classmethod
-    def reset(cls):
-        cls._finding_results = []

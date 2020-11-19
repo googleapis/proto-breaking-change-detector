@@ -13,13 +13,9 @@ from click.testing import CliRunner
 from src.cli.detect import detect
 from unittest.mock import patch
 from io import StringIO
-from src.findings.finding_container import FindingContainer
 
 
 class CliDetectTest(unittest.TestCase):
-    def tearDown(self):
-        FindingContainer.reset()
-
     def test_descriptor_set_enum(self):
         # Mock the stdout so that the unit test does not
         # print anything to the console.

@@ -47,38 +47,36 @@ class EnumComparatorTest(unittest.TestCase):
             locations=locations,
             path=(4, 0,),
         )
+        self.finding_container = FindingContainer()
         # fmt: on
 
-    def tearDown(self):
-        FindingContainer.reset()
-
     def test_enum_removal(self):
-        EnumComparator(self.enum_foo, None).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumComparator(self.enum_foo, None, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "An Enum `Foo` is removed.")
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_addition(self):
-        EnumComparator(None, self.enum_bar).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumComparator(None, self.enum_bar, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new Enum `Bar` is added.")
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_value_change(self):
-        EnumComparator(self.enum_foo, self.enum_bar).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumComparator(self.enum_foo, self.enum_bar, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new EnumValue `VALUE2` is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 3)
 
     def test_no_api_change(self):
-        EnumComparator(self.enum_foo, self.enum_foo).compare()
-        self.assertEqual(len(FindingContainer.getAllFindings()), 0)
+        EnumComparator(self.enum_foo, self.enum_foo, self.finding_container).compare()
+        self.assertEqual(len(self.finding_container.getAllFindings()), 0)
 
 
 if __name__ == "__main__":

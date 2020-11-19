@@ -24,9 +24,11 @@ class DescriptorComparator:
         self,
         message_original: Message,
         message_update: Message,
+        finding_container: FindingContainer,
     ):
         self.message_original = message_original
         self.message_update = message_update
+        self.finding_container = finding_container
 
     def compare(self):
         # _compare method will be recursively called for nested message comparison.
@@ -35,7 +37,7 @@ class DescriptorComparator:
     def _compare(self, message_original, message_update):
         # 1. If original message is None, then a new message is added.
         if message_original is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_ADDITION,
                 proto_file_name=message_update.proto_file_name,
                 source_code_line=message_update.source_code_line,
@@ -45,7 +47,7 @@ class DescriptorComparator:
             return
         # 2. If updated message is None, then the original message is removed.
         if message_update is None:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
                 source_code_line=message_original.source_code_line,
@@ -89,13 +91,22 @@ class DescriptorComparator:
         fields_number_update = set(fields_dict_update.keys())
 
         for fieldNumber in fields_number_original - fields_number_update:
-            FieldComparator(fields_dict_original[fieldNumber], None).compare()
+            FieldComparator(
+                fields_dict_original[fieldNumber],
+                None,
+                self.finding_container,
+            ).compare()
         for fieldNumber in fields_number_update - fields_number_original:
-            FieldComparator(None, fields_dict_update[fieldNumber]).compare()
+            FieldComparator(
+                None,
+                fields_dict_update[fieldNumber],
+                self.finding_container,
+            ).compare()
         for fieldNumber in fields_number_original & fields_number_update:
             FieldComparator(
                 fields_dict_original[fieldNumber],
                 fields_dict_update[fieldNumber],
+                self.finding_container,
             ).compare()
 
     def _compare_nested_messages(
@@ -126,6 +137,7 @@ class DescriptorComparator:
             EnumComparator(
                 nested_enum_dict_original[name],
                 nested_enum_dict_update[name],
+                self.finding_container,
             ).compare()
 
     def _compare_resources(
@@ -137,7 +149,7 @@ class DescriptorComparator:
             return
         # 1. A new resource definition is added.
         if not resource_original and resource_update:
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,
@@ -153,7 +165,7 @@ class DescriptorComparator:
             resource_original.value.type != resource_update.value.type
         ):
             if not self.global_resources_update:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
@@ -163,7 +175,7 @@ class DescriptorComparator:
                 return
             # Check if the removed resource is in the global file-level resource database.
             if resource_original.value.type not in self.global_resources_update.types:
-                FindingContainer.addFinding(
+                self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
@@ -182,7 +194,7 @@ class DescriptorComparator:
                 if self._compatible_patterns(
                     resource_original.value.pattern, global_resource_pattern
                 ):
-                    FindingContainer.addFinding(
+                    self.finding_container.addFinding(
                         category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                         proto_file_name=self.message_original.proto_file_name,
                         source_code_line=resource_original.source_code_line,
@@ -195,7 +207,7 @@ class DescriptorComparator:
         if not self._compatible_patterns(
             resource_original.value.pattern, resource_update.value.pattern
         ):
-            FindingContainer.addFinding(
+            self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,

@@ -23,20 +23,18 @@ from google.api import resource_pb2
 class DescriptorComparatorTest(unittest.TestCase):
     def setUp(self):
         self.message_foo = make_message("Message")
-
-    def tearDown(self):
-        FindingContainer.reset()
+        self.finding_container = FindingContainer()
 
     def test_message_removal(self):
-        DescriptorComparator(self.message_foo, None).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        DescriptorComparator(self.message_foo, None, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "An existing message `Message` is removed.")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_message_addition(self):
-        DescriptorComparator(None, self.message_foo).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        DescriptorComparator(None, self.message_foo, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new message `Message` is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -46,8 +44,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         field_string = make_field(proto_type="TYPE_STRING")
         message1 = make_message(fields=[field_int])
         message2 = make_message(fields=[field_string])
-        DescriptorComparator(message1, message2).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(message1, message2, self.finding_container).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
         ]
@@ -62,8 +60,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         nested_message_without_fields = make_message(name="nested_message")
         message1 = make_message(nested_messages=[nested_message_with_fields])
         message2 = make_message(nested_messages=[nested_message_without_fields])
-        DescriptorComparator(message1, message2).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(message1, message2, self.finding_container).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["An existing field `nested_field` is removed."]
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -86,8 +84,8 @@ class DescriptorComparatorTest(unittest.TestCase):
         )
         message1 = make_message(nested_enums=[nested_enum1])
         message2 = make_message(nested_enums=[nested_enum2])
-        DescriptorComparator(message1, message2).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(message1, message2, self.finding_container).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["A new EnumValue `BLUE` is added."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -102,8 +100,10 @@ class DescriptorComparatorTest(unittest.TestCase):
         # The resource annotation is removed.
         message = make_message("Message", options=message_options)
         message_without_resource = make_message("Message")
-        DescriptorComparator(message, message_without_resource).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(
+            message, message_without_resource, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "An existing message-level resource definition `example/Bar` has been removed."
         ]
@@ -117,8 +117,10 @@ class DescriptorComparatorTest(unittest.TestCase):
         resource.type = "example/Bar"
         message = make_message("Message", options=options)
         message_without_resource = make_message("Message")
-        DescriptorComparator(message_without_resource, message).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(
+            message_without_resource, message, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "A message-level resource definition `example/Bar` has been added."
         ]
@@ -144,8 +146,10 @@ class DescriptorComparatorTest(unittest.TestCase):
         # The resource annotation is removed.
         message = make_message("Message", options=message_options_change)
         message_pattern_removal = make_message("Message", options=message_options)
-        DescriptorComparator(message, message_pattern_removal).compare()
-        findings_map = {f.message: f for f in FindingContainer.getAllFindings()}
+        DescriptorComparator(
+            message, message_pattern_removal, self.finding_container
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
             "The pattern of an existing message-level resource definition `example/Bar` has changed from `['foo/{foo}/bar', 'foo/{foo}/bar/{bar}']` to `['foo/{foo}/bar']`."
         ]
