@@ -77,7 +77,7 @@ class Options:
         return True
 
     def _valid_arguments(self) -> bool:
-        # Either directories of the proto definition files or path of 
+        # Either directories of the proto definition files or path of
         # the descriptor set files should be specified. And the pass in
         # directory or file path should be valid. Else return False.
 
