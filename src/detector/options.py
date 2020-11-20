@@ -52,20 +52,23 @@ class Options:
         )
         self.original_descriptor_set_file_path = original_descriptor_set_file_path
         self.update_descriptor_set_file_path = update_descriptor_set_file_path
+        # Check the arguments are valid for detection.
         if not self._valid_arguments():
             raise _InvalidArgumentsException(
-                "Either dectories of the proto definintion files or path of the descriptor set file should be specified."
+                "Either directories of the proto definition files or path of the descriptor set files should be specified."
             )
         self.package_prefixes = self._get_package_prefixes(package_prefixes)
         self.human_readable_message = human_readable_message
         self.output_json_path = self._get_output_json_path(output_json_path)
 
     def use_proto_dirs(self) -> bool:
+        # User pass in the directorirs of proto definition files as input.
         if not self.original_api_definition_dirs or not self.update_api_definition_dirs:
             return False
         return True
 
     def use_descriptor_set(self) -> bool:
+        # User pass in the path of descriptor set files as input.
         if (
             not self.original_descriptor_set_file_path
             or not self.update_descriptor_set_file_path
@@ -74,6 +77,10 @@ class Options:
         return True
 
     def _valid_arguments(self) -> bool:
+        # Either directories of the proto definition files or path of 
+        # the descriptor set files should be specified. And the pass in
+        # directory or file path should be valid. Else return False.
+
         if not self.use_proto_dirs() and not self.use_descriptor_set():
             return False
         if self.use_proto_dirs():
@@ -96,6 +103,8 @@ class Options:
         return [prefix.strip() for prefix in prefixes.split(",")]
 
     def _get_output_json_path(self, path):
+        # Return the path of json output file, use default path if not set.
+        # Raise error if the specified path is not valid.
         if not path:
             return os.path.join(os.getcwd(), "detected_breaking_changes.json")
         elif not os.path.isfile(path):
@@ -103,12 +112,14 @@ class Options:
         return path
 
     def _check_valid_dirs(self, dirs) -> bool:
+        # Return True if the directories path are valid, else False.
         for directory in dirs:
             if not os.path.isdir(directory):
                 raise TypeError(f"The directory {directory} is not existing.")
         return True
 
     def _check_valid_file(self, file) -> bool:
+        # Return True if the file path is valid, else False.
         if not os.path.isfile(file):
             raise TypeError(f"The file {file} is not existing.")
         return True

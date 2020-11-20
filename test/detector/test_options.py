@@ -136,7 +136,7 @@ class OptionsTest(unittest.TestCase):
                 mocked_isdir.return_value = True
                 with mock.patch("os.path.isfile") as mocked_isfile:
                     mocked_isfile.return_value = True
-                    # Either dectories of the proto definintion files or
+                    # Either directories of the proto definition files or
                     # path of the descriptor set file should be specified.
                     Options(
                         original_api_definition_dirs="a,b",
