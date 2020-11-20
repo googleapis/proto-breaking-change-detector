@@ -19,8 +19,22 @@ from src.detector.detector import Detector
 
 
 @click.command()
-@click.argument("original_api_definition")
-@click.argument("update_api_definition")
+@click.option(
+    "--original_api_definition_dirs",
+    help="The path to the directories of original proto API definition files.",
+)
+@click.option(
+    "--update_api_definition_dirs",
+    help="The path to the directories of update proto API definition files.",
+)
+@click.option(
+    "--original_descriptor_set_file_path",
+    help="The path to the original compiled descriptor set file.",
+)
+@click.option(
+    "--update_descriptor_set_file_path",
+    help="The path to the update compiled descriptor set file.",
+)
 @click.option(
     "--output_json_path",
     help="The file path for json output which contains all the breaking change findings. The default path is the current folder.",
@@ -37,8 +51,10 @@ from src.detector.detector import Detector
     help="Enable the human-readable message output if set to True. Default value is false.",
 )
 def detect(
-    original_api_definition: str,
-    update_api_definition: str,
+    original_api_definition_dirs: str,
+    update_api_definition_dirs: str,
+    original_descriptor_set_file_path: str,
+    update_descriptor_set_file_path: str,
     output_json_path: str,
     package_prefixes: str,
     human_readable_message: bool,
@@ -49,16 +65,30 @@ def detect(
     # a) proto API defintion files.
     # b) compiled FileDescriptorSet file which can be obtained by protocal compiler.
     options = Options(
-        original_api_definition,
-        update_api_definition,
+        original_api_definition_dirs,
+        update_api_definition_dirs,
+        original_descriptor_set_file_path,
+        update_descriptor_set_file_path,
         package_prefixes,
         human_readable_message,
         output_json_path,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
     # It takes options, returns fileDescriptorSet.
-    file_set_original = Loader(options.proto_definition_original).get_descriptor_set()
-    file_set_update = Loader(options.proto_definition_update).get_descriptor_set()
+    if options.use_descriptor_set():
+        file_set_original = Loader(
+            None, options.original_descriptor_set_file_path
+        ).get_descriptor_set()
+        file_set_update = Loader(
+            None, options.update_descriptor_set_file_path
+        ).get_descriptor_set()
+    elif options.use_proto_dirs():
+        file_set_original = Loader(
+            options.original_api_definition_dirs, None
+        ).get_descriptor_set()
+        file_set_update = Loader(
+            options.update_api_definition_dirs, None
+        ).get_descriptor_set()
     # 4. Create the detector with two FileDescriptorSet and options.
     # It creates output_json file and prints human-readable message if the option is enabled.
     Detector(file_set_original, file_set_update, options).detect_breaking_changes()

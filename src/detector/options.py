@@ -18,10 +18,12 @@ import os
 class Options:
     """Build the options for protoc command arguments.
 
-    proto_definition: Required. The directories where we should find the proto files,
-                including proto definition files and their dependencies.
-                Comma separated string. It can also be FileDescriptorSet object
-                compiled by protocol compiler.
+    proto_definition_dirs: Required if descriptor_set_file_path is not set.
+                           The directories where we should find the proto files,
+                           including proto definition files and their dependencies.
+                           Comma separated string. It can also be FileDescriptorSet object
+                           compiled by protocol compiler.
+    descriptor_set_file_path: The path to the compiled descriptor set file.
     package_prefixes: Optional.The package prefixes of the proto definition files,
                       so that in the comparators, we can safely skip the
                       dependency protos if needed. Comma separated string.
@@ -34,33 +36,59 @@ class Options:
 
     def __init__(
         self,
-        proto_definition_original: str,
-        proto_definition_update: str,
+        original_api_definition_dirs: str,
+        update_api_definition_dirs: str,
+        original_descriptor_set_file_path: str,
+        update_descriptor_set_file_path: str,
         package_prefixes: str = None,
         human_readable_message: bool = False,
         output_json_path: str = None,
     ):
-        self.proto_definition_original = self._get_proto_definition(
-            proto_definition_original
+        self.original_api_definition_dirs = self._get_proto_dirs(
+            original_api_definition_dirs
         )
-        self.proto_definition_update = self._get_proto_definition(
-            proto_definition_update
+        self.update_api_definition_dirs = self._get_proto_dirs(
+            update_api_definition_dirs
         )
+        self.original_descriptor_set_file_path = original_descriptor_set_file_path
+        self.update_descriptor_set_file_path = update_descriptor_set_file_path
+        if not self._valid_arguments():
+            raise _InvalidArgumentsException(
+                "Either dectories of the proto definintion files or path of the descriptor set file should be specified."
+            )
         self.package_prefixes = self._get_package_prefixes(package_prefixes)
         self.human_readable_message = human_readable_message
         self.output_json_path = self._get_output_json_path(output_json_path)
 
-    def _get_proto_definition(self, arg):
+    def use_proto_dirs(self) -> bool:
+        if not self.original_api_definition_dirs or not self.update_api_definition_dirs:
+            return False
+        return True
+
+    def use_descriptor_set(self) -> bool:
+        if (
+            not self.original_descriptor_set_file_path
+            or not self.update_descriptor_set_file_path
+        ):
+            return False
+        return True
+
+    def _valid_arguments(self) -> bool:
+        if not self.use_proto_dirs() and not self.use_descriptor_set():
+            return False
+        if self.use_proto_dirs():
+            return self._check_valid_dirs(
+                self.original_api_definition_dirs
+            ) and self._check_valid_dirs(self.update_api_definition_dirs)
+        return self._check_valid_file(
+            self.original_descriptor_set_file_path
+        ) and self._check_valid_file(self.update_descriptor_set_file_path)
+
+    def _get_proto_dirs(self, arg):
         # Return an array of the proto directories or a descriptor set file path.
-        args = arg.split(",")
-        if os.path.isfile(args[0]):
-            # Users pass in descriptor set file, return the path.
-            return args[0]
-        # Users pass in the proto file directories.
-        for directory in args:
-            if not os.path.isdir(directory):
-                raise TypeError(f"The directory {directory} is not existing.")
-        return args
+        if not arg:
+            return None
+        return arg.split(",")
 
     def _get_package_prefixes(self, prefixes):
         if not prefixes:
@@ -73,3 +101,18 @@ class Options:
         elif not os.path.isfile(path):
             raise TypeError(f"The output_json_path {path} is not existing.")
         return path
+
+    def _check_valid_dirs(self, dirs) -> bool:
+        for directory in dirs:
+            if not os.path.isdir(directory):
+                raise TypeError(f"The directory {directory} is not existing.")
+        return True
+
+    def _check_valid_file(self, file) -> bool:
+        if not os.path.isfile(file):
+            raise TypeError(f"The file {file} is not existing.")
+        return True
+
+
+class _InvalidArgumentsException(Exception):
+    pass

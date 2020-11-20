@@ -24,6 +24,7 @@ class LoaderTest(unittest.TestCase):
     def test_loader_proto_dirs(self):
         loader = Loader(
             [os.path.join(self._CURRENT_DIR, "test/testdata/protos/example/")],
+            None,
             [
                 os.path.join(
                     self._CURRENT_DIR, "test/testdata/protos/example/wrappers.proto"
@@ -32,7 +33,7 @@ class LoaderTest(unittest.TestCase):
         )
         self.assertTrue(loader)
         self.assertEqual(
-            loader.proto_defintion,
+            loader.proto_defintion_dirs,
             [os.path.join(self._CURRENT_DIR, "test/testdata/protos/example/")],
         )
         self.assertEqual(
@@ -50,13 +51,14 @@ class LoaderTest(unittest.TestCase):
 
     def test_loader_descriptor_set(self):
         loader = Loader(
+            None,
             os.path.join(
                 self._CURRENT_DIR, "test/testdata/protos/enum/v1/enum_descriptor_set.pb"
-            )
+            ),
         )
         self.assertTrue(loader)
         self.assertEqual(
-            loader.proto_defintion,
+            loader.descriptor_set,
             os.path.join(
                 self._CURRENT_DIR, "test/testdata/protos/enum/v1/enum_descriptor_set.pb"
             ),
