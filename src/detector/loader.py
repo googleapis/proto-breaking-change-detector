@@ -33,25 +33,27 @@ class Loader:
 
     def __init__(
         self,
-        proto_defintion,
+        proto_defintion_dirs,
+        descriptor_set,
         proto_files=None,
     ):
-        self.proto_defintion = proto_defintion
+        self.proto_defintion_dirs = proto_defintion_dirs
+        self.descriptor_set = descriptor_set
         self.proto_files = (
-            proto_files if proto_files else self._get_proto_files(self.proto_defintion)
+            proto_files if proto_files else self._get_proto_files(proto_defintion_dirs)
         )
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         desc_set = desc.FileDescriptorSet()
         # If users pass in descriptor set file directly, we
         # can skip running the protoc command.
-        if type(self.proto_defintion) is str:
-            with open(self.proto_defintion, "rb") as f:
+        if self.descriptor_set:
+            with open(self.descriptor_set, "rb") as f:
                 desc_set.ParseFromString(f.read())
             return desc_set
         # Construct the protoc command with proper argument prefix.
         protoc_command = [self.PROTOC_BINARY]
-        for directory in self.proto_defintion:
+        for directory in self.proto_defintion_dirs:
             protoc_command.append(f"--proto_path={directory}")
         protoc_command.append(f"--proto_path={self.COMMON_PROTOS_DIR}")
         protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
@@ -73,9 +75,9 @@ class Loader:
         return desc_set
 
     def _get_proto_files(self, proto_definition):
-        # Get all the files that have extension `.proto` in proto_dirs.
-        if type(proto_definition) is not list:
+        if not proto_definition:
             return None
+        # Get all the files that have extension `.proto` in proto_dirs.
         proto_files = [
             fname
             for directory in proto_definition

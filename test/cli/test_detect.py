@@ -24,8 +24,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/enum/v1/enum_descriptor_set.pb",
-                    "test/testdata/protos/enum/v1beta1/enum_descriptor_set.pb",
+                    "--original_descriptor_set_file_path=test/testdata/protos/enum/v1/enum_descriptor_set.pb",
+                    "--update_descriptor_set_file_path=test/testdata/protos/enum/v1beta1/enum_descriptor_set.pb",
                     "--human_readable_message",
                 ],
             )
@@ -42,8 +42,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/enum/v1",
-                    "test/testdata/protos/enum/v1beta1",
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1",
                     "--human_readable_message",
                 ],
             )
@@ -58,8 +58,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/message/v1",
-                    "test/testdata/protos/message/v1beta1",
+                    "--original_api_definition_dirs=test/testdata/protos/message/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/message/v1beta1",
                     "--human_readable_message",
                 ],
             )
@@ -79,8 +79,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/service/v1",
-                    "test/testdata/protos/service/v1beta1",
+                    "--original_api_definition_dirs=test/testdata/protos/service/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/service/v1beta1",
                     "--human_readable_message",
                 ],
             )
@@ -105,8 +105,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/service_annotation/v1",
-                    "test/testdata/protos/service_annotation/v1beta1",
+                    "--original_api_definition_dirs=test/testdata/protos/service_annotation/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/service_annotation/v1beta1",
                     "--human_readable_message",
                 ],
             )
@@ -130,8 +130,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "test/testdata/protos/enum/v1,test/testdata/protos/message/v1",
-                    "test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1",
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1,test/testdata/protos/message/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1",
                     "--human_readable_message",
                 ],
             )
