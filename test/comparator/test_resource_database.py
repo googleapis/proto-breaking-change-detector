@@ -24,6 +24,7 @@ class ResourceDatabaseTest(unittest.TestCase):
     PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
     INVOKER = Loader(
         [PROTO_DIR],
+        None,
         [os.path.join(PROTO_DIR, "resource_database_v1.proto")],
     )
 

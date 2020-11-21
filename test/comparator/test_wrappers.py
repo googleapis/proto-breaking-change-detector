@@ -26,6 +26,7 @@ class WrappersTest(unittest.TestCase):
     _CURRENT_DIR = os.getcwd()
     _INVOKER = Loader(
         [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")],
+        None,
         [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/wrappers.proto")],
     )
     _FILE_SET = FileSet(_INVOKER.get_descriptor_set())
