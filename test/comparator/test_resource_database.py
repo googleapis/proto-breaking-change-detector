@@ -23,9 +23,9 @@ from src.comparator.wrappers import WithLocation
 class ResourceDatabaseTest(unittest.TestCase):
     PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
     INVOKER = Loader(
-        [PROTO_DIR],
-        None,
-        [os.path.join(PROTO_DIR, "resource_database_v1.proto")],
+        proto_defintion_dirs=[PROTO_DIR],
+        proto_files=[os.path.join(PROTO_DIR, "resource_database_v1.proto")],
+        descriptor_set=None,
     )
 
     def setUp(self):

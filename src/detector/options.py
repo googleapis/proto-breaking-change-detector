@@ -19,14 +19,13 @@ class Options:
     """Build the options for protoc command arguments.
 
     proto_definition_dirs: Required if descriptor_set_file_path is not set.
-                           The directories where we should find the proto files,
-                           including proto definition files and their dependencies.
-                           Comma separated string. It can also be FileDescriptorSet object
-                           compiled by protocol compiler.
+                           Specify the directories in which to search for the
+                           original proto API definition files and imports.
+                           Comma separated string.
+    proto_files: Required if descriptor_set_file_path is not set.
+                 The path to the files of proto API definition files.
+                 Comma separated string.
     descriptor_set_file_path: The path to the compiled descriptor set file.
-    package_prefixes: Optional.The package prefixes of the proto definition files,
-                      so that in the comparators, we can safely skip the
-                      dependency protos if needed. Comma separated string.
     human_readable_message: Optional flag. Enable printing the human-readable
                             messages if true. Default value if false.
     output_json_path: Optional. The path of the findings json file. If not specify,
@@ -38,18 +37,19 @@ class Options:
         self,
         original_api_definition_dirs: str,
         update_api_definition_dirs: str,
+        original_proto_files: str,
+        update_proto_files: str,
         original_descriptor_set_file_path: str,
         update_descriptor_set_file_path: str,
-        package_prefixes: str = None,
         human_readable_message: bool = False,
         output_json_path: str = None,
     ):
-        self.original_api_definition_dirs = self._get_proto_dirs(
+        self.original_api_definition_dirs = self._get_arg_arr(
             original_api_definition_dirs
         )
-        self.update_api_definition_dirs = self._get_proto_dirs(
-            update_api_definition_dirs
-        )
+        self.update_api_definition_dirs = self._get_arg_arr(update_api_definition_dirs)
+        self.original_proto_files = self._get_arg_arr(original_proto_files)
+        self.update_proto_files = self._get_arg_arr(update_proto_files)
         self.original_descriptor_set_file_path = original_descriptor_set_file_path
         self.update_descriptor_set_file_path = update_descriptor_set_file_path
         # Check the arguments are valid for detection.
@@ -57,13 +57,17 @@ class Options:
             raise _InvalidArgumentsException(
                 "Either directories of the proto definition files or path of the descriptor set files should be specified."
             )
-        self.package_prefixes = self._get_package_prefixes(package_prefixes)
         self.human_readable_message = human_readable_message
         self.output_json_path = self._get_output_json_path(output_json_path)
 
     def use_proto_dirs(self) -> bool:
         # User pass in the directorirs of proto definition files as input.
-        if not self.original_api_definition_dirs or not self.update_api_definition_dirs:
+        if (
+            not self.original_api_definition_dirs
+            or not self.update_api_definition_dirs
+            or not self.original_proto_files
+            or not self.update_proto_files
+        ):
             return False
         return True
 
@@ -91,16 +95,11 @@ class Options:
             self.original_descriptor_set_file_path
         ) and self._check_valid_file(self.update_descriptor_set_file_path)
 
-    def _get_proto_dirs(self, arg):
+    def _get_arg_arr(self, args):
         # Return an array of the proto directories or a descriptor set file path.
-        if not arg:
+        if not args:
             return None
-        return arg.split(",")
-
-    def _get_package_prefixes(self, prefixes):
-        if not prefixes:
-            return None
-        return [prefix.strip() for prefix in prefixes.split(",")]
+        return [arg.strip() for arg in args.split(",")]
 
     def _get_output_json_path(self, path):
         # Return the path of json output file, use default path if not set.

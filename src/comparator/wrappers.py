@@ -644,16 +644,11 @@ class FileSet:
     """Description of a fileSet.
 
     file_set_pb: The FileDescriptorSet object that is obtained by proto compiler.
-    package_prefixes: the prefixes of package names for the API definition files.
-                    The FileDescriptorSet object also contains imported dependencies if any.
-                    So we use the prefix to identify the API definition source files.
-                    None if no external dependencies are needed for the API.
     """
 
     def __init__(
         self,
         file_set_pb: descriptor_pb2.FileDescriptorSet,
-        package_prefixes: Sequence[str] = None,
     ):
         # The default value for every language package option is a dict.
         # whose key is the option str, and value is the WithLocation object with
@@ -665,8 +660,6 @@ class FileSet:
         self.resources_database = ResourceDatabase()
         path = ()
         for fd in file_set_pb.file:
-            # Check whether this file is an imported dependency.
-            is_dependency = self._is_imported_dependency(fd, package_prefixes)
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -680,7 +673,7 @@ class FileSet:
                 source_code_locations[tuple(location.path)] = location
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self._get_packaging_options_map(
-                fd.options, is_dependency, fd.name, source_code_locations, path + (8,)
+                fd.options, fd.name, source_code_locations, path + (8,)
             )
             # fmt: off
             for i, resource in enumerate(
@@ -736,18 +729,12 @@ class FileSet:
     def _get_packaging_options_map(
         self,
         file_options: descriptor_pb2.FileOptions,
-        is_dependency: bool,
         proto_file_name: str,
         source_code_locations: Dict[
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
     ):
-        # If the file is an imported dependency, we will not include the packaging options
-        # of it in the map. Since we do not care about the packaging options of dependencies,
-        # but only the services, messages that are used in the API definition files.
-        if is_dependency:
-            return
         # TODO(xiaozhenliu): check with One-platform about the version naming.
         # We should allow minor version updates, then the packaging options like
         # `java_package = "com.pubsub.v1"` will always be changed. But versions
@@ -774,14 +761,3 @@ class FileSet:
                     path + packaging_options_path[option],
                     proto_file_name,
                 )
-
-    def _is_imported_dependency(
-        self, fd: descriptor_pb2.FileDescriptorProto, prefixes: Sequence[str]
-    ) -> bool:
-        # If no external dependencies are included, the prefixes can be None.
-        if not prefixes or not fd.package:
-            return False
-        for prefix in prefixes:
-            if fd.package.startswith(prefix):
-                return False
-        return True

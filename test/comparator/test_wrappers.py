@@ -25,9 +25,13 @@ class WrappersTest(unittest.TestCase):
     # create a FileDescriptorSet out of it.
     _CURRENT_DIR = os.getcwd()
     _INVOKER = Loader(
-        [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")],
-        None,
-        [os.path.join(_CURRENT_DIR, "test/testdata/protos/example/wrappers.proto")],
+        proto_defintion_dirs=[
+            os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
+        ],
+        proto_files=[
+            os.path.join(_CURRENT_DIR, "test/testdata/protos/example/wrappers.proto")
+        ],
+        descriptor_set=None,
     )
     _FILE_SET = FileSet(_INVOKER.get_descriptor_set())
 

@@ -33,15 +33,13 @@ class Loader:
 
     def __init__(
         self,
-        proto_defintion_dirs,
-        descriptor_set,
-        proto_files=None,
+        proto_defintion_dirs: Sequence[str],
+        proto_files: Sequence[str],
+        descriptor_set: str,
     ):
         self.proto_defintion_dirs = proto_defintion_dirs
         self.descriptor_set = descriptor_set
-        self.proto_files = (
-            proto_files if proto_files else self._get_proto_files(proto_defintion_dirs)
-        )
+        self.proto_files = proto_files
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         desc_set = desc.FileDescriptorSet()
@@ -73,18 +71,6 @@ class Loader:
         # Create FileDescriptorSet from the serialized data.
         desc_set.ParseFromString(process.stdout)
         return desc_set
-
-    def _get_proto_files(self, proto_definition):
-        if not proto_definition:
-            return None
-        # Get all the files that have extension `.proto` in proto_dirs.
-        proto_files = [
-            fname
-            for directory in proto_definition
-            for fname in os.listdir(directory)
-            if os.path.splitext(fname)[1] == ".proto"
-        ]
-        return proto_files
 
 
 class _ProtocInvokerException(Exception):
