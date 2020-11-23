@@ -732,7 +732,9 @@ class FileSet:
             # fmt: on
         self.api_version = self._get_api_version(dependency_map)
 
-    def _get_api_version(self, dependency_map: Dict[str, Sequence[str]]) -> str:
+    def _get_api_version(
+        self, dependency_map: Dict[str, Sequence[str]]
+    ) -> Optional[str]:
         # Find the root API definition file.
         version = r"(?P<version>v[0-9]+(p[0-9]+)?((alpha|beta)[0-9]*)?)"
         for f, deps in dependency_map.items():
