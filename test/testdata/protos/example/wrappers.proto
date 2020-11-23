@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package example;
+package example.v1alpha;
 
 import "google/api/resource.proto";
 import "google/api/annotations.proto";

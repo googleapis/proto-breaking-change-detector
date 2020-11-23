@@ -306,6 +306,7 @@ def make_file_pb2(
     services: Sequence[wrappers.Service] = (),
     locations: Sequence[desc.SourceCodeInfo.Location] = (),
     options: desc.FileOptions = None,
+    dependency: Sequence[str] = [],
     **kwargs,
 ) -> desc.FileDescriptorProto:
     return desc.FileDescriptorProto(
@@ -316,6 +317,7 @@ def make_file_pb2(
         service=[s.service_pb for s in services],
         source_code_info=desc.SourceCodeInfo(location=locations),
         options=options,
+        dependency=dependency,
     )
 
 

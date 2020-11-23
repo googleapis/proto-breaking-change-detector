@@ -49,6 +49,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(
             list(self._FILE_SET.services_map.keys()), ["Operations", "Example"]
         )
+        self.assertEqual(self._FILE_SET.api_version, "v1alpha")
 
     def test_service_wrapper(self):
         service = self._FILE_SET.services_map["Example"]
@@ -116,7 +117,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(enum_field.label.value, "LABEL_OPTIONAL")
         self.assertEqual(enum_field.required, False)
         self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
-        self.assertEqual(enum_field.type_name.value, ".example.Enum1")
+        self.assertEqual(enum_field.type_name.value, ".example.v1alpha.Enum1")
         self.assertEqual(enum_field.is_primitive_type, False)
         self.assertEqual(enum_field.oneof, False)
         self.assertEqual(enum_field.child_type, True)
