@@ -197,6 +197,7 @@ class FileSetTest(unittest.TestCase):
         file2 = make_file_pb2(
             name="proto2", dependency=["proto1"], package=".example.v1beta"
         )
+
         file_set = make_file_set(files=[file1, file2, dep1, dep2])
         self.assertEqual(file_set.api_version, "v1beta")
 
