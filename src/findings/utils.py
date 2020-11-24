@@ -59,6 +59,7 @@ class FindingCategory(enum.Enum):
     # Packaging options
     PACKAGING_OPTION_REMOVAL = 40
     PACKAGING_OPTION_ADDITION = 41
+    PACKAGING_OPTION_CHANGE = 42
 
 
 class Finding:

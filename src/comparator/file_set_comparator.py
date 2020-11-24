@@ -84,49 +84,45 @@ class FileSetComparator:
                         )
             # Compare the option of language namespace. Minor version updates in consideration.
             else:
-                # Update the original packaging options map with new keys that replace the
-                # original api version with updated api version.
+                # Replace the version in the original packaging options with new api version.
+                # Transformed map is to store the original option value and replaced option value.
+                transformed_option_value_original = {}
+                transformed_option_value_update = {}
                 for namespace in per_language_options_original:
-                    option_value = packaging_options_original[option][namespace]
-                    packaging_options_original[option].pop(namespace, None)
-                    packaging_options_original[option][
+                    transformed_option_value_original[
                         namespace.lower().replace(
                             api_version_original, api_version_update
                         )
-                    ] = option_value
+                    ] = namespace
                 for namespace in per_language_options_update:
-                    option_value = packaging_options_update[option][namespace]
-                    packaging_options_update[option].pop(namespace, None)
-                    packaging_options_update[option][
-                        namespace.lower()
-                    ] = option_value
+                    transformed_option_value_update[namespace.lower()] = namespace
 
-                per_language_options_original = set(
-                    packaging_options_original[option].keys()
-                )
-                per_language_options_update = set(
-                    packaging_options_update[option].keys()
-                )
-                for namespace in (
-                    per_language_options_original - per_language_options_update
+                for namespace in set(transformed_option_value_original.keys()) - set(
+                    transformed_option_value_update.keys()
                 ):
-                    namespace_option = packaging_options_original[option][namespace]
+                    original_option_value = transformed_option_value_original[namespace]
+                    namespace_option = packaging_options_original[option][
+                        original_option_value
+                    ]
                     self.finding_container.addFinding(
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
-                        message=f"An exisiting packaging option `{namespace}` for `{option}` is removed.",
+                        message=f"An exisiting packaging option `{original_option_value}` for `{option}` is removed.",
                         actionable=True,
                     )
-                for namespace in (
-                    per_language_options_update - per_language_options_original
+                for namespace in set(transformed_option_value_update.keys()) - set(
+                    transformed_option_value_original.keys()
                 ):
-                    namespace_option = packaging_options_update[option][namespace]
+                    original_option_value = transformed_option_value_update[namespace]
+                    namespace_option = packaging_options_update[option][
+                        original_option_value
+                    ]
                     self.finding_container.addFinding(
                         category=FindingCategory.PACKAGING_OPTION_ADDITION,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
-                        message=f"A new packaging option `{namespace}` for `{option}` is added.",
+                        message=f"A new packaging option `{original_option_value}` for `{option}` is added.",
                         actionable=True,
                     )
 
