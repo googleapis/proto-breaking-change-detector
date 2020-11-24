@@ -277,6 +277,7 @@ def make_service(
     proto_file_name: str = "foo",
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
+    api_version: str = None,
     **kwargs,
 ) -> wrappers.Service:
     method_pbs = [m.method_pb for m in methods]
@@ -295,6 +296,7 @@ def make_service(
         proto_file_name=proto_file_name,
         source_code_locations=source_code_locations,
         path=path,
+        api_version=api_version,
     )
 
 
