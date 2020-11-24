@@ -627,13 +627,24 @@ class Service:
             Sequence[str]: A sequence of OAuth scopes.
         """
         # Return the OAuth scopes, split on comma.
-        return tuple(
-            i.strip()
-            for i in self.service_pb.options.Extensions[client_pb2.oauth_scopes].split(
-                ","
-            )
-            if i
-        )
+        oauth_scopes = []
+        for scope in self.service_pb.options.Extensions[client_pb2.oauth_scopes].split(
+            ","
+        ):
+            if scope:
+                oauth_scopes.append(
+                    WithLocation(
+                        scope.strip(),
+                        self.source_code_locations,
+                        self.path
+                        + (
+                            3,
+                            1050,
+                        ),
+                    )
+                )
+
+        return oauth_scopes
 
     @property
     def source_code_line(self):
