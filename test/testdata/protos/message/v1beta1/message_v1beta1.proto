@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package tutorial;
+package tutorial.v1beta1;
 
 message Person {
   string name = 1;

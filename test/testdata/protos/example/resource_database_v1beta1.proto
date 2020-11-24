@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package example;
+package example.v1beta1;
 
 import "google/api/resource.proto";
 

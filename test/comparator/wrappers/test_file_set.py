@@ -72,7 +72,8 @@ class FileSetTest(unittest.TestCase):
             name="bar.proto", package=".example.v1", messages=messages
         )
         file_set = make_file_set(files=[file_bar, file_foo])
-        self.assertTrue(file_set.packaging_options_map)
+        # Default to be empty.
+        self.assertFalse(file_set.packaging_options_map)
         self.assertEqual(list(file_set.messages_map.keys()), ["InnerMessage"])
         self.assertEqual(list(file_set.enums_map.keys()), ["Irrelevant"])
         self.assertEqual(list(file_set.services_map.keys()), ["ThingDoer"])
@@ -162,14 +163,18 @@ class FileSetTest(unittest.TestCase):
         )
 
     def test_file_set_packaging_options(self):
-        file_pb2_options = descriptor_pb2.FileOptions()
-        file_pb2_options.java_package = "com.google.example.v1"
-        file_pb2_options.php_namespace = "Google\\Cloud\\Example\\V1"
+        option1 = descriptor_pb2.FileOptions()
+        option1.java_package = "com.google.example.v1"
+        option1.php_namespace = "Google\\Cloud\\Example\\V1"
+        option1.java_outer_classname = "Foo"
+        option2 = descriptor_pb2.FileOptions()
+        option2.java_outer_classname = "Bar"
         # Two proto files have the same packging options.
-        file1 = make_file_pb2(name="proto1", options=file_pb2_options)
-        file2 = make_file_pb2(name="proto2", options=file_pb2_options)
+        file1 = make_file_pb2(name="proto1", options=option1)
+        file2 = make_file_pb2(name="proto2", options=option2)
         file_set = make_file_set(files=[file1, file2])
         self.assertTrue(file_set.packaging_options_map)
+
         self.assertEqual(
             list(file_set.packaging_options_map["java_package"].keys()),
             ["com.google.example.v1"],
@@ -177,6 +182,10 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             list(file_set.packaging_options_map["php_namespace"].keys()),
             ["Google\\Cloud\\Example\\V1"],
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["java_outer_classname"].keys()),
+            ["Foo", "Bar"],
         )
 
     def test_file_set_api_version(self):

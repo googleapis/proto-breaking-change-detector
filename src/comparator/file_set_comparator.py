@@ -46,27 +46,89 @@ class FileSetComparator:
     def _compare_packaging_options(self, fs_original, fs_update):
         packaging_options_original = fs_original.packaging_options_map
         packaging_options_update = fs_update.packaging_options_map
+        if not packaging_options_original and not packaging_options_update:
+            return
+        api_version_original = fs_original.api_version
+        api_version_update = fs_update.api_version
         for option in packaging_options_original.keys():
-            language_option_original = set(packaging_options_original[option].keys())
-            language_option_update = set(packaging_options_update[option].keys())
-            for language_option in language_option_original - language_option_update:
-                removed_option = packaging_options_original[option][language_option]
-                self.finding_container.addFinding(
-                    category=FindingCategory.PACKAGING_OPTION_REMOVAL,
-                    proto_file_name=removed_option.proto_file_name,
-                    source_code_line=removed_option.source_code_line,
-                    message=f"An exisiting packaging option for `{option}` is removed.",
-                    actionable=True,
+            per_language_options_original = list(
+                packaging_options_original[option].keys()
+            )
+            per_language_options_update = list(packaging_options_update[option].keys())
+            # Compare the option of `java_outer_classname`. No minor version updates
+            # need to consider.
+            if option == "java_outer_classname":
+                # Sort the java_outer_classname list for comparison.
+                classnames_original = sorted(
+                    per_language_options_original, key=str.lower
                 )
-            for language_option in language_option_update - language_option_original:
-                added_option = packaging_options_update[option][language_option]
-                self.finding_container.addFinding(
-                    category=FindingCategory.PACKAGING_OPTION_ADDITION,
-                    proto_file_name=added_option.proto_file_name,
-                    source_code_line=added_option.source_code_line,
-                    message=f"An exisiting packaging option for `{option}` is added.",
-                    actionable=True,
+                classnames_update = sorted(per_language_options_update, key=str.lower)
+                for i, classname in enumerate(classnames_original):
+                    if i >= len(classnames_update):
+                        classname_option = packaging_options_original[option][classname]
+                        self.finding_container.addFinding(
+                            category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                            proto_file_name=classname_option.proto_file_name,
+                            source_code_line=classname_option.source_code_line,
+                            message=f"An exisiting packaging option `{classname}` for `{option}` is removed.",
+                            actionable=True,
+                        )
+                    elif classname != classnames_update[i]:
+                        classname_option = packaging_options_original[option][classname]
+                        self.finding_container.addFinding(
+                            category=FindingCategory.PACKAGING_OPTION_CHANGE,
+                            proto_file_name=classname_option.proto_file_name,
+                            source_code_line=classname_option.source_code_line,
+                            message=f"An exisiting packaging option for `{option}` is changed from `{classname}` to `{classnames_update[i]}`.",
+                            actionable=True,
+                        )
+            # Compare the option of language namespace. Minor version updates in consideration.
+            else:
+                # Update the original packaging options map with new keys that replace the
+                # original api version with updated api version.
+                for namespace in per_language_options_original:
+                    option_value = packaging_options_original[option][namespace]
+                    packaging_options_original[option].pop(namespace, None)
+                    packaging_options_original[option][
+                        namespace.lower().replace(
+                            api_version_original, api_version_update
+                        )
+                    ] = option_value
+                for namespace in per_language_options_update:
+                    option_value = packaging_options_update[option][namespace]
+                    packaging_options_update[option].pop(namespace, None)
+                    packaging_options_update[option][
+                        namespace.lower()
+                    ] = option_value
+
+                per_language_options_original = set(
+                    packaging_options_original[option].keys()
                 )
+                per_language_options_update = set(
+                    packaging_options_update[option].keys()
+                )
+                for namespace in (
+                    per_language_options_original - per_language_options_update
+                ):
+                    namespace_option = packaging_options_original[option][namespace]
+                    self.finding_container.addFinding(
+                        category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                        proto_file_name=namespace_option.proto_file_name,
+                        source_code_line=namespace_option.source_code_line,
+                        message=f"An exisiting packaging option `{namespace}` for `{option}` is removed.",
+                        actionable=True,
+                    )
+                for namespace in (
+                    per_language_options_update - per_language_options_original
+                ):
+                    namespace_option = packaging_options_update[option][namespace]
+                    self.finding_container.addFinding(
+                        category=FindingCategory.PACKAGING_OPTION_ADDITION,
+                        proto_file_name=namespace_option.proto_file_name,
+                        source_code_line=namespace_option.source_code_line,
+                        message=f"A new packaging option `{namespace}` for `{option}` is added.",
+                        actionable=True,
+                    )
 
     def _compare_services(self, fs_original, fs_update):
         keys_original = set(fs_original.services_map.keys())
