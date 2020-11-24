@@ -38,8 +38,8 @@ class Detector:
     def detect_breaking_changes(self):
         # Init FileSetComparator and compare the two FileDescriptorSet.
         FileSetComparator(
-            FileSet(self.descriptor_set_original, self.opts.package_prefixes),
-            FileSet(self.descriptor_set_update, self.opts.package_prefixes),
+            FileSet(self.descriptor_set_original),
+            FileSet(self.descriptor_set_update),
             self.finding_container,
         ).compare()
         # Output json file of findings and human-readable messages if the

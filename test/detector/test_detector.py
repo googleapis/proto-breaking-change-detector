@@ -34,14 +34,18 @@ class DectetorTest(unittest.TestCase):
             file=[make_file_pb2(services=[service_update])]
         )
         with mock.patch("os.path.isdir") as mocked_isdir:
-            mocked_isdir.return_value = True
-            opts = Options(
-                original_api_definition_dirs="c,d",
-                update_api_definition_dirs="a,b",
-                original_descriptor_set_file_path=None,
-                update_descriptor_set_file_path=None,
-                human_readable_message=True,
-            )
+            with mock.patch("os.path.isfile") as mocked_isfile:
+                mocked_isdir.return_value = True
+                mocked_isfile.return_value = True
+                opts = Options(
+                    original_api_definition_dirs="c,d",
+                    update_api_definition_dirs="a,b",
+                    original_proto_files="pf1, pf2",
+                    update_proto_files="pf3, pf4",
+                    original_descriptor_set_file_path=None,
+                    update_descriptor_set_file_path=None,
+                    human_readable_message=True,
+                )
         with mock.patch("sys.stdout", new=StringIO()) as fakeOutput:
             Detector(file_set_original, file_set_update, opts).detect_breaking_changes()
             self.assertEqual(

@@ -44,6 +44,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     "--original_api_definition_dirs=test/testdata/protos/enum/v1",
                     "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto",
                     "--human_readable_message",
                 ],
             )
@@ -60,6 +62,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     "--original_api_definition_dirs=test/testdata/protos/message/v1",
                     "--update_api_definition_dirs=test/testdata/protos/message/v1beta1",
+                    "--original_proto_files=test/testdata/protos/message/v1/message_v1.proto",
+                    "--update_proto_files=test/testdata/protos/message/v1beta1/message_v1beta1.proto",
                     "--human_readable_message",
                 ],
             )
@@ -81,6 +85,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     "--original_api_definition_dirs=test/testdata/protos/service/v1",
                     "--update_api_definition_dirs=test/testdata/protos/service/v1beta1",
+                    "--original_proto_files=test/testdata/protos/service/v1/service_v1.proto",
+                    "--update_proto_files=test/testdata/protos/service/v1beta1/service_v1beta1.proto",
                     "--human_readable_message",
                 ],
             )
@@ -107,6 +113,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     "--original_api_definition_dirs=test/testdata/protos/service_annotation/v1",
                     "--update_api_definition_dirs=test/testdata/protos/service_annotation/v1beta1",
+                    "--original_proto_files=test/testdata/protos/service_annotation/v1/service_annotation_v1.proto",
+                    "--update_proto_files=test/testdata/protos/service_annotation/v1beta1/service_annotation_v1beta1.proto",
                     "--human_readable_message",
                 ],
             )
@@ -132,6 +140,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     "--original_api_definition_dirs=test/testdata/protos/enum/v1,test/testdata/protos/message/v1",
                     "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto,test/testdata/protos/message/v1/message_v1.proto",
+                    "--update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto,test/testdata/protos/message/v1beta1/message_v1beta1.proto",
                     "--human_readable_message",
                 ],
             )

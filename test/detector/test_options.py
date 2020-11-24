@@ -21,20 +21,24 @@ from src.detector.options import Options, _InvalidArgumentsException
 class OptionsTest(unittest.TestCase):
     def test_options_proto_dirs_default(self):
         with mock.patch("os.path.isdir") as mocked_isdir:
-            mocked_isdir.return_value = True
-            opts = Options(
-                original_api_definition_dirs="c,d",
-                update_api_definition_dirs="a,b",
-                original_descriptor_set_file_path=None,
-                update_descriptor_set_file_path=None,
-            )
+            with mock.patch("os.path.isfile") as mocked_isfile:
+                mocked_isdir.return_value = True
+                mocked_isfile.return_value = True
+                opts = Options(
+                    original_api_definition_dirs="c,d",
+                    update_api_definition_dirs="a,b",
+                    original_proto_files="pf1, pf2",
+                    update_proto_files="pf3, pf4",
+                    original_descriptor_set_file_path=None,
+                    update_descriptor_set_file_path=None,
+                )
         self.assertEqual(opts.original_api_definition_dirs, ["c", "d"])
         self.assertEqual(opts.update_api_definition_dirs, ["a", "b"])
+        self.assertEqual(opts.original_proto_files, ["pf1", "pf2"])
+        self.assertEqual(opts.update_proto_files, ["pf3", "pf4"])
         # Default value for human_readable_message is False.
         self.assertFalse(opts.human_readable_message)
-        # Package_prefixes should be None if not set, no
         # external dependencie is needed.
-        self.assertEqual(opts.package_prefixes, None)
         self.assertEqual(opts.original_descriptor_set_file_path, None)
         self.assertEqual(opts.update_descriptor_set_file_path, None)
         self.assertTrue(opts.use_proto_dirs())
@@ -45,27 +49,29 @@ class OptionsTest(unittest.TestCase):
             os.path.join(os.getcwd(), "detected_breaking_changes.json"),
         )
 
-    def test_options_proto_dirs(self):
+    def test_options_proto_dirs_custom(self):
         with mock.patch("os.path.isdir") as mocked_isdir:
-            mocked_isdir.return_value = True
-            opts = Options(
-                original_api_definition_dirs="c,d",
-                update_api_definition_dirs="a,b",
-                original_descriptor_set_file_path=None,
-                update_descriptor_set_file_path=None,
-                human_readable_message=True,
-                package_prefixes="prefix1, prefix2, prefix3",
-            )
+            with mock.patch("os.path.isfile") as mocked_isfile:
+                mocked_isdir.return_value = True
+                mocked_isfile.return_value = True
+                opts = Options(
+                    original_api_definition_dirs="c,d",
+                    update_api_definition_dirs="a,b",
+                    original_proto_files="pf1, pf2",
+                    update_proto_files="pf3, pf4",
+                    original_descriptor_set_file_path=None,
+                    update_descriptor_set_file_path=None,
+                    human_readable_message=True,
+                    output_json_path="mock_path.json",
+                )
         self.assertEqual(opts.original_api_definition_dirs, ["c", "d"])
         self.assertEqual(opts.update_api_definition_dirs, ["a", "b"])
-        self.assertTrue(opts.human_readable_message)
         # Strip the unneeded whitespaces.
-        self.assertEqual(opts.package_prefixes, ["prefix1", "prefix2", "prefix3"])
-        # Use default json path if not set.
-        self.assertEqual(
-            opts.output_json_path,
-            os.path.join(os.getcwd(), "detected_breaking_changes.json"),
-        )
+        self.assertEqual(opts.original_proto_files, ["pf1", "pf2"])
+        self.assertEqual(opts.update_proto_files, ["pf3", "pf4"])
+        self.assertTrue(opts.human_readable_message)
+        # Use custom json path if set.
+        self.assertEqual(opts.output_json_path, "mock_path.json")
 
     def test_options_descriptor_set_file(self):
         with mock.patch("os.path.isfile") as mocked_isfile:
@@ -73,10 +79,11 @@ class OptionsTest(unittest.TestCase):
             opts = Options(
                 original_api_definition_dirs=None,
                 update_api_definition_dirs=None,
+                original_proto_files=None,
+                update_proto_files=None,
                 original_descriptor_set_file_path="descriptor_set_original.pb",
                 update_descriptor_set_file_path="descriptor_set_udpate.pb",
                 human_readable_message=True,
-                package_prefixes="prefix1, prefix2, prefix3",
             )
         self.assertEqual(
             opts.original_descriptor_set_file_path, "descriptor_set_original.pb"
@@ -86,11 +93,11 @@ class OptionsTest(unittest.TestCase):
         )
         self.assertEqual(opts.original_api_definition_dirs, None)
         self.assertEqual(opts.update_api_definition_dirs, None)
+        self.assertEqual(opts.original_proto_files, None)
+        self.assertEqual(opts.update_proto_files, None)
         self.assertTrue(opts.use_descriptor_set())
         self.assertFalse(opts.use_proto_dirs())
         self.assertTrue(opts.human_readable_message)
-        # Strip the unneeded whitespaces.
-        self.assertEqual(opts.package_prefixes, ["prefix1", "prefix2", "prefix3"])
         # Use default json path if not set.
         self.assertEqual(
             opts.output_json_path,
@@ -103,6 +110,8 @@ class OptionsTest(unittest.TestCase):
             Options(
                 original_api_definition_dirs="c,d",
                 update_api_definition_dirs="a,b",
+                original_proto_files="pf1",
+                update_proto_files="pf1",
                 original_descriptor_set_file_path=None,
                 update_descriptor_set_file_path=None,
             )
@@ -113,22 +122,11 @@ class OptionsTest(unittest.TestCase):
             Options(
                 original_api_definition_dirs=None,
                 update_api_definition_dirs=None,
+                original_proto_files=None,
+                update_proto_files=None,
                 original_descriptor_set_file_path="fake_descriptor_set.pb",
                 update_descriptor_set_file_path="fake_descriptor_set.pb",
             )
-
-    def test_options_json_file_not_existing(self):
-        with self.assertRaises(TypeError):
-            with mock.patch("os.path.isdir") as mocked_isdir:
-                mocked_isdir.return_value = True
-                # The output json file is not existing, raise TypeError.
-                Options(
-                    original_api_definition_dirs="c,d",
-                    update_api_definition_dirs="a,b",
-                    original_descriptor_set_file_path=None,
-                    update_descriptor_set_file_path=None,
-                    output_json_path="not_existing.json",
-                )
 
     def test_options_invalid_args(self):
         with self.assertRaises(_InvalidArgumentsException):
@@ -141,6 +139,8 @@ class OptionsTest(unittest.TestCase):
                     Options(
                         original_api_definition_dirs="a,b",
                         update_api_definition_dirs=None,
+                        original_proto_files=None,
+                        update_proto_files=None,
                         original_descriptor_set_file_path="fake_descriptor_set.pb",
                         update_descriptor_set_file_path=None,
                     )
