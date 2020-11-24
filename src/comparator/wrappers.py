@@ -197,15 +197,13 @@ class Field:
             field_behavior_pb2.FieldBehavior.Value("REQUIRED")
             in self.field_pb.options.Extensions[field_behavior_pb2.field_behavior]
         )
+        # fmt: off
         return WithLocation(
             required,
             self.source_code_locations,
-            self.path
-            + (
-                8,
-                1052,
-            ),
+            self.path + (8, 1052),
         )
+        # fmt: on
 
     @property
     def proto_type(self):
