@@ -745,9 +745,9 @@ class FileSet:
             "csharp_namespace": (11,),
             "go_package": (37,),
             "swift_prefix": (39,),
-            "php_namespace": (40,),
-            "php_metadata_namespace": (41,),
-            "php_class_prefix": (44,),
+            "php_namespace": (41,),
+            "php_metadata_namespace": (44,),
+            "php_class_prefix": (40,),
             "ruby_package": (45,),
         }
         # Put default empty set for every packaging options.
