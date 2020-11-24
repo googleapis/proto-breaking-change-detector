@@ -179,6 +179,18 @@ class FileSetTest(unittest.TestCase):
             ["Google\\Cloud\\Example\\V1"],
         )
 
+    def test_file_set_api_version(self):
+        dep1 = make_file_pb2(name="dep1", package=".example.external")
+        dep2 = make_file_pb2(name="dep2", package=".example.external")
+        file1 = make_file_pb2(
+            name="proto1", dependency=["dep1", "dep2"], package=".example.common"
+        )
+        file2 = make_file_pb2(
+            name="proto2", dependency=["proto1"], package=".example.v1beta"
+        )
+        file_set = make_file_set(files=[file1, file2, dep1, dep2])
+        self.assertEqual(file_set.api_version, "v1beta")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,6 +21,7 @@ describe descriptors).
 """
 
 import dataclasses
+import re
 from collections import defaultdict
 from google.api import field_behavior_pb2
 from google.api import resource_pb2
@@ -658,8 +659,12 @@ class FileSet:
         self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
         self.resources_database = ResourceDatabase()
+        dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
         path = ()
         for fd in file_set_pb.file:
+            # Put the fileDescriptor and its dependencies to the dependency map.
+            for dep in fd.dependency:
+                dependency_map[dep].append(fd)
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -725,6 +730,19 @@ class FileSet:
                 for i, enum in enumerate(fd.enum_type)
             )
             # fmt: on
+        self.api_version = self._get_api_version(dependency_map)
+
+    def _get_api_version(
+        self, dependency_map: Dict[str, Sequence[str]]
+    ) -> Optional[str]:
+        # Find the root API definition file.
+        version = r"(?P<version>v[0-9]+(p[0-9]+)?((alpha|beta)[0-9]*)?)"
+        for f, deps in dependency_map.items():
+            for dep in deps:
+                if dep.name not in dependency_map:
+                    match = re.search(version, dep.package)
+                    return match.group() if match else None
+        return None
 
     def _get_packaging_options_map(
         self,
