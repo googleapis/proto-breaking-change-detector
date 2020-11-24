@@ -755,10 +755,9 @@ class FileSet:
         ],
         path: Tuple[int],
     ):
-        # TODO(xiaozhenliu): check with One-platform about the version naming.
-        # We should allow minor version updates, then the packaging options like
-        # `java_package = "com.pubsub.v1"` will always be changed. But versions
-        # update between two stable versions (e.g. v1 to v2) is not permitted.
+        # The minor version updates are allowed, for example
+        # `java_package = "com.pubsub.v1"` is updated to `java_package = "com.pubsub.v1beta1".
+        # But update between two stable versions (e.g. v1 to v2) is not permitted.
         packaging_options_path = {
             "java_package": (1,),
             "java_outer_classname": (8,),
