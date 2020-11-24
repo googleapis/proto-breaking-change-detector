@@ -53,8 +53,8 @@ class WrappersTest(unittest.TestCase):
 
     def test_service_wrapper(self):
         service = self._FILE_SET.services_map["Example"]
-        # Service `Example` is defined at Line19 in .proto file.
-        self.assertEqual(service.source_code_line, 19)
+        # Service `Example` is defined at Line20 in .proto file.
+        self.assertEqual(service.source_code_line, 20)
         self.assertEqual(service.proto_file_name, "wrappers.proto")
         foo_method = service.methods["Foo"]
         bar_method = service.methods["Bar"]
@@ -66,8 +66,8 @@ class WrappersTest(unittest.TestCase):
             foo_method.http_annotation.value["http_uri"], "/v1/example:foo"
         )
 
-        # Method `Foo` is defined at Line21 in .proto file.
-        self.assertEqual(foo_method.source_code_line, 21)
+        # Method `Foo` is defined at Line22 in .proto file.
+        self.assertEqual(foo_method.source_code_line, 22)
         self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
 
         self.assertEqual(bar_method.input.value, "FooRequest")
@@ -83,30 +83,30 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(
             bar_method.http_annotation.value["http_uri"], "/v1/example:bar"
         )
-        # Method `Bar` is defined at Line29 in .proto file.
-        self.assertEqual(bar_method.source_code_line, 29)
+        # Method `Bar` is defined at Line30 in .proto file.
+        self.assertEqual(bar_method.source_code_line, 30)
 
     def test_message_wrapper(self):
         messages_map = self._FILE_SET.messages_map
         foo_request_message = messages_map["FooRequest"]
-        # Message `FooRequest` is defined at Line41 in .proto file.
-        self.assertEqual(foo_request_message.source_code_line, 41)
+        # Message `FooRequest` is defined at Line42 in .proto file.
+        self.assertEqual(foo_request_message.source_code_line, 42)
         self.assertTrue(foo_request_message.nested_messages["NestedMessage"])
         self.assertEqual(foo_request_message.proto_file_name, "wrappers.proto")
-        # Nested message `NestedMessage` is defined at Line50 in .proto file.
+        # Nested message `NestedMessage` is defined at Line51 in .proto file.
         self.assertEqual(
-            foo_request_message.nested_messages["NestedMessage"].source_code_line, 50
+            foo_request_message.nested_messages["NestedMessage"].source_code_line, 51
         )
         self.assertTrue(foo_request_message.nested_enums["NestedEnum"])
-        # Nested enum `NestedEnum` is defined at Line51 in .proto file.
+        # Nested enum `NestedEnum` is defined at Line52 in .proto file.
         self.assertEqual(
-            foo_request_message.nested_enums["NestedEnum"].source_code_line, 51
+            foo_request_message.nested_enums["NestedEnum"].source_code_line, 52
         )
         self.assertEqual(foo_request_message.oneof_fields[0].name, "content")
         self.assertEqual(foo_request_message.oneof_fields[1].name, "error")
         # Oneof field `content` and `error` are defined at Line47,48 in .proto file.
-        self.assertEqual(foo_request_message.oneof_fields[0].source_code_line, 47)
-        self.assertEqual(foo_request_message.oneof_fields[1].source_code_line, 48)
+        self.assertEqual(foo_request_message.oneof_fields[0].source_code_line, 48)
+        self.assertEqual(foo_request_message.oneof_fields[1].source_code_line, 49)
         resource = foo_request_message.resource
         self.assertEqual(resource.value.pattern, ["foo/{foo}/bar/{bar}"])
         self.assertEqual(resource.value.type, "example.googleapis.com/Foo")
@@ -114,8 +114,8 @@ class WrappersTest(unittest.TestCase):
     def test_field_wrapper(self):
         foo_response_message = self._FILE_SET.messages_map["FooResponse"]
         enum_field = foo_response_message.fields[1]
-        self.assertEqual(enum_field.label.value, "LABEL_OPTIONAL")
-        self.assertEqual(enum_field.required, False)
+        self.assertFalse(enum_field.repeated.value)
+        self.assertFalse(enum_field.required.value)
         self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
         self.assertEqual(enum_field.type_name.value, ".example.v1alpha.Enum1")
         self.assertEqual(enum_field.is_primitive_type, False)
@@ -124,17 +124,24 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(
             enum_field.resource_reference.value.child_type, "example.googleapis.com/t1"
         )
-        # Enum `enum_field` is defined at Line57 in .proto file.
-        self.assertEqual(enum_field.source_code_line, 57)
+        # Enum `enum_field` is defined at Line58 in .proto file.
+        self.assertEqual(enum_field.source_code_line, 58)
         self.assertEqual(enum_field.proto_file_name, "wrappers.proto")
+
+        foo_metadata_message = self._FILE_SET.messages_map["FooMetadata"]
+        # Field `name` has `google.api.field_behavior` option as `required`.
+        name_field = foo_metadata_message.fields[1]
+        self.assertEqual(name_field.name, "name")
+        self.assertFalse(name_field.repeated.value)
+        self.assertTrue(name_field.required.value)
 
     def test_enum_wrapper(self):
         enum = self._FILE_SET.enums_map["Enum1"]
         self.assertEqual(enum.values[0].name, "a")
         self.assertEqual(enum.values[1].name, "b")
-        # EnumValue `a` and `b` are defined at Line57 in .proto file.
-        self.assertEqual(enum.values[0].source_code_line, 65)
-        self.assertEqual(enum.values[1].source_code_line, 66)
+        # EnumValue `a` and `b` are defined at Line70 in .proto file.
+        self.assertEqual(enum.values[0].source_code_line, 70)
+        self.assertEqual(enum.values[1].source_code_line, 71)
         self.assertEqual(enum.values[0].proto_file_name, "wrappers.proto")
 
 
