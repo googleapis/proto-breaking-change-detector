@@ -73,11 +73,7 @@ class CliDetectTest(unittest.TestCase):
                 "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`.\n"
-                # TODO(xiaozhenliu): The minor version update for message type.
-                + "message_v1beta1.proto L21: Type of an existing field `phones` is changed from `.tutorial.v1.Person.PhoneNumber` to `.tutorial.v1beta1.Person.PhoneNumber`.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
-                # TODO(xiaozhenliu): The minor version update for message type.
-                + "message_v1beta1.proto L26: Type of an existing field `people` is changed from `.tutorial.v1.Person` to `.tutorial.v1beta1.Person`.\n"
                 + "message_v1.proto L18: An existing field `type` is removed.\n",
             )
 
@@ -153,12 +149,8 @@ class CliDetectTest(unittest.TestCase):
                 result.output,
                 "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
-                # TODO(xiaozhenliu): The minor version update for message type.
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed from `LABEL_REPEATED` to `LABEL_OPTIONAL`.\n"
-                + "message_v1beta1.proto L21: Type of an existing field `phones` is changed from `.tutorial.v1.Person.PhoneNumber` to `.tutorial.v1beta1.Person.PhoneNumber`.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
-                # TODO(xiaozhenliu): The minor version update for message type.
-                + "message_v1beta1.proto L26: Type of an existing field `people` is changed from `.tutorial.v1.Person` to `.tutorial.v1beta1.Person`.\n"
                 + "message_v1.proto L18: An existing field `type` is removed.\n"
                 + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
