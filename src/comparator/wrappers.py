@@ -141,6 +141,7 @@ class Field:
         path: Tuple[int],
         file_resources: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
+        api_version: str = None,
     ):
         """file_resources: file-level resource definitions.
         message_resource: message-level resource definition.
@@ -154,6 +155,7 @@ class Field:
         self.path = path
         self.file_resources = file_resources
         self.message_resource = message_resource
+        self.api_version = api_version
 
     def __getattr__(self, name):
         return getattr(self.field_pb, name)
@@ -276,12 +278,14 @@ class Message:
         ],
         path: Tuple[int],
         file_resources: ResourceDatabase = None,
+        api_version: str = None,
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
         self.source_code_locations = source_code_locations
         self.path = path
         self.file_resources = file_resources
+        self.api_version = api_version
 
     def __getattr__(self, name):
         return getattr(self.message_pb, name)
@@ -308,6 +312,7 @@ class Message:
                 self.path + (2, i,),
                 self.file_resources,
                 self.resource,
+                self.api_version,
             )
             for i, field in enumerate(self.message_pb.field)
         }
@@ -698,6 +703,7 @@ class FileSet:
                         source_code_locations,
                         path + (4, i,),
                         self.resources_database,
+                        self.api_version,
                     ),
                 )
                 for i, message in enumerate(fd.message_type)

@@ -92,6 +92,7 @@ class WrappersTest(unittest.TestCase):
         foo_request_message = messages_map["FooRequest"]
         # Message `FooRequest` is defined at Line41 in .proto file.
         self.assertEqual(foo_request_message.source_code_line, 41)
+        self.assertEqual(foo_request_message.api_version, "v1alpha")
         self.assertTrue(foo_request_message.nested_messages["NestedMessage"])
         self.assertEqual(foo_request_message.proto_file_name, "wrappers.proto")
         # Nested message `NestedMessage` is defined at Line50 in .proto file.
@@ -116,6 +117,7 @@ class WrappersTest(unittest.TestCase):
         foo_response_message = self._FILE_SET.messages_map["FooResponse"]
         enum_field = foo_response_message.fields[1]
         self.assertEqual(enum_field.label.value, "LABEL_OPTIONAL")
+        self.assertEqual(enum_field.api_version, "v1alpha")
         self.assertEqual(enum_field.required, False)
         self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
         self.assertEqual(enum_field.type_name.value, ".example.v1alpha.Enum1")
