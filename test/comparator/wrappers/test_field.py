@@ -65,22 +65,19 @@ class FieldTest(unittest.TestCase):
 
     def test_repeated(self):
         field = make_field(repeated=True)
-        self.assertEqual(field.label.value, "LABEL_REPEATED")
+        self.assertTrue(field.repeated.value)
 
     def test_not_repeated(self):
         field = make_field(repeated=False)
-        self.assertEqual(field.label.value, "LABEL_OPTIONAL")
+        self.assertFalse(field.repeated.value)
 
     def test_required(self):
-        field = make_field()
-        field.options.Extensions[field_behavior_pb2.field_behavior].append(
-            field_behavior_pb2.FieldBehavior.Value("REQUIRED")
-        )
-        self.assertTrue(field.required)
+        field = make_field(required=True)
+        self.assertTrue(field.required.value)
 
     def test_not_required(self):
         field = make_field()
-        self.assertEqual(field.required, False)
+        self.assertEqual(field.required.value, False)
 
     def test_oneof(self):
         field = make_field(oneof=True)

@@ -51,23 +51,38 @@ class ServiceComparator:
             return
         self.messages_map_original = self.service_original.messages_map
         self.messages_map_update = self.service_update.messages_map
+        self._compare_oauth_scopes()
         # 3. Check the methods list
         self._compareRpcMethods(
-            self.service_original,
-            self.service_update,
             self.messages_map_original,
             self.messages_map_update,
         )
 
+    def _compare_oauth_scopes(self):
+        oauth_scopes_original = {
+            scope.value: scope for scope in self.service_original.oauth_scopes
+        }
+        oauth_scopes_update = {
+            scope.value: scope for scope in self.service_update.oauth_scopes
+        }
+        for scope in set(oauth_scopes_original.keys()) - set(
+            oauth_scopes_update.keys()
+        ):
+            self.finding_container.addFinding(
+                category=FindingCategory.OAUTH_SCOPE_REMOVAL,
+                proto_file_name=self.service_original.proto_file_name,
+                source_code_line=oauth_scopes_original[scope].source_code_line,
+                message=f"An existing oauth_scope `{scope}` is removed.",
+                actionable=True,
+            )
+
     def _compareRpcMethods(
         self,
-        service_original,
-        service_update,
         messages_map_original,
         messages_map_update,
     ):
-        methods_original = service_original.methods
-        methods_update = service_update.methods
+        methods_original = self.service_original.methods
+        methods_update = self.service_update.methods
         methods_original_keys = set(methods_original.keys())
         methods_update_keys = set(methods_update.keys())
         # 3.1 An RPC method is removed.
