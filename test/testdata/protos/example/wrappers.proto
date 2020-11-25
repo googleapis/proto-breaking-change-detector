@@ -4,6 +4,7 @@ package example.v1alpha;
 
 import "google/api/resource.proto";
 import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 import "google/api/client.proto";
 import "google/rpc/status.proto";
 import "google/longrunning/operations.proto";
@@ -17,6 +18,7 @@ option (google.api.resource_definition) = {
 };
 
 service Example {
+  option(google.api.oauth_scopes) = "https://www.googleapis.com/auth/cloud-platform";
 
   rpc Foo(FooRequest) returns (FooResponse) {
     option (google.api.http) = {
@@ -59,7 +61,11 @@ message FooResponse {
   ];
 }
 
-message FooMetadata {}
+message FooMetadata {
+  string name = 1 [
+     (google.api.field_behavior) = REQUIRED
+  ];
+}
 
 enum Enum1 {
   a = 0;

@@ -76,12 +76,21 @@ class FieldComparator:
 
         # 4. If the FieldDescriptors have the same name, check if the
         # repeated state of them stay the same.
-        if self.field_original.label.value != self.field_update.label.value:
+        if self.field_original.repeated.value != self.field_update.repeated.value:
             self.finding_container.addFinding(
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
-                source_code_line=self.field_update.label.source_code_line,
-                message=f"Repeated state of an existing field `{self.field_original.name}` is changed from `{self.field_original.label.value}` to `{self.field_update.label.value}`.",
+                source_code_line=self.field_update.repeated.source_code_line,
+                message=f"Repeated state of an existing field `{self.field_original.name}` is changed.",
+                actionable=True,
+            )
+        # Field option change from optional to required is breaking.
+        if not self.field_original.required.value and self.field_update.required.value:
+            self.finding_container.addFinding(
+                category=FindingCategory.FIELD_BEHAVIOR_CHANGE,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.required.source_code_line,
+                message=f"Field behavior of an existing field `{self.field_original.name}` is changed.",
                 actionable=True,
             )
         # 5. Check the type of the field.

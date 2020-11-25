@@ -47,8 +47,9 @@ class ServiceTest(unittest.TestCase):
 
     def test_service_scopes(self):
         service = make_service(scopes=("https://foo/user/", "https://foo/admin/"))
-        self.assertTrue("https://foo/user/" in service.oauth_scopes)
-        self.assertTrue("https://foo/admin/" in service.oauth_scopes)
+        oauth_scopes = [scope.value for scope in service.oauth_scopes]
+        self.assertTrue("https://foo/user/" in oauth_scopes)
+        self.assertTrue("https://foo/admin/" in oauth_scopes)
 
     def test_service_no_scopes(self):
         service = make_service()

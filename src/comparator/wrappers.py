@@ -168,11 +168,11 @@ class Field:
         return self.field_pb.number
 
     @property
-    def label(self):
-        """Return the label of the field.
+    def repeated(self) -> bool:
+        """Return True if this is a repeated field, False otherwise.
 
         Returns:
-            str: "LABEL_OPTIONAL", "LABEL_REPEATED" or "LABEL_REQUIRED".
+            bool: Whether this field is repeated.
         """
         # For proto3, only LABEL_REPEATED is explicitly specified which has a path.
         # For "LABEL_OPTIONAL" and "LABEL_REQUIRED", return the path of the field.
@@ -181,22 +181,29 @@ class Field:
         )
         # FieldDescriptorProto.label has field number 4.
         return WithLocation(
-            FieldDescriptorProto().Label.Name(self.field_pb.label),
+            label_repeated,
             self.source_code_locations,
             self.path + (4,) if label_repeated else self.path,
         )
 
     @property
-    def required(self) -> bool:
+    def required(self):
         """Return True if this field is required, False otherwise.
 
         Returns:
             bool: Whether this field is required in field_behavior annotation.
         """
-        return (
+        required = (
             field_behavior_pb2.FieldBehavior.Value("REQUIRED")
             in self.field_pb.options.Extensions[field_behavior_pb2.field_behavior]
         )
+        # fmt: off
+        return WithLocation(
+            required,
+            self.source_code_locations,
+            self.path + (8, 1052),
+        )
+        # fmt: on
 
     @property
     def proto_type(self):
@@ -483,7 +490,7 @@ class Method:
         # The field containing pagination results should be the first
         # field in the message and have a field number of 1.
         for field in response_fields_map.values():
-            if field.label.value == "LABEL_REPEATED" and field.number == 1:
+            if field.repeated.value and field.number == 1:
                 return field
         return None
 
@@ -629,13 +636,20 @@ class Service:
             Sequence[str]: A sequence of OAuth scopes.
         """
         # Return the OAuth scopes, split on comma.
-        return tuple(
-            i.strip()
-            for i in self.service_pb.options.Extensions[client_pb2.oauth_scopes].split(
-                ","
-            )
-            if i
-        )
+        # fmt: off
+        oauth_scopes = []
+        for scope in self.service_pb.options.Extensions[client_pb2.oauth_scopes].split(","):
+            if scope:
+                oauth_scopes.append(
+                    WithLocation(
+                        scope.strip(),
+                        self.source_code_locations,
+                        self.path + (3, 1050),
+                    )
+                )
+
+        return oauth_scopes
+        # fmt: on
 
     @property
     def source_code_line(self):
