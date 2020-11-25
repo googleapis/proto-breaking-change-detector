@@ -84,7 +84,8 @@ class FieldComparator:
                 message=f"Repeated state of an existing field `{self.field_original.name}` is changed.",
                 actionable=True,
             )
-        if self.field_original.required.value != self.field_update.required.value:
+        # Field option change from optional to required is breaking.
+        if not self.field_original.required.value and self.field_update.required.value:
             self.finding_container.addFinding(
                 category=FindingCategory.FIELD_BEHAVIOR_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,

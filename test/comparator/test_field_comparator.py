@@ -77,8 +77,15 @@ class FieldComparatorTest(unittest.TestCase):
     def test_field_behavior_change(self):
         field_required = make_field(required=True)
         field_non_required = make_field(required=False)
+        # Required to optional, non-breaking change.
         FieldComparator(
             field_required, field_non_required, self.finding_container
+        ).compare()
+        findings = self.finding_container.getAllFindings()
+        self.assertFalse(findings)
+        # Required to optional, non-breaking change.
+        FieldComparator(
+            field_non_required, field_required, self.finding_container
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
