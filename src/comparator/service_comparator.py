@@ -167,6 +167,8 @@ class ServiceComparator:
         """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""
         http_annotation_original = method_original.http_annotation.value
         http_annotation_update = method_update.http_annotation.value
+        api_version_original = self.service_original.api_version
+        api_version_update = self.service_update.api_version
 
         if not http_annotation_original or not http_annotation_update:
             # (Aip127) APIs must provide HTTP definitions for each RPC that they define,
@@ -189,33 +191,37 @@ class ServiceComparator:
                     actionable=False,
                 )
             return
-        for annotation in (
-            (
-                "http_method",
-                "None",
-                f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
-            ),
-            (
-                "http_uri",
-                "None",
-                f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
-            ),
-            (
-                "http_body",
-                "None",
-                f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
-            ),
+        # Compare http method, they should be identical.
+        if (
+            http_annotation_original["http_method"]
+            != http_annotation_update["http_method"]
         ):
-            # TODO (xiaozhenliu): this should allow version updates. For example,
-            # from `v1/example:foo` to `v1beta1/example:foo` is not a breaking change.
-            if http_annotation_original.get(
-                annotation[0], annotation[1]
-            ) != http_annotation_update.get(annotation[0], annotation[1]):
+            self.finding_container.addFinding(
+                category=FindingCategory.HTTP_ANNOTATION_CHANGE,
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=method_update.http_annotation.source_code_line,
+                message=f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
+                actionable=True,
+            )
+        # Compare http body, they should be identical.
+        if http_annotation_original["http_body"] != http_annotation_update["http_body"]:
+            self.finding_container.addFinding(
+                category=FindingCategory.HTTP_ANNOTATION_CHANGE,
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=method_update.http_annotation.source_code_line,
+                message=f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
+                actionable=True,
+            )
+        # Compare http URI, minor version updates are allowed if not identical.
+        if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
+            annotation_value = http_annotation_original["http_uri"]
+            transformed_value = annotation_value.replace(api_version_original, api_version_update) if annotation_value and api_version_original else None
+            if not transformed_value or transformed_value != http_annotation_update["http_uri"]:
                 self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
-                    message=annotation[2],
+                    message=f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
                     actionable=True,
                 )
 
