@@ -32,6 +32,30 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
+    def test_service_oauth_scopes_change(self):
+        service_original = make_service(
+            scopes=("https://foo/user/", "https://foo/admin/")
+        )
+        service_update = make_service(
+            scopes=("https://www.googleapis.com/auth/cloud-platform")
+        )
+        ServiceComparator(
+            service_original,
+            service_update,
+            self.finding_container,
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        finding = findings_map[
+            "An existing oauth_scope `https://foo/user/` is removed."
+        ]
+        self.assertEqual(finding.category.name, "OAUTH_SCOPE_REMOVAL")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+        finding = findings_map[
+            "An existing oauth_scope `https://foo/admin/` is removed."
+        ]
+        self.assertEqual(finding.category.name, "OAUTH_SCOPE_REMOVAL")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
     def test_method_removal(self):
         method_foo = make_method(name="foo")
         method_bar = make_method(name="bar")
