@@ -27,6 +27,12 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(field.proto_type.value, "TYPE_MESSAGE")
         self.assertEqual(field.oneof, False)
         self.assertEqual(field.proto_file_name, "foo")
+        self.assertEqual(field.api_version, None)
+
+    def test_api_version(self):
+        field = make_field("Foo", api_version="v1")
+        self.assertEqual(field.name, "Foo")
+        self.assertEqual(field.api_version, "v1")
 
     def test_field_is_primitive(self):
         primitive_field = make_field(proto_type="TYPE_INT32")

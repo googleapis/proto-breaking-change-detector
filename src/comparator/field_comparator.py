@@ -108,15 +108,28 @@ class FieldComparator:
         elif self.field_original.type_name and (
             self.field_original.type_name.value != self.field_update.type_name.value
         ):
-            # TODO(xiaozhenliu): version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
-            # But from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate` is breaking.
-            self.finding_container.addFinding(
-                category=FindingCategory.FIELD_TYPE_CHANGE,
-                proto_file_name=self.field_update.proto_file_name,
-                source_code_line=self.field_update.type_name.source_code_line,
-                message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
-                actionable=True,
+            # Version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
+            # But from `.example.v1.Enum` to `.example.v2.EnumUpdate` is breaking.
+            api_version_original = self.field_original.api_version
+            api_version_update = self.field_update.api_version
+            transformed_type_name = (
+                self.field_original.type_name.value.replace(
+                    api_version_original, api_version_update
+                )
+                if api_version_original
+                else None
             )
+            if (
+                not transformed_type_name
+                or transformed_type_name != self.field_update.type_name.value
+            ):
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_TYPE_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.type_name.source_code_line,
+                    message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
+                    actionable=True,
+                )
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
             proto_file_name = self.field_update.proto_file_name

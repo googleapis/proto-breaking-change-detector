@@ -102,6 +102,7 @@ def make_field(
     proto_file_name: str = "foo",
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
+    api_version: str = None,
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
@@ -133,6 +134,7 @@ def make_field(
         path=path,
         file_resources=file_resources,
         message_resource=message_resource,
+        api_version=api_version,
     )
 
 
@@ -164,6 +166,7 @@ def make_message(
     path: Tuple[int] = (),
     file_resources: ResourceDatabase = None,
     options: desc.MessageOptions = None,
+    api_version: str = None,
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -183,6 +186,7 @@ def make_message(
         source_code_locations=source_code_locations,
         path=path,
         file_resources=file_resources,
+        api_version=api_version,
         **kwargs,
     )
 
