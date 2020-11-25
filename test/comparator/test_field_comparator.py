@@ -61,6 +61,17 @@ class FieldComparatorTest(unittest.TestCase):
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
+    def test_message_type_change_minor_version_update(self):
+        field_message = make_field(type_name=".example.v1.Enum", api_version="v1")
+        field_message_update = make_field(
+            type_name=".example.v1beta1.Enum", api_version="v1beta1"
+        )
+        FieldComparator(
+            field_message, field_message_update, self.finding_container
+        ).compare()
+        findings = self.finding_container.getAllFindings()
+        self.assertFalse(findings)
+
     def test_repeated_label_change(self):
         field_repeated = make_field(repeated=True)
         field_non_repeated = make_field(repeated=False)

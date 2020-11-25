@@ -30,6 +30,11 @@ class MessageTest(unittest.TestCase):
             "No source code line can be identified by path ().",
         )
 
+    def test_api_version(self):
+        message = make_message("Foo", api_version="v1")
+        self.assertEqual(message.name, "Foo")
+        self.assertEqual(message.api_version, "v1")
+
     def test_get_field(self):
         fields = (
             make_field(name="field_one", number=1),
