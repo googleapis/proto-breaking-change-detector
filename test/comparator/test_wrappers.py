@@ -56,6 +56,12 @@ class WrappersTest(unittest.TestCase):
         # Service `Example` is defined at Line20 in .proto file.
         self.assertEqual(service.source_code_line, 20)
         self.assertEqual(service.proto_file_name, "wrappers.proto")
+        self.assertEqual(len(service.oauth_scopes), 1)
+        self.assertEqual(
+            service.oauth_scopes[0].value,
+            "https://www.googleapis.com/auth/cloud-platform",
+        )
+        self.assertEqual(service.oauth_scopes[0].source_code_line, 20)
         foo_method = service.methods["Foo"]
         bar_method = service.methods["Bar"]
         self.assertEqual(foo_method.input.value, "FooRequest")

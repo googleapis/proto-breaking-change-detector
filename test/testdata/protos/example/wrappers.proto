@@ -18,6 +18,7 @@ option (google.api.resource_definition) = {
 };
 
 service Example {
+  option(google.api.oauth_scopes) = "https://www.googleapis.com/auth/cloud-platform";
 
   rpc Foo(FooRequest) returns (FooResponse) {
     option (google.api.http) = {

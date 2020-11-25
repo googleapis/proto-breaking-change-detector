@@ -59,6 +59,9 @@ class FindingCategory(enum.Enum):
     # Packaging options
     PACKAGING_OPTION_REMOVAL = 40
     PACKAGING_OPTION_ADDITION = 41
+    PACKAGING_OPTION_CHANGE = 42
+    # Service options
+    OAUTH_SCOPE_REMOVAL = 43
     # Field Options
     FIELD_BEHAVIOR_CHANGE = 44
 

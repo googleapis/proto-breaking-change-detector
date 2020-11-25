@@ -73,7 +73,11 @@ class CliDetectTest(unittest.TestCase):
                 "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
+                # TODO(xiaozhenliu): The minor version update for message type.
+                + "message_v1beta1.proto L21: Type of an existing field `phones` is changed from `.tutorial.v1.Person.PhoneNumber` to `.tutorial.v1beta1.Person.PhoneNumber`.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
+                # TODO(xiaozhenliu): The minor version update for message type.
+                + "message_v1beta1.proto L26: Type of an existing field `people` is changed from `.tutorial.v1.Person` to `.tutorial.v1beta1.Person`.\n"
                 + "message_v1.proto L18: An existing field `type` is removed.\n",
             )
 
@@ -121,8 +125,8 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_annotation_v1beta1.proto L14: An existing http method of google.api.http annotation is changed for method `Foo`.\n"
-                + "service_annotation_v1beta1.proto L14: An existing http method URI of google.api.http annotation is changed for method `Foo`.\n"
+                "service_annotation_v1beta1.proto L14: An existing http method URI of google.api.http annotation is changed for method `Foo`.\n"
+                + "service_annotation_v1beta1.proto L14: An existing http method of google.api.http annotation is changed for method `Foo`.\n"
                 + "service_annotation_v1beta1.proto L18: An existing method_signature for method `Foo` is changed from `content` to `error`.\n"
                 + "service_annotation_v1beta1.proto L18: An existing method_signature for method `Foo` is changed from `error` to `content`.\n"
                 + "service_annotation_v1beta1.proto L22: An existing http method body of google.api.http annotation is changed for method `Bar`.\n"
@@ -151,7 +155,11 @@ class CliDetectTest(unittest.TestCase):
                 "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
+                # TODO(xiaozhenliu): The minor version update for message type.
+                + "message_v1beta1.proto L21: Type of an existing field `phones` is changed from `.tutorial.v1.Person.PhoneNumber` to `.tutorial.v1beta1.Person.PhoneNumber`.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
+                # TODO(xiaozhenliu): The minor version update for message type.
+                + "message_v1beta1.proto L26: Type of an existing field `people` is changed from `.tutorial.v1.Person` to `.tutorial.v1beta1.Person`.\n"
                 + "message_v1.proto L18: An existing field `type` is removed.\n"
                 + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
