@@ -20,7 +20,7 @@ service Example {
 
   rpc Bar(FooRequest) returns (google.longrunning.Operation) {
     option (google.api.http) = {
-      post: "/v1/example:bar"
+      post: "/v1beta1/example:bar"
       body: "updatedHttpBody"
     };
     option (google.longrunning.operation_info) = {

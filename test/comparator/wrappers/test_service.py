@@ -27,10 +27,15 @@ class ServiceTest(unittest.TestCase):
         self.assertEqual(service.name, "ThingDoer")
         self.assertEqual(service.proto_file_name, "foo")
         self.assertEqual(service.path, ())
+        self.assertFalse(service.api_version)
         self.assertEqual(
             service.source_code_line,
             "No source code line can be identified by path ().",
         )
+
+    def test_service_api_version(self):
+        service = make_service(api_version="v1alpha")
+        self.assertEqual(service.api_version, "v1alpha")
 
     def test_service_host(self):
         service = make_service(host="thingdoer.googleapis.com")
