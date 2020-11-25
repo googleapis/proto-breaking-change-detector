@@ -16,7 +16,7 @@ from typing import Tuple, Sequence, Dict
 from google.protobuf import descriptor_pb2 as desc
 import src.comparator.wrappers as wrappers
 from src.comparator.resource_database import ResourceDatabase
-from google.api import resource_pb2, client_pb2, annotations_pb2
+from google.api import resource_pb2, client_pb2, annotations_pb2, field_behavior_pb2
 from google.longrunning import operations_pb2  # type: ignore
 
 
@@ -94,6 +94,7 @@ def make_field(
     proto_type: str = "TYPE_MESSAGE",
     type_name: str = None,
     repeated: bool = False,
+    required: bool = False,
     oneof: bool = False,
     options: desc.FieldOptions = None,
     file_resources: ResourceDatabase = None,
@@ -118,7 +119,11 @@ def make_field(
         options=options,
         **kwargs,
     )
-
+    # Set the Field_behavior option as required.
+    if required:
+        field_pb.options.Extensions[field_behavior_pb2.field_behavior].append(
+            field_behavior_pb2.FieldBehavior.Value("REQUIRED")
+        )
     source_code_locations = {tuple(location.path): location for location in locations}
 
     return wrappers.Field(
