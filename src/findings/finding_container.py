@@ -60,7 +60,8 @@ class FindingContainer:
         for file_name, findings in file_to_findings.items():
             # Customize sort key function to output the findings in the same
             # file based on the source code line number.
-            findings.sort(key=lambda f: f.location.source_code_line)
+            # Sort message alphabetically if the line number is same.
+            findings.sort(key=lambda f: (f.location.source_code_line, f.message))
             for finding in findings:
                 output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
