@@ -265,9 +265,6 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        # TODO(xiaozhenliu): This should be removed once we have version updates
-        # support. The URI update from `v1/example:foo` to `v1beta1/example:foo`
-        # is allowed.
         uri_change_finding = findings_map[
             "An existing http method URI of google.api.http annotation is changed for method `Method`."
         ]
@@ -285,6 +282,26 @@ class ServiceComparatorTest(unittest.TestCase):
             body_change_finding.location.proto_file_name,
             "foo",
         )
+
+    def test_http_annotation_minor_version_update(self):
+        method_original = make_method(
+            name="Method",
+            http_uri="/v1/{name=projects/*}",
+            http_body="*",
+        )
+        method_update = make_method(
+            name="Method",
+            http_uri="/v1alpha/{name=projects/*}",
+            http_body="*",
+        )
+        ServiceComparator(
+            make_service(methods=(method_original,), api_version="v1"),
+            make_service(methods=(method_update,), api_version="v1alpha"),
+            self.finding_container,
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        # No breaking changes, since only minor version update in the http URI.
+        self.assertFalse(findings_map)
 
 
 if __name__ == "__main__":

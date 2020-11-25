@@ -586,12 +586,14 @@ class Service:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
+        api_version: str = None,
     ):
         self.service_pb = service_pb
         self.messages_map = messages_map
         self.proto_file_name = proto_file_name
         self.source_code_locations = source_code_locations
         self.path = path
+        self.api_version = api_version
 
     @property
     def name(self):
@@ -674,12 +676,9 @@ class FileSet:
         self.enums_map: Dict[str, Enum] = {}
         self.resources_database = ResourceDatabase()
         self.file_set_pb = file_set_pb
-        dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
+        self.api_version = self._get_api_version(file_set_pb)
         path = ()
         for fd in file_set_pb.file:
-            # Put the fileDescriptor and its dependencies to the dependency map.
-            for dep in fd.dependency:
-                dependency_map[dep].append(fd)
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -727,6 +726,7 @@ class FileSet:
                         fd.name,
                         source_code_locations,
                         path + (6, i,),
+                        self.api_version,
                     ),
                 )
                 for i, service in enumerate(fd.service)
@@ -745,11 +745,15 @@ class FileSet:
                 for i, enum in enumerate(fd.enum_type)
             )
             # fmt: on
-        self.api_version = self._get_api_version(dependency_map)
 
     def _get_api_version(
-        self, dependency_map: Dict[str, Sequence[str]]
+        self, file_set: descriptor_pb2.FileDescriptorSet
     ) -> Optional[str]:
+        dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
+        for fd in file_set.file:
+            # Put the fileDescriptor and its dependencies to the dependency map.
+            for dep in fd.dependency:
+                dependency_map[dep].append(fd)
         # Find the root API definition file.
         version = r"(?P<version>v[0-9]+(p[0-9]+)?((alpha|beta)[0-9]*)?)"
         for f, deps in dependency_map.items():
