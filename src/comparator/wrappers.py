@@ -659,6 +659,7 @@ class FileSet:
         self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
         self.resources_database = ResourceDatabase()
+        self.file_set_pb = file_set_pb
         dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
         path = ()
         for fd in file_set_pb.file:
@@ -742,7 +743,8 @@ class FileSet:
                 if dep.name not in dependency_map:
                     match = re.search(version, dep.package)
                     return match.group() if match else None
-        return None
+        package = self.file_set_pb.file[0].package
+        return re.search(version, package).group()
 
     def _get_packaging_options_map(
         self,
@@ -753,10 +755,9 @@ class FileSet:
         ],
         path: Tuple[int],
     ):
-        # TODO(xiaozhenliu): check with One-platform about the version naming.
-        # We should allow minor version updates, then the packaging options like
-        # `java_package = "com.pubsub.v1"` will always be changed. But versions
-        # update between two stable versions (e.g. v1 to v2) is not permitted.
+        # The minor version updates are allowed, for example
+        # `java_package = "com.pubsub.v1"` is updated to `java_package = "com.pubsub.v1beta1".
+        # But update between two stable versions (e.g. v1 to v2) is not permitted.
         packaging_options_path = {
             "java_package": (1,),
             "java_outer_classname": (8,),
@@ -770,7 +771,7 @@ class FileSet:
         }
         # Put default empty set for every packaging options.
         for option in packaging_options_path.keys():
-            if hasattr(file_options, option):
+            if getattr(file_options, option) != "":
                 self.packaging_options_map[option][
                     getattr(file_options, option)
                 ] = WithLocation(

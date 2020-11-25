@@ -163,14 +163,26 @@ class FileSetComparatorTest(unittest.TestCase):
 
     def test_packaging_options_change(self):
         file_options_original = descriptor_pb2.FileOptions()
-        file_options_original.php_namespace = "example_php_namespace"
+        file_options_original.php_namespace = "Google\\Cloud\\Service\\V1"
+        file_options_original.csharp_namespace = "Google.Cloud.Service.V1"
+        file_options_original.java_outer_classname = "ServiceProto"
         file_original = make_file_pb2(
-            name="original.proto", options=file_options_original
+            name="original.proto",
+            package="google.cloud.service.v1",
+            options=file_options_original,
         )
 
         file_options_update = descriptor_pb2.FileOptions()
-        file_options_update.php_namespace = "example_php_namespace_update"
-        file_update = make_file_pb2(name="update.proto", options=file_options_update)
+        # Breaking since version should be updated to `v1alpha`
+        file_options_update.php_namespace = "Google\\Cloud\\Service\\V1beta"
+        # No breaking change
+        file_options_update.csharp_namespace = "Google.Cloud.Service.V1alpha"
+        file_options_update.java_outer_classname = "ServiceUpdateProto"
+        file_update = make_file_pb2(
+            name="update.proto",
+            package="google.cloud.service.v1alpha",
+            options=file_options_update,
+        )
 
         FileSetComparator(
             make_file_set(files=[file_original]),
@@ -178,19 +190,59 @@ class FileSetComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        go_package_option_removal = findings_map[
-            "An exisiting packaging option for `php_namespace` is removed."
+        java_classname_option_change = findings_map[
+            "An exisiting packaging option for `java_outer_classname` is changed from `ServiceProto` to `ServiceUpdateProto`."
         ]
         self.assertEqual(
-            go_package_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"
+            java_classname_option_change.category.name, "PACKAGING_OPTION_CHANGE"
+        )
+        php_namespace_option_removal = findings_map[
+            "An exisiting packaging option `Google\\Cloud\\Service\\V1` for `php_namespace` is removed."
+        ]
+        self.assertEqual(
+            php_namespace_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"
         )
 
-        ruby_package_option_removal = findings_map[
-            "An exisiting packaging option for `php_namespace` is added."
+        php_namespace_option_addition = findings_map[
+            "A new packaging option `Google\\Cloud\\Service\\V1beta` for `php_namespace` is added."
         ]
         self.assertEqual(
-            ruby_package_option_removal.category.name, "PACKAGING_OPTION_ADDITION"
+            php_namespace_option_addition.category.name, "PACKAGING_OPTION_ADDITION"
         )
+
+    def test_packaging_options_version_update(self):
+        file_options_original = descriptor_pb2.FileOptions()
+        file_options_original.java_outer_classname = "ServiceProto"
+        file_options_original.java_package = "com.google.cloud.service.v1"
+        file_options_original.csharp_namespace = "Google.Cloud.Service.V1"
+        file_options_original.php_namespace = "Google\\Cloud\\Service\\V1"
+        file_options_original.ruby_package = "Google::Cloud::Service::V1"
+        file_original = make_file_pb2(
+            name="original.proto",
+            package="google.cloud.service.v1",
+            options=file_options_original,
+        )
+
+        file_options_update = descriptor_pb2.FileOptions()
+        file_options_update.java_outer_classname = "ServiceProto"
+        file_options_update.java_package = "com.google.cloud.service.v1alpha"
+        file_options_update.csharp_namespace = "Google.Cloud.Service.V1alpha"
+        file_options_update.php_namespace = "Google\\Cloud\\Service\\V1alpha"
+        file_options_update.ruby_package = "Google::Cloud::Service::V1alpha"
+        file_update = make_file_pb2(
+            name="update.proto",
+            package="google.cloud.service.v1alpha",
+            options=file_options_update,
+        )
+
+        FileSetComparator(
+            make_file_set(files=[file_original]),
+            make_file_set(files=[file_update]),
+            self.finding_container,
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        # No breaking changes since there are only minor version updates.
+        self.assertFalse(findings_map)
 
 
 if __name__ == "__main__":
