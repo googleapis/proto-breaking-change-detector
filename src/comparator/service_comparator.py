@@ -215,8 +215,15 @@ class ServiceComparator:
         # Compare http URI, minor version updates are allowed if not identical.
         if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
             annotation_value = http_annotation_original["http_uri"]
-            transformed_value = annotation_value.replace(api_version_original, api_version_update) if annotation_value and api_version_original else None
-            if not transformed_value or transformed_value != http_annotation_update["http_uri"]:
+            transformed_value = (
+                annotation_value.replace(api_version_original, api_version_update)
+                if annotation_value and api_version_original
+                else None
+            )
+            if (
+                not transformed_value
+                or transformed_value != http_annotation_update["http_uri"]
+            ):
                 self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
