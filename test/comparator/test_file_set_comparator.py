@@ -161,6 +161,38 @@ class FileSetComparatorTest(unittest.TestCase):
             "foo.proto",
         )
 
+    def test_java_outer_classname_removal(self):
+        option1 = descriptor_pb2.FileOptions()
+        option1.java_outer_classname = "Foo"
+        file1 = make_file_pb2(
+            name="fil1.proto",
+            package="example.v1",
+            options=option1,
+        )
+        option2 = descriptor_pb2.FileOptions()
+        option2.java_outer_classname = "Bar"
+        file2 = make_file_pb2(
+            name="fil2.proto",
+            package="example.v1",
+            options=option2,
+        )
+        file_set_original = make_file_set(files=[file1, file2])
+        option3 = descriptor_pb2.FileOptions()
+        option3.java_outer_classname = "Bar"
+        file3 = make_file_pb2(
+            name="file3.proto", package="example.v1beta", options=option3
+        )
+        file_set_update = make_file_set(files=[file3])
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "PACKAGING_OPTION_REMOVAL")
+        self.assertEqual(
+            finding.message,
+            "An exisiting packaging option `Foo` for `java_outer_classname` is removed.",
+        )
+
     def test_packaging_options_change(self):
         file_options_original = descriptor_pb2.FileOptions()
         file_options_original.php_namespace = "Google\\Cloud\\Service\\V1"
@@ -191,10 +223,10 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         java_classname_option_change = findings_map[
-            "An exisiting packaging option for `java_outer_classname` is changed from `ServiceProto` to `ServiceUpdateProto`."
+            "An exisiting packaging option `ServiceProto` for `java_outer_classname` is removed."
         ]
         self.assertEqual(
-            java_classname_option_change.category.name, "PACKAGING_OPTION_CHANGE"
+            java_classname_option_change.category.name, "PACKAGING_OPTION_REMOVAL"
         )
         php_namespace_option_removal = findings_map[
             "An exisiting packaging option `Google\\Cloud\\Service\\V1` for `php_namespace` is removed."

@@ -51,37 +51,24 @@ class FileSetComparator:
         api_version_original = fs_original.api_version
         api_version_update = fs_update.api_version
         for option in packaging_options_original.keys():
-            per_language_options_original = list(
+            per_language_options_original = set(
                 packaging_options_original[option].keys()
             )
-            per_language_options_update = list(packaging_options_update[option].keys())
-            # Compare the option of `java_outer_classname`. No minor version updates
-            # need to consider.
+            per_language_options_update = set(packaging_options_update[option].keys())
+            # Compare the option of `java_outer_classname`.
+            # No minor version updates need to consider.
             if option == "java_outer_classname":
-                # Sort the java_outer_classname list for comparison.
-                classnames_original = sorted(
-                    per_language_options_original, key=str.lower
-                )
-                classnames_update = sorted(per_language_options_update, key=str.lower)
-                for i, classname in enumerate(classnames_original):
-                    if i >= len(classnames_update):
-                        classname_option = packaging_options_original[option][classname]
-                        self.finding_container.addFinding(
-                            category=FindingCategory.PACKAGING_OPTION_REMOVAL,
-                            proto_file_name=classname_option.proto_file_name,
-                            source_code_line=classname_option.source_code_line,
-                            message=f"An exisiting packaging option `{classname}` for `{option}` is removed.",
-                            actionable=True,
-                        )
-                    elif classname != classnames_update[i]:
-                        classname_option = packaging_options_original[option][classname]
-                        self.finding_container.addFinding(
-                            category=FindingCategory.PACKAGING_OPTION_CHANGE,
-                            proto_file_name=classname_option.proto_file_name,
-                            source_code_line=classname_option.source_code_line,
-                            message=f"An exisiting packaging option for `{option}` is changed from `{classname}` to `{classnames_update[i]}`.",
-                            actionable=True,
-                        )
+                for classname in (
+                    per_language_options_original - per_language_options_update
+                ):
+                    classname_option = packaging_options_original[option][classname]
+                    self.finding_container.addFinding(
+                        category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                        proto_file_name=classname_option.proto_file_name,
+                        source_code_line=classname_option.source_code_line,
+                        message=f"An exisiting packaging option `{classname}` for `{option}` is removed.",
+                        actionable=True,
+                    )
             # Compare the option of language namespace. Minor version updates in consideration.
             else:
                 # Replace the version in the original packaging options with new api version.
