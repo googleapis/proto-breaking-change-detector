@@ -504,6 +504,7 @@ class Method:
     def lro_annotation(self):
         """Return the LRO operation_info annotation defined for this method."""
         # Skip the operations.proto because the `GetOperation` does not have LRO annotations.
+        # Remove this condition will fail the service-annotation test in cli integration test.
         if not self.output.value.endswith("google.longrunning.Operation") or self.proto_file_name == "google/longrunning/operations.proto":
             return None
         op = self.method_pb.options.Extensions[operations_pb2.operation_info]
