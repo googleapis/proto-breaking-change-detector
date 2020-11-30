@@ -155,6 +155,26 @@ class CliDetectTest(unittest.TestCase):
                 + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
 
+    def test_oslogin_proto(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/",
+                    "--update_api_definition_dirs=test/testdata/protos/",
+                    "--original_proto_files=test/testdata/protos/google/cloud/oslogin/v1/oslogin.proto",
+                    "--update_proto_files=test/testdata/protos/google/cloud/oslogin/v1beta/oslogin.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "google/cloud/oslogin/v1beta/oslogin.proto L149: The child_type `oslogin.googleapis.com/PosixAccount` and type `oslogin.googleapis.com/User` of resource reference option in field `name` cannot be resolved to the identical resource.\n"
+                + "google/cloud/oslogin/v1beta/oslogin.proto L179: Field behavior of an existing field `ssh_public_key` is changed.\n"
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
