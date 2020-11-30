@@ -172,7 +172,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "google/cloud/oslogin/v1beta/oslogin.proto L149: The child_type `oslogin.googleapis.com/PosixAccount` and type `oslogin.googleapis.com/User` of resource reference option in field `name` cannot be resolved to the identical resource.\n"
-                + "google/cloud/oslogin/v1beta/oslogin.proto L179: Field behavior of an existing field `ssh_public_key` is changed.\n"
+                + "google/cloud/oslogin/v1beta/oslogin.proto L179: Field behavior of an existing field `ssh_public_key` is changed.\n",
             )
 
 
