@@ -94,14 +94,14 @@ class FileSetTest(unittest.TestCase):
                 pattern=["foo/{foo}"],
             )
         )
-        # File1 with resource definition `example.v1/Foo`.
+        # File1 with file-level resource definition `example.v1/Foo`.
         file1 = make_file_pb2(
             name="foo.proto",
             package=".example.v1",
             dependency=["bar.proto"],
             options=options,
         )
-        # File2 with resource definition in messasge and nested message.
+        # File2 with resource definition in message and nested message.
         message_options = descriptor_pb2.MessageOptions()
         resource = message_options.Extensions[resource_pb2.resource]
         resource.pattern.append("user/{user}")
@@ -112,12 +112,14 @@ class FileSetTest(unittest.TestCase):
         resource = nested_message_options.Extensions[resource_pb2.resource]
         resource.pattern.append("tests/{test}/")
         resource.type = "example.v1/Test"
-        nesed_message = make_message("Test", options=nested_message_options)
+        nesed_message = make_message("nested_message", options=nested_message_options)
         message = make_message(
-            name="Test", nested_messages=[nesed_message], options=message_options
+            name="outer_message",
+            nested_messages=[nesed_message],
+            options=message_options,
         )
         file2 = make_file_pb2(
-            name="foo.proto", package=".example.v1", messages=[message]
+            name="bar.proto", package=".example.v1", messages=[message]
         )
         file_set = make_file_set(files=[file1, file2])
         # All resources should be registered in the database.
