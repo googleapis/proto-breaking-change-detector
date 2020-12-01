@@ -90,19 +90,28 @@ class FileSetTest(unittest.TestCase):
         options = descriptor_pb2.FileOptions()
         options.Extensions[resource_pb2.resource_definition].append(
             resource_pb2.ResourceDescriptor(
-                type=".example.v1.Bar",
+                type="example.v1/Bar",
                 pattern=["foo/{foo}/bar/{bar}", "foo/{foo}/bar"],
             )
         )
+        message_options = descriptor_pb2.MessageOptions()
+        resource = message_options.Extensions[resource_pb2.resource]
+        resource.pattern.append("foo/{foo}/")
+        resource.type = "example.v1/Foo"
+        nesed_message = make_message("Test", options=message_options)
+        message = make_message(nested_messages=[nesed_message])
         file_pb2 = make_file_pb2(
-            name="foo.proto", package=".example.v1", options=options
+            name="foo.proto", package=".example.v1", options=options, messages=[message]
         )
         file_set = make_file_set(files=[file_pb2])
         resource_types = file_set.resources_database.types
         resource_patterns = file_set.resources_database.patterns
-        self.assertEqual(list(resource_types.keys()), [".example.v1.Bar"])
         self.assertEqual(
-            list(resource_patterns.keys()), ["foo/{foo}/bar/{bar}", "foo/{foo}/bar"]
+            list(resource_types.keys()), ["example.v1/Bar", "example.v1/Foo"]
+        )
+        self.assertEqual(
+            list(resource_patterns.keys()),
+            ["foo/{foo}/bar/{bar}", "foo/{foo}/bar", "foo/{foo}/"],
         )
 
     def test_file_set_source_code_location(self):
