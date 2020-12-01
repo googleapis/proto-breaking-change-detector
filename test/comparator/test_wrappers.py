@@ -24,9 +24,12 @@ class WrappersTest(unittest.TestCase):
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet out of it.
     _CURRENT_DIR = os.getcwd()
+    COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
+
     _INVOKER = Loader(
         proto_defintion_dirs=[
-            os.path.join(_CURRENT_DIR, "test/testdata/protos/example/")
+            os.path.join(_CURRENT_DIR, "test/testdata/protos/example/"),
+            COMMON_PROTOS_DIR,
         ],
         proto_files=[
             os.path.join(_CURRENT_DIR, "test/testdata/protos/example/wrappers.proto")
