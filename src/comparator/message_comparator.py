@@ -174,7 +174,7 @@ class DescriptorComparator:
                 )
                 return
             # Check if the removed resource is in the global file-level resource database.
-            if resource_original.value.type not in self.global_resources_update.types.keys():
+            if resource_original.value.type not in self.global_resources_update.types:
                 self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
