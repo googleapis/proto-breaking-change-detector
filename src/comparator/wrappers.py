@@ -785,7 +785,7 @@ class FileSet:
         resources_database = ResourceDatabase()
         for fd in file_set.file:
             source_code_locations = source_code_locations_map[fd.name]
-            # File-level resource definition.
+            # Register file-level resource definitions in database.
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
             ):
@@ -795,14 +795,38 @@ class FileSet:
                         resource, source_code_locations, resource_path, fd.name
                     )
                 )
-            # message-level resource definition.
+            # Register message-level resource definitions in database.
+            # Put first layer message in stack and iterate them for nested messages.
+            message_stack = []
             for i, message in enumerate(fd.message_type):
+                resource_path = (4, i, 7, 1053)
+                message_stack.append(
+                    WithLocation(message, source_code_locations, resource_path, fd.name)
+                )
+            while len(message_stack) != 0:
+                message_with_location = message_stack.pop()
+                message = message_with_location.value
                 resource = message.options.Extensions[resource_pb2.resource]
                 if resource.type and resource.pattern:
-                    resource_path = (4, i, 7, 1053)
                     resources_database.register_resource(
                         WithLocation(
-                            resource, source_code_locations, resource_path, fd.name
+                            resource,
+                            source_code_locations,
+                            message_with_location.path,
+                            fd.name,
+                        )
+                    )
+                for i, nested_message in enumerate(message.nested_type):
+                    resource_path = message_with_location.path + (
+                        3,
+                        i,
+                    )
+                    message_stack.append(
+                        WithLocation(
+                            nested_message,
+                            source_code_locations,
+                            resource_path,
+                            fd.name,
                         )
                     )
 
