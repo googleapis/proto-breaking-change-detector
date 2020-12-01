@@ -174,7 +174,7 @@ class DescriptorComparator:
                 )
                 return
             # Check if the removed resource is in the global file-level resource database.
-            if resource_original.value.type not in self.global_resources_update.types:
+            if resource_original.value.type not in self.global_resources_update.types.keys():
                 self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                     proto_file_name=self.message_original.proto_file_name,
@@ -191,7 +191,7 @@ class DescriptorComparator:
 
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.
-                if self._compatible_patterns(
+                if not self._compatible_patterns(
                     resource_original.value.pattern, global_resource_pattern
                 ):
                     self.finding_container.addFinding(

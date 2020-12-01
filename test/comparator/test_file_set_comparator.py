@@ -150,7 +150,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         file_resource_addition = findings_map[
-            "A file-level resource definition `.example.v1.Bar` has been added."
+            "A new resource definition `.example.v1.Bar` has been added."
         ]
         self.assertEqual(
             file_resource_addition.category.name,
