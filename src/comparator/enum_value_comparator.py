@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 from src.comparator.wrappers import EnumValue
 
 
@@ -36,7 +36,7 @@ class EnumValueComparator:
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
                 message=f"A new EnumValue `{self.enum_value_update.name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
         # 2. If updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
@@ -45,7 +45,7 @@ class EnumValueComparator:
                 proto_file_name=self.enum_value_original.proto_file_name,
                 source_code_line=self.enum_value_original.source_code_line,
                 message=f"An EnumValue `{self.enum_value_original.name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is changed.
         elif self.enum_value_original.name != self.enum_value_update.name:
@@ -54,5 +54,5 @@ class EnumValueComparator:
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
                 message=f"Name of the EnumValue is changed from `{self.enum_value_original.name}` to `{self.enum_value_update.name}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )

@@ -108,7 +108,7 @@ class ResourceReferenceTest(unittest.TestCase):
             "resource_database_v1.proto",
         )
         self.assertEqual(message_resource_removal.location.source_code_line, 34)
-        self.assertEqual(message_resource_removal.actionable, True)
+        self.assertEqual(message_resource_removal.change_type.value, 1)
 
     def test_resource_reference_change(self):
         _INVOKER_ORIGNAL = Loader(
