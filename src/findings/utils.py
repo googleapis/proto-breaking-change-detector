@@ -103,6 +103,6 @@ class Finding:
                 "source_code_line": self.location.source_code_line,
             },
             "message": self.message,
-            "change_type": self.change_type,
+            "change_type": self.change_type.name,
             "extra_info": self.extra_info,
         }
