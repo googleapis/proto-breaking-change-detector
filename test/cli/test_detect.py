@@ -9,6 +9,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import os
 from click.testing import CliRunner
 from src.cli.detect import detect
 from unittest.mock import patch
@@ -16,6 +17,8 @@ from io import StringIO
 
 
 class CliDetectTest(unittest.TestCase):
+    COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
+
     def test_descriptor_set_enum(self):
         # Mock the stdout so that the unit test does not
         # print anything to the console.
@@ -111,8 +114,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "--original_api_definition_dirs=test/testdata/protos/service_annotation/v1",
-                    "--update_api_definition_dirs=test/testdata/protos/service_annotation/v1beta1",
+                    f"--original_api_definition_dirs=test/testdata/protos/service_annotation/v1,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=test/testdata/protos/service_annotation/v1beta1,{self.COMMON_PROTOS_DIR}",
                     "--original_proto_files=test/testdata/protos/service_annotation/v1/service_annotation_v1.proto",
                     "--update_proto_files=test/testdata/protos/service_annotation/v1beta1/service_annotation_v1beta1.proto",
                     "--human_readable_message",
@@ -161,8 +164,8 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    "--original_api_definition_dirs=test/testdata/protos/",
-                    "--update_api_definition_dirs=test/testdata/protos/",
+                    f"--original_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
                     "--original_proto_files=test/testdata/protos/google/cloud/oslogin/v1/oslogin.proto",
                     "--update_proto_files=test/testdata/protos/google/cloud/oslogin/v1beta/oslogin.proto",
                     "--human_readable_message",
