@@ -203,7 +203,7 @@ class Field:
         return WithLocation(
             required,
             self.source_code_locations,
-            self.path + (8, 1052),
+            self.path + (8, 1052, 0),
         )
         # fmt: on
 
