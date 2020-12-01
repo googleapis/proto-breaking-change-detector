@@ -66,6 +66,11 @@ class FindingCategory(enum.Enum):
     FIELD_BEHAVIOR_CHANGE = 44
 
 
+class ChangeType(enum.Enum):
+    MAJOR = 1
+    MINOR = 2
+
+
 class Finding:
     class _Location:
         proto_file_name: str
@@ -81,13 +86,13 @@ class Finding:
         proto_file_name,
         source_code_line,
         message,
-        actionable,
+        change_type,
         extra_info=None,
     ):
         self.category = category
         self.location = self._Location(proto_file_name, source_code_line)
         self.message = message
-        self.actionable = actionable
+        self.change_type = change_type
         self.extra_info = extra_info
 
     def toDict(self):
@@ -98,6 +103,6 @@ class Finding:
                 "source_code_line": self.location.source_code_line,
             },
             "message": self.message,
-            "actionable": self.actionable,
+            "change_type": self.change_type.value,
             "extra_info": self.extra_info,
         }

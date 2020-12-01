@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 from src.comparator.wrappers import Field
 
 
@@ -41,7 +41,7 @@ class FieldComparator:
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
                 message=f"A new field `{self.field_update.name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
 
@@ -53,7 +53,7 @@ class FieldComparator:
                 proto_file_name=self.field_original.proto_file_name,
                 source_code_line=self.field_original.source_code_line,
                 message=f"An existing field `{self.field_original.name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
             return
 
@@ -70,7 +70,7 @@ class FieldComparator:
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
                 message=f"Name of an existing field is changed from `{self.field_original.name}` to `{self.field_update.name}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
             return
 
@@ -82,7 +82,7 @@ class FieldComparator:
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.repeated.source_code_line,
                 message=f"Repeated state of an existing field `{self.field_original.name}` is changed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # Field option change from optional to required is breaking.
         if not self.field_original.required.value and self.field_update.required.value:
@@ -91,7 +91,7 @@ class FieldComparator:
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.required.source_code_line,
                 message=f"Field behavior of an existing field `{self.field_original.name}` is changed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # 5. Check the type of the field.
         if self.field_original.proto_type.value != self.field_update.proto_type.value:
@@ -100,7 +100,7 @@ class FieldComparator:
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.proto_type.source_code_line,
                 message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.proto_type.value}` to `{self.field_update.proto_type.value}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # If field has the same primitive type, then the type is identical.
         # If field has the same non-primitive type like `TYPE_ENUM`.
@@ -128,7 +128,7 @@ class FieldComparator:
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.type_name.source_code_line,
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
@@ -141,7 +141,7 @@ class FieldComparator:
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
                     message=msg,
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             else:
                 msg = f"An existing field `{self.field_original.name}` is moved into One-of."
@@ -150,7 +150,7 @@ class FieldComparator:
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
                     message=msg,
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
 
         # 6. Check `google.api.resource_reference` annotation.
@@ -169,7 +169,7 @@ class FieldComparator:
                 proto_file_name=field_update.proto_file_name,
                 source_code_line=resource_ref_update.source_code_line,
                 message=f"A resource reference option is added to the field `{field_original.name}`.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # Resource annotation is removed, check if it is added as a message resource.
@@ -180,7 +180,7 @@ class FieldComparator:
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
                     message=f"A resource reference option of the field `{field_original.name}` is removed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             return
         # Resource annotation is both existing in the field for original and update versions.
@@ -269,5 +269,5 @@ class FieldComparator:
                 message=f"The child_type `{child_type}` and type `{parent_type}` of "
                 f"resource reference option in field `{self.field_original.name}` "
                 "cannot be resolved to the identical resource.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )

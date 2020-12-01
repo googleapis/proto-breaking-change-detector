@@ -14,7 +14,7 @@
 
 import unittest
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 
 
 class FindingContainerTest(unittest.TestCase):
@@ -30,7 +30,7 @@ class FindingContainerTest(unittest.TestCase):
             proto_file_name="my_proto.proto",
             source_code_line=12,
             message="An rpc method bar is removed.",
-            actionable=True,
+            change_type=ChangeType.MAJOR,
         )
         self.assertEqual(len(self.finding_container.getAllFindings()), 1)
 
@@ -40,7 +40,7 @@ class FindingContainerTest(unittest.TestCase):
             proto_file_name="my_proto.proto",
             source_code_line=15,
             message="Not breaking change.",
-            actionable=False,
+            change_type=ChangeType.MINOR,
         )
         self.assertEqual(len(self.finding_container.getActionableFindings()), 1)
 
@@ -55,14 +55,14 @@ class FindingContainerTest(unittest.TestCase):
             proto_file_name="my_proto.proto",
             source_code_line=5,
             message="An existing file-level resource definition has changed.",
-            actionable=True,
+            change_type=ChangeType.MAJOR,
         )
         self.finding_container.addFinding(
             category=FindingCategory.METHOD_SIGNATURE_CHANGE,
             proto_file_name="my_other_proto.proto",
             source_code_line=16,
             message="An existing method_signature is changed from 'sig1' to 'sig2'.",
-            actionable=True,
+            change_type=ChangeType.MAJOR,
         )
         self.assertEqual(
             self.finding_container.toHumanReadableMessage(),

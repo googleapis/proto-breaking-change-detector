@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 from src.comparator.wrappers import Service
 
 
@@ -36,7 +36,7 @@ class ServiceComparator:
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
                 message=f"A new service `{self.service_update.name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # 2. If updated service is None, then the original service is removed.
@@ -46,7 +46,7 @@ class ServiceComparator:
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
                 message=f"An existing service `{self.service_original.name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
             return
         self.messages_map_original = self.service_original.messages_map
@@ -73,7 +73,7 @@ class ServiceComparator:
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=oauth_scopes_original[scope].source_code_line,
                 message=f"An existing oauth_scope `{scope}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
 
     def _compareRpcMethods(
@@ -93,7 +93,7 @@ class ServiceComparator:
                 proto_file_name=removed_method.proto_file_name,
                 source_code_line=removed_method.source_code_line,
                 message=f"An existing rpc method `{name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
@@ -103,7 +103,7 @@ class ServiceComparator:
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
                 message=f"An rpc method `{name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
@@ -117,7 +117,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.input.source_code_line,
                     message=f"Input type of an existing method `{name}` is changed from `{input_type_original}` to `{input_type_update}`.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             # 3.4 The response type of an RPC method is changed.
             response_type_original = method_original.output.value
@@ -128,7 +128,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.output.source_code_line,
                     message=f"Output type of an existing method `{name}` is changed from `{response_type_original}` to `{response_type_update}`.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             # 3.5 The request streaming state of an RPC method is changed.
             if (
@@ -140,7 +140,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.client_streaming.source_code_line,
                     message=f"The request streaming type of an existing method `{name}` is changed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             # 3.6 The response streaming state of an RPC method is changed.
             if (
@@ -152,7 +152,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.server_streaming.source_code_line,
                     message=f"The response streaming type of an existing method `{name}` is changed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             # 3.7 The paginated response of an RPC method is changed.
             if method_original.paged_result_field or method_update.paged_result_field:
@@ -167,7 +167,7 @@ class ServiceComparator:
                         proto_file_name=method_update.proto_file_name,
                         source_code_line=method_update.source_code_line,
                         message=f"The paginated response of an existing method `{name}` is changed.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)
@@ -195,7 +195,7 @@ class ServiceComparator:
                     proto_file_name=method_original.proto_file_name,
                     source_code_line=method_original.http_annotation.source_code_line,
                     message=f"The google.api.http annotation for existing method `{method_original.name}` is removed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             if not http_annotation_original and http_annotation_update:
                 self.finding_container.addFinding(
@@ -203,7 +203,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
                     message=f"A google.api.http annotation is added to method `{method_update.name}`.",
-                    actionable=False,
+                    change_type=ChangeType.MINOR,
                 )
             return
         # Compare http method, they should be identical.
@@ -216,7 +216,7 @@ class ServiceComparator:
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
                 message=f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # Compare http body, they should be identical.
         if http_annotation_original["http_body"] != http_annotation_update["http_body"]:
@@ -225,7 +225,7 @@ class ServiceComparator:
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
                 message=f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # Compare http URI, minor version updates are allowed if not identical.
         if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
@@ -244,7 +244,7 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
                     message=f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
 
     def _compare_lro_annotations(self, method_original, method_update):
@@ -259,7 +259,7 @@ class ServiceComparator:
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.lro_annotation.source_code_line,
                 message=f"A LRO operation_info annotation is added to method `{method_update.name}`.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # LRO operation_info annotation removal.
@@ -269,7 +269,7 @@ class ServiceComparator:
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.lro_annotation.source_code_line,
                 message=f"An existing LRO operation_info annotation is removed from method `{method_update.name}`.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # The response_type value of LRO operation_info is changed.
@@ -279,7 +279,7 @@ class ServiceComparator:
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
                 message=f"The response_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['response_type']}` to `{lro_update.value['response_type']}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         # The metadata_type value of LRO operation_info is changed.
         if lro_original.value["metadata_type"] != lro_update.value["metadata_type"]:
@@ -288,7 +288,7 @@ class ServiceComparator:
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
                 message=f"The metadata_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['metadata_type']}` to `{lro_update.value['metadata_type']}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
 
     def _compare_method_signatures(self, method_original, method_update):
@@ -300,7 +300,7 @@ class ServiceComparator:
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
                 message=f"An existing method_signature is removed from method `{method_original.name}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
         for old_sig, new_sig in zip(signatures_original, signatures_update):
             if old_sig != new_sig:
@@ -309,5 +309,5 @@ class ServiceComparator:
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.method_signatures.source_code_line,
                     message=f"An existing method_signature for method `{method_update.name}` is changed from `{old_sig}` to `{new_sig}`.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )

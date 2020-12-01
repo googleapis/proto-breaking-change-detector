@@ -16,7 +16,7 @@ from src.comparator.field_comparator import FieldComparator
 from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 
 
 class DescriptorComparator:
@@ -42,7 +42,7 @@ class DescriptorComparator:
                 proto_file_name=message_update.proto_file_name,
                 source_code_line=message_update.source_code_line,
                 message=f"A new message `{message_update.name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # 2. If updated message is None, then the original message is removed.
@@ -52,7 +52,7 @@ class DescriptorComparator:
                 proto_file_name=message_original.proto_file_name,
                 source_code_line=message_original.source_code_line,
                 message=f"An existing message `{message_original.name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
             return
 
@@ -154,7 +154,7 @@ class DescriptorComparator:
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,
                 message=f"A message-level resource definition `{resource_update.value.type}` has been added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
             return
         # 2. Message-level resource definitions removal may not be breaking change since
@@ -170,7 +170,7 @@ class DescriptorComparator:
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
                     message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
                 return
             # Check if the removed resource is in the global file-level resource database.
@@ -180,7 +180,7 @@ class DescriptorComparator:
                     proto_file_name=self.message_original.proto_file_name,
                     source_code_line=resource_original.source_code_line,
                     message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             else:
                 # Check the patterns of existing file-level resource are compatible with
@@ -199,7 +199,7 @@ class DescriptorComparator:
                         proto_file_name=self.message_original.proto_file_name,
                         source_code_line=resource_original.source_code_line,
                         message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
             return
         # Resource is existing in both original and update versions.
@@ -212,7 +212,7 @@ class DescriptorComparator:
                 proto_file_name=self.message_update.proto_file_name,
                 source_code_line=resource_update.source_code_line,
                 message=f"The pattern of an existing message-level resource definition `{resource_original.value.type}` has changed from `{resource_original.value.pattern}` to `{resource_update.value.pattern}`.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
 
     def _compatible_patterns(self, patterns_original, patterns_update):

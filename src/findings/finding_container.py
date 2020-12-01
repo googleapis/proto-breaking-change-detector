@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.findings.utils import Finding
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType, Finding
 from collections import defaultdict
 
 
@@ -27,7 +26,7 @@ class FindingContainer:
         proto_file_name: str,
         source_code_line: int,
         message: str,
-        actionable: bool,
+        change_type: ChangeType,
         extra_info=None,
     ):
         self.finding_results.append(
@@ -36,7 +35,7 @@ class FindingContainer:
                 proto_file_name,
                 source_code_line,
                 message,
-                actionable,
+                change_type,
                 extra_info,
             )
         )
@@ -45,7 +44,11 @@ class FindingContainer:
         return self.finding_results
 
     def getActionableFindings(self):
-        return [finding for finding in self.finding_results if finding.actionable]
+        return [
+            finding
+            for finding in self.finding_results
+            if finding.change_type == ChangeType.MAJOR
+        ]
 
     def toDictArr(self):
         return [finding.toDict() for finding in self.finding_results]

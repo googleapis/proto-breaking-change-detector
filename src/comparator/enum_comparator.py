@@ -14,7 +14,7 @@
 
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 from src.comparator.wrappers import Enum
 
 
@@ -38,7 +38,7 @@ class EnumComparator:
                 proto_file_name=self.enum_update.proto_file_name,
                 source_code_line=self.enum_update.source_code_line,
                 message=f"A new Enum `{self.enum_update.name}` is added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
 
         # 2. If updated EnumDescriptor is None, then the original
@@ -49,7 +49,7 @@ class EnumComparator:
                 proto_file_name=self.enum_original.proto_file_name,
                 source_code_line=self.enum_original.source_code_line,
                 message=f"An Enum `{self.enum_original.name}` is removed.",
-                actionable=True,
+                change_type=ChangeType.MAJOR,
             )
 
         # 3. If the EnumDescriptors have the same name, check the values

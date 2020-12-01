@@ -17,7 +17,7 @@ from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
 
 
 class FileSetComparator:
@@ -67,7 +67,7 @@ class FileSetComparator:
                         proto_file_name=classname_option.proto_file_name,
                         source_code_line=classname_option.source_code_line,
                         message=f"An exisiting packaging option `{classname}` for `{option}` is removed.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
             # Compare the option of language namespace. Minor version updates in consideration.
             else:
@@ -96,7 +96,7 @@ class FileSetComparator:
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
                         message=f"An exisiting packaging option `{original_option_value}` for `{option}` is removed.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
                 for namespace in set(transformed_option_value_update.keys()) - set(
                     transformed_option_value_original.keys()
@@ -110,7 +110,7 @@ class FileSetComparator:
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
                         message=f"A new packaging option `{original_option_value}` for `{option}` is added.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
 
     def _compare_services(self, fs_original, fs_update):
@@ -191,7 +191,7 @@ class FileSetComparator:
                         resource_type
                     ].source_code_line,
                     message=f"An existing pattern value of the resource definition `{resource_type}` is removed.",
-                    actionable=True,
+                    change_type=ChangeType.MAJOR,
                 )
             # An existing pattern value is changed.
             # A new pattern value appended to the pattern list is not consider breaking change.
@@ -206,7 +206,7 @@ class FileSetComparator:
                             resource_type
                         ].source_code_line,
                         message=f"An existing pattern value of the resource definition `{resource_type}` is updated from `{old_pattern}` to `{new_pattern}`.",
-                        actionable=True,
+                        change_type=ChangeType.MAJOR,
                     )
 
         # 2. File-level resource definitions addition.
@@ -216,7 +216,7 @@ class FileSetComparator:
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
                 message=f"A file-level resource definition `{resource_type}` has been added.",
-                actionable=False,
+                change_type=ChangeType.MINOR,
             )
         # 3. File-level resource definitions removal may not be breaking change since
         # the resource could be moved to message-level. This will be checked in the message
