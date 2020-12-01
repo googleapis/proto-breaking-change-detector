@@ -114,7 +114,7 @@ class FileSetTest(unittest.TestCase):
             messages=[message],
         )
         file_set = make_file_set(files=[file1, file2])
-        # All resources should register in the database.
+        # All resources should be registered in the database.
         resource_types = file_set.resources_database.types
         resource_patterns = file_set.resources_database.patterns
         self.assertEqual(
