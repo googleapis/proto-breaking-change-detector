@@ -96,7 +96,10 @@ class FileSetTest(unittest.TestCase):
         )
         # File1 with resource definition `example.v1/Foo`.
         file1 = make_file_pb2(
-            name="foo.proto", package=".example.v1", dependency=["bar.proto"], options=options
+            name="foo.proto",
+            package=".example.v1",
+            dependency=["bar.proto"],
+            options=options,
         )
         # File2 with resource definition in messasge `example.v1/Bar`.
         message_options = descriptor_pb2.MessageOptions()
@@ -106,15 +109,20 @@ class FileSetTest(unittest.TestCase):
         resource.type = "example.v1/Bar"
         message = make_message("Test", options=message_options)
         file2 = make_file_pb2(
-            name="bar.proto", package=".example.v1", messages=[message],
-        )    
+            name="bar.proto",
+            package=".example.v1",
+            messages=[message],
+        )
         file_set = make_file_set(files=[file1, file2])
-        # All resources should register in the database. 
+        # All resources should register in the database.
         resource_types = file_set.resources_database.types
         resource_patterns = file_set.resources_database.patterns
-        self.assertEqual(list(resource_types.keys()), ["example.v1/Foo", "example.v1/Bar"])
         self.assertEqual(
-            list(resource_patterns.keys()), ["foo/{foo}", "user/{user}", "user/{user}/bar/"]
+            list(resource_types.keys()), ["example.v1/Foo", "example.v1/Bar"]
+        )
+        self.assertEqual(
+            list(resource_patterns.keys()),
+            ["foo/{foo}", "user/{user}", "user/{user}/bar/"],
         )
 
     def test_file_set_source_code_location(self):

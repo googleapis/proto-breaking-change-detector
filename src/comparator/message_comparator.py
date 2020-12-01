@@ -83,7 +83,7 @@ class DescriptorComparator:
 
         # 6. Check `google.api.resource` annotation.
         # This check has been done in file_set comparator. Since we have
-        # registered all resources in the database. 
+        # registered all resources in the database.
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())

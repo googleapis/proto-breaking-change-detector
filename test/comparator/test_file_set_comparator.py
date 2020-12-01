@@ -171,7 +171,11 @@ class FileSetComparatorTest(unittest.TestCase):
         message = make_message("Test", options=message_options)
         # Original file set with one resource defined at message level.
         file_set_original = make_file_set(
-            files=[make_file_pb2(name="bar.proto", package=".example.v1", messages=[message])]
+            files=[
+                make_file_pb2(
+                    name="bar.proto", package=".example.v1", messages=[message]
+                )
+            ]
         )
         # Update file set without any resources.
         file_set_update = make_file_set(
@@ -180,11 +184,19 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}  
-        file_resource_removal= findings_map[
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        file_resource_removal = findings_map[
             "An existing resource definition `example.v1/Bar` has been removed."
         ]
-        
+        self.assertEqual(
+            file_resource_removal.category.name,
+            "RESOURCE_DEFINITION_REMOVAL",
+        )
+        self.assertEqual(
+            file_resource_removal.location.proto_file_name,
+            "bar.proto",
+        )
+
     def test_java_outer_classname_removal(self):
         option1 = descriptor_pb2.FileOptions()
         option1.java_outer_classname = "Foo"

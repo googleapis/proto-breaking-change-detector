@@ -223,7 +223,9 @@ class FileSetComparator:
             self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                 proto_file_name=resources_original.types[resource_type].proto_file_name,
-                source_code_line=resources_original.types[resource_type].source_code_line,
+                source_code_line=resources_original.types[
+                    resource_type
+                ].source_code_line,
                 message=f"An existing resource definition `{resource_type}` has been removed.",
                 change_type=ChangeType.MAJOR,
-            )       
+            )
