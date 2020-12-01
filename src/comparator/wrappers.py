@@ -503,9 +503,17 @@ class Method:
     @property
     def lro_annotation(self):
         """Return the LRO operation_info annotation defined for this method."""
-        if not self.output.value.endswith("google.longrunning.Operation"):
+        # Skip the operations.proto because the `GetOperation` does not have LRO annotations.
+        # Remove this condition will fail the service-annotation test in cli integration test.
+        if not self.output.value.endswith("google.longrunning.Operation") or self.proto_file_name == "google/longrunning/operations.proto":
             return None
         op = self.method_pb.options.Extensions[operations_pb2.operation_info]
+        if not op.response_type or not op.metadata_type:
+            raise TypeError(
+                f"rpc {self.name} returns a google.longrunning."
+                "Operation, but is missing a response type or "
+                "metadata type.",
+            )
         lro_annotation = {
             "response_type": op.response_type,
             "metadata_type": op.metadata_type,
@@ -785,7 +793,7 @@ class FileSet:
         resources_database = ResourceDatabase()
         for fd in file_set.file:
             source_code_locations = source_code_locations_map[fd.name]
-            # File-level resource definition.
+            # Register file-level resource definitions in database.
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
             ):
@@ -795,14 +803,38 @@ class FileSet:
                         resource, source_code_locations, resource_path, fd.name
                     )
                 )
-            # message-level resource definition.
+            # Register message-level resource definitions in database.
+            # Put first layer message in stack and iterate them for nested messages.
+            message_stack = []
             for i, message in enumerate(fd.message_type):
+                resource_path = (4, i, 7, 1053)
+                message_stack.append(
+                    WithLocation(message, source_code_locations, resource_path, fd.name)
+                )
+            while len(message_stack) != 0:
+                message_with_location = message_stack.pop()
+                message = message_with_location.value
                 resource = message.options.Extensions[resource_pb2.resource]
                 if resource.type and resource.pattern:
-                    resource_path = (4, i, 7, 1053)
                     resources_database.register_resource(
                         WithLocation(
-                            resource, source_code_locations, resource_path, fd.name
+                            resource,
+                            source_code_locations,
+                            message_with_location.path,
+                            fd.name,
+                        )
+                    )
+                for i, nested_message in enumerate(message.nested_type):
+                    resource_path = message_with_location.path + (
+                        3,
+                        i,
+                    )
+                    message_stack.append(
+                        WithLocation(
+                            nested_message,
+                            source_code_locations,
+                            resource_path,
+                            fd.name,
                         )
                     )
 

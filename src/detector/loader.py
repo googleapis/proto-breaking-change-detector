@@ -28,7 +28,6 @@ class Loader:
     # from API definition files that ussers pass in from the command line.
     _CURRENT_DIR = os.getcwd()
     PROTOC_BINARY = os.path.join(_CURRENT_DIR, "test/tools/protoc")
-    COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
     PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
 
     def __init__(
@@ -53,7 +52,6 @@ class Loader:
         protoc_command = [self.PROTOC_BINARY]
         for directory in self.proto_defintion_dirs:
             protoc_command.append(f"--proto_path={directory}")
-        protoc_command.append(f"--proto_path={self.COMMON_PROTOS_DIR}")
         protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
         protoc_command.append("-o/dev/stdout")
         protoc_command.append("--include_source_info")

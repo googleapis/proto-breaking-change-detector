@@ -29,18 +29,19 @@ class ResourceReferenceTest(unittest.TestCase):
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet (_PB_ORIGNAL and _PB_UPDATE) out of it.
     PROTO_DIR = os.path.join(os.getcwd(), "test/testdata/protos/example/")
+    COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
 
     def setUp(self):
         self.finding_container = FindingContainer()
 
     def test_resources_change(self):
         _INVOKER_ORIGNAL = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR],
+            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[os.path.join(self.PROTO_DIR, "resource_database_v1.proto")],
             descriptor_set=None,
         )
         _INVOKER_UPDATE = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR],
+            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[
                 os.path.join(self.PROTO_DIR, "resource_database_v1beta1.proto")
             ],
@@ -98,12 +99,12 @@ class ResourceReferenceTest(unittest.TestCase):
 
     def test_resource_reference_change(self):
         _INVOKER_ORIGNAL = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR],
+            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[os.path.join(self.PROTO_DIR, "resource_reference_v1.proto")],
             descriptor_set=None,
         )
         _INVOKER_UPDATE = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR],
+            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[
                 os.path.join(self.PROTO_DIR, "resource_reference_v1beta1.proto")
             ],
