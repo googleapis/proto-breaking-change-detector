@@ -90,19 +90,31 @@ class FileSetTest(unittest.TestCase):
         options = descriptor_pb2.FileOptions()
         options.Extensions[resource_pb2.resource_definition].append(
             resource_pb2.ResourceDescriptor(
-                type=".example.v1.Bar",
-                pattern=["foo/{foo}/bar/{bar}", "foo/{foo}/bar"],
+                type="example.v1/Foo",
+                pattern=["foo/{foo}"],
             )
         )
-        file_pb2 = make_file_pb2(
-            name="foo.proto", package=".example.v1", options=options
+        # File1 with resource definition `example.v1/Foo`.
+        file1 = make_file_pb2(
+            name="foo.proto", package=".example.v1", dependency=["bar.proto"], options=options
         )
-        file_set = make_file_set(files=[file_pb2])
+        # File2 with resource definition in messasge `example.v1/Bar`.
+        message_options = descriptor_pb2.MessageOptions()
+        resource = message_options.Extensions[resource_pb2.resource]
+        resource.pattern.append("user/{user}")
+        resource.pattern.append("user/{user}/bar/")
+        resource.type = "example.v1/Bar"
+        message = make_message("Test", options=message_options)
+        file2 = make_file_pb2(
+            name="bar.proto", package=".example.v1", messages=[message],
+        )    
+        file_set = make_file_set(files=[file1, file2])
+        # All resources should register in the database. 
         resource_types = file_set.resources_database.types
         resource_patterns = file_set.resources_database.patterns
-        self.assertEqual(list(resource_types.keys()), [".example.v1.Bar"])
+        self.assertEqual(list(resource_types.keys()), ["example.v1/Foo", "example.v1/Bar"])
         self.assertEqual(
-            list(resource_patterns.keys()), ["foo/{foo}/bar/{bar}", "foo/{foo}/bar"]
+            list(resource_patterns.keys()), ["foo/{foo}", "user/{user}", "user/{user}/bar/"]
         )
 
     def test_file_set_source_code_location(self):
