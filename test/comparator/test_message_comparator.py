@@ -155,6 +155,22 @@ class DescriptorComparatorTest(unittest.TestCase):
         ]
         self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
 
+    def test_compatible_patterns(self):
+        message_comparator = DescriptorComparator(None, None, None)
+        # An existing pattern is removed.
+        self.assertFalse(message_comparator._compatible_patterns(["a", "b"], ["a"]))
+        # An existing pattern value is changed.
+        self.assertFalse(
+            message_comparator._compatible_patterns(["a", "b"], ["b", "a"])
+        )
+        self.assertFalse(message_comparator._compatible_patterns(["a", "b"], ["c"]))
+        # An new pattern value is appended.
+        self.assertTrue(
+            message_comparator._compatible_patterns(["a", "b"], ["a", "b", "c"])
+        )
+        # Identical patterns
+        self.assertTrue(message_comparator._compatible_patterns(["a", "b"], ["a", "b"]))
+
 
 if __name__ == "__main__":
     unittest.main()

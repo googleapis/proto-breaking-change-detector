@@ -65,19 +65,6 @@ class ResourceReferenceTest(unittest.TestCase):
             "resource_database_v1beta1.proto",
         )
         self.assertEqual(file_resource_pattern_change.location.source_code_line, 13)
-        # A new file-level resource definition is added.
-        file_resource_addition = findings_map[
-            "A file-level resource definition `example.googleapis.com/t3` has been added."
-        ]
-        self.assertEqual(
-            file_resource_addition.category.name,
-            "RESOURCE_DEFINITION_ADDITION",
-        )
-        self.assertEqual(
-            file_resource_addition.location.proto_file_name,
-            "resource_database_v1beta1.proto",
-        )
-        self.assertEqual(file_resource_addition.location.source_code_line, 19)
         # An existing pattern of a message-level resource annotation is changed.
         message_resource_pattern_change = findings_map[
             "The pattern of an existing message-level resource definition `example.googleapis.com/Foo` has changed from `['foo/{foo}/bar/{bar}']` to `['foo/{foo}/bar']`."

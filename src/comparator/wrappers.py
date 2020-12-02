@@ -687,34 +687,20 @@ class FileSet:
         self.services_map: Dict[str, Service] = {}
         self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
-        self.resources_database = ResourceDatabase()
         self.file_set_pb = file_set_pb
         self.api_version = self._get_api_version(file_set_pb)
         path = ()
+        source_code_locations_map = self._get_source_code_locations_map(file_set_pb)
+        self.resources_database = self._get_resource_database(
+            file_set_pb, source_code_locations_map
+        )
         for fd in file_set_pb.file:
-            # Iterate over the source_code_info and place it into a dictionary.
-            #
-            # The comments in protocol buffers are sorted by a concept called
-            # the "path", which is a sequence of integers described in more
-            # detail below; this code simply shifts from a list to a dict,
-            # with tuples of paths as the dictionary keys.
-            source_code_locations: Dict[
-                Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
-            ] = {}
-            for location in fd.source_code_info.location:
-                source_code_locations[tuple(location.path)] = location
+            source_code_locations = source_code_locations_map[fd.name]
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self._get_packaging_options_map(
                 fd.options, fd.name, source_code_locations, path + (8,)
             )
             # fmt: off
-            for i, resource in enumerate(
-                fd.options.Extensions[resource_pb2.resource_definition]
-            ):
-                resource_path = path + (8, 1053, i)
-                self.resources_database.register_resource(
-                    WithLocation(resource, source_code_locations, resource_path, fd.name)
-                )
             # FileDescriptorProto.message_type has field number 4
             self.messages_map.update(
                 (
@@ -777,6 +763,87 @@ class FileSet:
                     return match.group() if match else None
         package = self.file_set_pb.file[0].package
         return re.search(version, package).group()
+
+    def _get_source_code_locations_map(
+        self, file_set: descriptor_pb2.FileDescriptorSet
+    ) -> Dict[str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]]:
+        source_code_locations_map = {}
+        for fd in file_set.file:
+            # Iterate over the source_code_info and place it into a dictionary.
+            #
+            # The comments in protocol buffers are sorted by a concept called
+            # the "path", which is a sequence of integers described in more
+            # detail below; this code simply shifts from a list to a dict,
+            # with tuples of paths as the dictionary keys.
+            source_code_locations = {
+                tuple(location.path): location
+                for location in fd.source_code_info.location
+            }
+            source_code_locations_map[fd.name] = source_code_locations
+        return source_code_locations_map
+
+    def _get_resource_database(
+        self,
+        file_set: descriptor_pb2.FileDescriptorSet,
+        source_code_locations_map: Dict[
+            str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
+        ],
+    ):
+        resources_database = ResourceDatabase()
+        for fd in file_set.file:
+            source_code_locations = source_code_locations_map[fd.name]
+            # Register file-level resource definitions in database.
+            for i, resource in enumerate(
+                fd.options.Extensions[resource_pb2.resource_definition]
+            ):
+                # The file option has field number 8, resource definition has
+                # field number 1053, and the index of the resource should be
+                # appended to the resource path.
+                resource_path = (8, 1053, i)
+                resources_database.register_resource(
+                    WithLocation(
+                        resource, source_code_locations, resource_path, fd.name
+                    )
+                )
+            # Register message-level resource definitions in database.
+            # Put first layer message in stack and iterate them for nested messages.
+            message_stack = [
+                # The messages in file has field number 4, the index of the messasge
+                # should be appended to the resource path. Message option has field
+                # number 7, and resource option has field number 1053.
+                WithLocation(message, source_code_locations, (4, i, 7, 1053), fd.name)
+                for i, message in enumerate(fd.message_type)
+            ]
+
+            while message_stack:
+                message_with_location = message_stack.pop()
+                message = message_with_location.value
+                resource = message.options.Extensions[resource_pb2.resource]
+                if resource.type and resource.pattern:
+                    resources_database.register_resource(
+                        WithLocation(
+                            resource,
+                            source_code_locations,
+                            message_with_location.path,
+                            fd.name,
+                        )
+                    )
+                for i, nested_message in enumerate(message.nested_type):
+                    # Nested message has field number 3, and index of the
+                    # nested message is appended to the resource path.
+                    # fmt: off
+                    resource_path = message_with_location.path + (3,i,)
+                    message_stack.append(
+                        WithLocation(
+                            nested_message,
+                            source_code_locations,
+                            resource_path,
+                            fd.name,
+                        )
+                    )
+                    # fmt: on
+
+        return resources_database
 
     def _get_packaging_options_map(
         self,

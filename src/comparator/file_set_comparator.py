@@ -215,7 +215,7 @@ class FileSetComparator:
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
-                message=f"A file-level resource definition `{resource_type}` has been added.",
+                message=f"A new resource definition `{resource_type}` has been added.",
                 change_type=ChangeType.MINOR,
             )
         # 3. File-level resource definitions removal may not be breaking change since

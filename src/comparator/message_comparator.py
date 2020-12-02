@@ -191,7 +191,7 @@ class DescriptorComparator:
 
                 # If there is pattern removal, or pattern value change. Then the global file-level resource
                 # can not replace the original message-level resource.
-                if self._compatible_patterns(
+                if not self._compatible_patterns(
                     resource_original.value.pattern, global_resource_pattern
                 ):
                     self.finding_container.addFinding(
