@@ -258,10 +258,11 @@ class FieldComparator:
             raise TypeError(
                 "In a resource_reference annotation, either `type` or `child_type` field should be defined"
             )
-        if resource_ref.type and self.local_resource_update.value.type != checked_type:
-            return False
-        parent_resources = self.global_resources_original.get_parent_resources_by_child_type(resource_ref.child_type)
-        if self.local_resource_update.type not in [resource.value.type for resource in parent_resources]:
+        if self.field_original.child_type:
+            parent_resources = self.global_resources_original.get_parent_resources_by_child_type(resource_ref.child_type)
+            if self.local_resource_update.value.type not in [resource.value.type for resource in parent_resources]:
+                return False
+        elif self.local_resource_update.value.type != resource_ref.type:
             return False
         return True
 
