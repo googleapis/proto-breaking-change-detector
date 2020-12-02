@@ -775,11 +775,10 @@ class FileSet:
             # the "path", which is a sequence of integers described in more
             # detail below; this code simply shifts from a list to a dict,
             # with tuples of paths as the dictionary keys.
-            source_code_locations: Dict[
-                Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
-            ] = {}
-            for location in fd.source_code_info.location:
-                source_code_locations[tuple(location.path)] = location
+            source_code_locations = {
+                tuple(location.path): location
+                for location in fd.source_code_info.location
+            }
             source_code_locations_map[fd.name] = source_code_locations
         return source_code_locations_map
 
@@ -797,6 +796,9 @@ class FileSet:
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
             ):
+                # The file option has field number 8, resource definition has
+                # field number 1053, and the index of the resource should be
+                # appended to the resource path.
                 resource_path = (8, 1053, i)
                 resources_database.register_resource(
                     WithLocation(
@@ -805,13 +807,15 @@ class FileSet:
                 )
             # Register message-level resource definitions in database.
             # Put first layer message in stack and iterate them for nested messages.
-            message_stack = []
-            for i, message in enumerate(fd.message_type):
-                resource_path = (4, i, 7, 1053)
-                message_stack.append(
-                    WithLocation(message, source_code_locations, resource_path, fd.name)
-                )
-            while len(message_stack) != 0:
+            message_stack = [
+                # The messages in file has field number 4, the index of the messasge
+                # should be appended to the resource path. Message option has field
+                # number 7, and resource option has field number 1053.
+                WithLocation(message, source_code_locations, (4, i, 7, 1053), fd.name)
+                for i, message in enumerate(fd.message_type)
+            ]
+
+            while message_stack:
                 message_with_location = message_stack.pop()
                 message = message_with_location.value
                 resource = message.options.Extensions[resource_pb2.resource]
@@ -825,10 +829,10 @@ class FileSet:
                         )
                     )
                 for i, nested_message in enumerate(message.nested_type):
-                    resource_path = message_with_location.path + (
-                        3,
-                        i,
-                    )
+                    # Nested message has field number 3, and index of the
+                    # nested message is appended to the resource path.
+                    # fmt: off
+                    resource_path = message_with_location.path + (3,i,)
                     message_stack.append(
                         WithLocation(
                             nested_message,
@@ -837,6 +841,7 @@ class FileSet:
                             fd.name,
                         )
                     )
+                    # fmt: on
 
         return resources_database
 
