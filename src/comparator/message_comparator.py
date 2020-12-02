@@ -56,8 +56,6 @@ class DescriptorComparator:
             )
             return
 
-        self.global_resources_original = self.message_original.file_resources
-        self.global_resources_update = self.message_update.file_resources
         # 3. Check breaking changes in each fields. Note: Fields are
         # identified by number, not by name. Descriptor.fields_by_number
         # (dict int -> FieldDescriptor) indexed by number.
@@ -84,7 +82,8 @@ class DescriptorComparator:
             )
 
         # 6. Check `google.api.resource` annotation.
-        self._compare_resources(message_original.resource, message_update.resource)
+        # This check has been done in file_set comparator. Since we have
+        # registered all resources in the database.
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
@@ -139,88 +138,3 @@ class DescriptorComparator:
                 nested_enum_dict_update[name],
                 self.finding_container,
             ).compare()
-
-    def _compare_resources(
-        self,
-        resource_original,
-        resource_update,
-    ):
-        if not resource_original and not resource_update:
-            return
-        # 1. A new resource definition is added.
-        if not resource_original and resource_update:
-            self.finding_container.addFinding(
-                category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
-                proto_file_name=self.message_update.proto_file_name,
-                source_code_line=resource_update.source_code_line,
-                message=f"A message-level resource definition `{resource_update.value.type}` has been added.",
-                change_type=ChangeType.MINOR,
-            )
-            return
-        # 2. Message-level resource definitions removal may not be breaking change since
-        # the resource could be moved to file-level resource definition.
-        # 3. Note that the type change of an existing resource definition is like one resource
-        # is removed and another one is added.
-        if (resource_original and not resource_update) or (
-            resource_original.value.type != resource_update.value.type
-        ):
-            if not self.global_resources_update:
-                self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    proto_file_name=self.message_original.proto_file_name,
-                    source_code_line=resource_original.source_code_line,
-                    message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                    change_type=ChangeType.MAJOR,
-                )
-                return
-            # Check if the removed resource is in the global file-level resource database.
-            if resource_original.value.type not in self.global_resources_update.types:
-                self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                    proto_file_name=self.message_original.proto_file_name,
-                    source_code_line=resource_original.source_code_line,
-                    message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                    change_type=ChangeType.MAJOR,
-                )
-            else:
-                # Check the patterns of existing file-level resource are compatible with
-                # the patterns of the removed message-level resource.
-                global_resource_pattern = self.global_resources_update.types[
-                    resource_original.value.type
-                ].value.pattern
-
-                # If there is pattern removal, or pattern value change. Then the global file-level resource
-                # can not replace the original message-level resource.
-                if not self._compatible_patterns(
-                    resource_original.value.pattern, global_resource_pattern
-                ):
-                    self.finding_container.addFinding(
-                        category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
-                        proto_file_name=self.message_original.proto_file_name,
-                        source_code_line=resource_original.source_code_line,
-                        message=f"An existing message-level resource definition `{resource_original.value.type}` has been removed.",
-                        change_type=ChangeType.MAJOR,
-                    )
-            return
-        # Resource is existing in both original and update versions.
-        # 3. Patterns of message-level resource definitions have changed.
-        if not self._compatible_patterns(
-            resource_original.value.pattern, resource_update.value.pattern
-        ):
-            self.finding_container.addFinding(
-                category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
-                proto_file_name=self.message_update.proto_file_name,
-                source_code_line=resource_update.source_code_line,
-                message=f"The pattern of an existing message-level resource definition `{resource_original.value.type}` has changed from `{resource_original.value.pattern}` to `{resource_update.value.pattern}`.",
-                change_type=ChangeType.MAJOR,
-            )
-
-    def _compatible_patterns(self, patterns_original, patterns_update):
-        # An existing pattern is removed.
-        if len(patterns_original) > len(patterns_update):
-            return False
-        # An existing pattern value is changed.
-        for old_pattern, new_pattern in zip(patterns_original, patterns_update):
-            if old_pattern != new_pattern:
-                return False
-        return True

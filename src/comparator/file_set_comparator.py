@@ -218,6 +218,14 @@ class FileSetComparator:
                 message=f"A new resource definition `{resource_type}` has been added.",
                 change_type=ChangeType.MINOR,
             )
-        # 3. File-level resource definitions removal may not be breaking change since
-        # the resource could be moved to message-level. This will be checked in the message
-        # and field level (where the resource is referenced).
+        # 3. File-level resource definitions removal.
+        for resource_type in resources_types_original - resources_types_update:
+            self.finding_container.addFinding(
+                category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
+                proto_file_name=resources_original.types[resource_type].proto_file_name,
+                source_code_line=resources_original.types[
+                    resource_type
+                ].source_code_line,
+                message=f"An existing resource definition `{resource_type}` has been removed.",
+                change_type=ChangeType.MAJOR,
+            )

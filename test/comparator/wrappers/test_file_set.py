@@ -90,28 +90,48 @@ class FileSetTest(unittest.TestCase):
         options = descriptor_pb2.FileOptions()
         options.Extensions[resource_pb2.resource_definition].append(
             resource_pb2.ResourceDescriptor(
-                type="example.v1/Bar",
-                pattern=["foo/{foo}/bar/{bar}", "foo/{foo}/bar"],
+                type="example.v1/Foo",
+                pattern=["foo/{foo}"],
             )
         )
+        # File1 with file-level resource definition `example.v1/Foo`.
+        file1 = make_file_pb2(
+            name="foo.proto",
+            package=".example.v1",
+            dependency=["bar.proto"],
+            options=options,
+        )
+        # File2 with resource definition in message and nested message.
         message_options = descriptor_pb2.MessageOptions()
         resource = message_options.Extensions[resource_pb2.resource]
-        resource.pattern.append("foo/{foo}/")
-        resource.type = "example.v1/Foo"
-        nesed_message = make_message("Test", options=message_options)
-        message = make_message(nested_messages=[nesed_message])
-        file_pb2 = make_file_pb2(
-            name="foo.proto", package=".example.v1", options=options, messages=[message]
+        resource.pattern.append("user/{user}")
+        resource.pattern.append("user/{user}/bar/")
+        resource.type = "example.v1/Bar"
+
+        nested_message_options = descriptor_pb2.MessageOptions()
+        resource = nested_message_options.Extensions[resource_pb2.resource]
+        resource.pattern.append("tests/{test}/")
+        resource.type = "example.v1/Test"
+        nesed_message = make_message("nested_message", options=nested_message_options)
+        message = make_message(
+            name="outer_message",
+            nested_messages=[nesed_message],
+            options=message_options,
         )
-        file_set = make_file_set(files=[file_pb2])
+        file2 = make_file_pb2(
+            name="bar.proto", package=".example.v1", messages=[message]
+        )
+        file_set = make_file_set(files=[file1, file2])
+        # All resources should be registered in the database.
         resource_types = file_set.resources_database.types
         resource_patterns = file_set.resources_database.patterns
         self.assertEqual(
-            list(resource_types.keys()), ["example.v1/Bar", "example.v1/Foo"]
+            list(resource_types.keys()),
+            ["example.v1/Foo", "example.v1/Bar", "example.v1/Test"],
         )
         self.assertEqual(
             list(resource_patterns.keys()),
-            ["foo/{foo}/bar/{bar}", "foo/{foo}/bar", "foo/{foo}/"],
+            ["foo/{foo}", "user/{user}", "user/{user}/bar/", "tests/{test}/"],
         )
 
     def test_file_set_source_code_location(self):
