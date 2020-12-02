@@ -296,7 +296,7 @@ class FieldComparator:
                     child_type
                 )
             )
-        if not any(parent_type == parent.value.type for parent in parent_resources):
+        if not any(parent.value.type == parent_type for parent in parent_resources):
             # Resulting referenced resource patterns cannot be resolved identical.
             self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
