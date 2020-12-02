@@ -14,8 +14,16 @@
 
 import unittest
 from test.tools.mock_descriptors import make_field
+from test.tools.mock_resources import (
+    make_resource_descriptor,
+    make_resource_database,
+    make_field_annotation_resource_reference,
+)
 from src.comparator.field_comparator import FieldComparator
 from src.findings.finding_container import FindingContainer
+from src.comparator.resource_database import ResourceDatabase
+from google.protobuf import descriptor_pb2 as desc
+from google.api import resource_pb2
 
 
 class FieldComparatorTest(unittest.TestCase):
@@ -123,6 +131,319 @@ class FieldComparatorTest(unittest.TestCase):
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings["An existing field `Foo` is moved out of One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
+
+    def test_resource_reference_addition_breaking(self):
+        # The added resource reference is not in the database. Breaking change.
+        # The original field is without resource reference.
+        field_without_reference = make_field(name="Test")
+        # The update field has resource reference, but it does not exist
+        # in the global database.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        FieldComparator(
+            field_without_reference, field_with_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getActionableFindings()[0]
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
+        self.assertEqual(
+            finding.message,
+            "A resource reference option is added to the field `Test`, but it is not defined anywhere",
+        )
+
+    def test_resource_reference_addition_non_breaking(self):
+        # The added resource reference is in the database. Non-breaking change.
+        # The original field is without resource reference.
+        field_without_reference = make_field(name="Test")
+        # Create a database with resource `example.v1/Foo` registered.
+        resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["foo/{foo}"]
+        )
+        file_resources = make_resource_database(resources=[resource])
+        # The update field has resource reference of type `example.v1/Foo`.
+        field_options = desc.FieldOptions()
+        field_options.Extensions[
+            resource_pb2.resource_reference
+        ].type = "example.v1/Foo"
+        field_with_reference = make_field(
+            name="Test", options=field_options, file_resources=file_resources
+        )
+        FieldComparator(
+            field_without_reference, field_with_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "A resource reference option is added to the field `Test`."
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+
+    def test_resource_reference_removal_breaking1(self):
+        # Removed resource reference is not added in message options. Breaking.
+        # Original field has resource reference `example.v1/Foo`.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        # The update field has no resource reference, and no resource reference is
+        # defined in the messasge.
+        field_without_reference = make_field(name="Test")
+        FieldComparator(
+            field_with_reference, field_without_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getActionableFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "A resource reference option of the field `Test` is removed.",
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_resource_reference_removal_breaking2(self):
+        # Removed resource reference is defined by type, which is not identical
+        # with the message options.
+        # Original field has resource reference `example.v1/Foo`.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        # Update field has no resource reference, and the resource type
+        # is different from the message options type.
+        message_resource = make_resource_descriptor(
+            resource_type="NotInteresting", resource_patterns=["NotInteresting"]
+        )
+        field_without_reference = make_field(
+            name="Test", message_resource=message_resource
+        )
+        FieldComparator(
+            field_with_reference, field_without_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getActionableFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "A resource reference option of the field `Test` is removed.",
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_resource_reference_removal_breaking3(self):
+        # Removed resource reference is defined by child type, which can not
+        # be resolved to identical resource with the message options.
+        # Original field has resource reference `example.v1/Foo`.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=True
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        # Update field has no resource reference, and the removed resource child type
+        # is not identical with the message resource option.
+        message_resource = make_resource_descriptor(
+            resource_type="example.v1/Bar", resource_patterns=["bar/{bar}"]
+        )
+        field_resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["foo/{foo}"]
+        )
+        # Register the two resources in the database.
+        resource_database = make_resource_database(
+            resources=[message_resource, field_resource]
+        )
+
+        field_without_reference = make_field(
+            name="Test",
+            file_resources=resource_database,
+            message_resource=message_resource,
+        )
+        FieldComparator(
+            field_with_reference, field_without_reference, self.finding_container
+        ).compare()
+        # `bar/{bar}` is not parent resource of `foo/{foo}`.
+        finding = self.finding_container.getActionableFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "A resource reference option of the field `Test` is removed.",
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_resource_reference_removal_non_breaking1(self):
+        # Removed resource reference is defined by type, and it is
+        # added back to the message options.
+        # Original field has resource reference `example.v1/Foo`.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        # Update field has no resource reference. But the message has
+        # resource options `example.v1/Foo`.
+        message_resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["bar/{bar}"]
+        )
+
+        field_without_reference = make_field(
+            name="Test", message_resource=message_resource
+        )
+        FieldComparator(
+            field_with_reference, field_without_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "A resource reference option of the field `Test` is removed, but added back to the message options.",
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MINOR")
+
+    def test_resource_reference_removal_non_breaking2(self):
+        # Removed resource reference is defined by child type, and it
+        # can be resolved to the same resource with the message options.
+        # Original field has resource reference `example.v1/Foo`.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        # Update field has no resource reference. But the message has
+        # resource options `example.v1/Foo`.
+        message_resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["bar/{bar}"]
+        )
+        field_resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["bar/{bar}/foo/{foo}"]
+        )
+        # Register the two resources in the database.
+        resource_database = make_resource_database(
+            resources=[message_resource, field_resource]
+        )
+        field_without_reference = make_field(
+            name="Test",
+            message_resource=message_resource,
+            file_resources=resource_database,
+        )
+        # `bar/{bar}` is the parent resource of `bar/{bar}/foo/{foo}`.
+        FieldComparator(
+            field_with_reference, field_without_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "A resource reference option of the field `Test` is removed, but added back to the message options.",
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MINOR")
+
+    def test_resource_reference_change_same_type(self):
+        # The field has the identical resource reference.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        FieldComparator(
+            field_with_reference, field_with_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()
+        # No breaking change should be detected.
+        self.assertFalse(finding)
+
+    def test_resource_reference_change_same_child_type(self):
+        # The field has the identical resource reference.
+        field_options = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=True
+        )
+        field_with_reference = make_field(name="Test", options=field_options)
+        FieldComparator(
+            field_with_reference, field_with_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()
+        # No breaking change should be detected.
+        self.assertFalse(finding)
+
+    def test_resource_reference_change_type_conversion_non_breaking(self):
+        child_resource = make_resource_descriptor(
+            resource_type="example.v1/Foo",
+            resource_patterns=["bar/{bar}/foo/{foo}", "bar/{bar}/foo"],
+        )
+        parent_resource = make_resource_descriptor(
+            resource_type="example.v1/Bar", resource_patterns=["bar/{bar}"]
+        )
+        # Register two resources in database.
+        resource_database = make_resource_database(
+            resources=[child_resource, parent_resource]
+        )
+        # The original field is defined by child type.
+        field_options_child = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=True
+        )
+        field_with_reference_child = make_field(
+            name="Test", options=field_options_child, file_resources=resource_database
+        )
+
+        # The update field is defined by parent type.
+        field_options_parent = make_field_annotation_resource_reference(
+            resource_type="example.v1/Bar", is_child_type=False
+        )
+        field_with_reference_parent = make_field(
+            name="Test", options=field_options_parent, file_resources=resource_database
+        )
+        # The two resources can be resolved to the identical resource.
+        FieldComparator(
+            field_with_reference_child,
+            field_with_reference_parent,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()
+        # No breaking change should be detected.
+        self.assertFalse(finding)
+
+        # Reverse should be same since the two resources can
+        # be resolved to the identical resource.
+        FieldComparator(
+            field_with_reference_parent,
+            field_with_reference_child,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()
+        # No breaking change should be detected.
+        self.assertFalse(finding)
+
+    def test_resource_reference_change_type_conversion_breaking(self):
+        resource_bar = make_resource_descriptor(
+            resource_type="example.v1/Bar",
+            resource_patterns=["bar/{bar}/foo/{foo}", "bar/{bar}/foo"],
+        )
+        resource_foo = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["foo/{foo}"]
+        )
+        # Register two resources in database.
+        resource_database = make_resource_database(
+            resources=[resource_bar, resource_foo]
+        )
+        # The original field is defined by child type.
+        field_options_child = make_field_annotation_resource_reference(
+            resource_type="example.v1/Bar", is_child_type=True
+        )
+        field_with_reference_child = make_field(
+            name="Test", options=field_options_child, file_resources=resource_database
+        )
+
+        # The update field is defined by parent type.
+        field_options_parent = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_with_reference_parent = make_field(
+            name="Test", options=field_options_parent, file_resources=resource_database
+        )
+        # The two resources can nnot be resolved to the identical resource.
+        FieldComparator(
+            field_with_reference_child,
+            field_with_reference_parent,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
+        self.assertEqual(
+            finding.message,
+            "The child_type `example.v1/Bar` and type `example.v1/Foo` of resource reference option in field `Test` cannot be resolved to the identical resource.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
 
 
 if __name__ == "__main__":

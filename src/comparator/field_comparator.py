@@ -166,7 +166,7 @@ class FieldComparator:
         if not resource_ref_original and resource_ref_update:
             # Check whether the new resource reference is in the database.
             resource_in_database = True
-            if field_update.child_type:
+            if field_update.child_type and self.global_resources_update:
                 parent_resources = (
                     self.global_resources_update.get_parent_resources_by_child_type(
                         resource_ref_update.value.child_type
@@ -174,14 +174,14 @@ class FieldComparator:
                 )
                 if not parent_resources:
                     resource_in_database = False
-            else:
+            elif not field_update.child_type and self.global_resources_update:
                 resources = self.global_resources_update.get_resource_by_type(
                     resource_ref_update.value.type
                 )
                 if not resources:
                     resource_in_database = False
             # If the new resource reference is not in the database, breaking change.
-            if not resource_in_database:
+            if not resource_in_database or not self.global_resources_update:
                 self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                     proto_file_name=field_update.proto_file_name,
@@ -208,6 +208,14 @@ class FieldComparator:
                     source_code_line=resource_ref_original.source_code_line,
                     message=f"A resource reference option of the field `{field_original.name}` is removed.",
                     change_type=ChangeType.MAJOR,
+                )
+            else:
+                self.finding_container.addFinding(
+                    category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
+                    proto_file_name=field_original.proto_file_name,
+                    source_code_line=resource_ref_original.source_code_line,
+                    message=f"A resource reference option of the field `{field_original.name}` is removed, but added back to the message options.",
+                    change_type=ChangeType.MINOR,
                 )
             return
         # Resource annotation is both existing in the field for original and update versions.
@@ -260,7 +268,7 @@ class FieldComparator:
             )
         if self.field_original.child_type:
             parent_resources = (
-                self.global_resources_original.get_parent_resources_by_child_type(
+                self.global_resources_update.get_parent_resources_by_child_type(
                     resource_ref.child_type
                 )
             )
