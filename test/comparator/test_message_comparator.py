@@ -164,7 +164,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             message_comparator._compatible_patterns(["a", "b"], ["b", "a"])
         )
         self.assertFalse(message_comparator._compatible_patterns(["a", "b"], ["c"]))
-        # An new pattern value is add at non-final position.
+        # An new pattern value is appended.
         self.assertTrue(
             message_comparator._compatible_patterns(["a", "b"], ["a", "b", "c"])
         )
