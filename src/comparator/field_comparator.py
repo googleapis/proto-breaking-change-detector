@@ -278,9 +278,10 @@ class FieldComparator:
                     resource_ref.child_type
                 )
             )
-            if self.local_resource_update.value.type not in [
-                resource.value.type for resource in parent_resources
-            ]:
+            if not any(
+                self.local_resource_update.value.type == resource.value.type
+                for resource in parent_resources
+            ):
                 return False
         elif self.local_resource_update.value.type != resource_ref.type:
             return False

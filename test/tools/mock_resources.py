@@ -44,8 +44,7 @@ def make_message_options_resource_definition(
     message_options = desc.MessageOptions()
     resource = message_options.Extensions[resource_pb2.resource]
     resource.type = resource_type
-    for pattern in resource_patterns:
-        resource.pattern.append(pattern)
+    resource.pattern.extend(resource_patterns)
     return message_options
 
 
