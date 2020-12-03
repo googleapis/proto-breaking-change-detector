@@ -193,7 +193,7 @@ class CliDetectTest(unittest.TestCase):
                 + "google/cloud/oslogin/v1/oslogin.proto L156: An existing field `system_id` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L166: A resource reference option of the field `name` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L177: A resource reference option of the field `parent` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L202: A resource reference option of the field `name` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L202: A resource reference option of the field `name` is removed.\n",
             )
 
     def test_oslogin_proto_beta(self):
