@@ -272,9 +272,10 @@ class FieldComparator:
                     resource_ref.child_type
                 )
             )
-            if self.local_resource_update.value.type not in [
-                resource.value.type for resource in parent_resources
-            ]:
+            if not any(
+                self.local_resource_update.value.type == resource.value.type
+                for resource in parent_resources
+            ):
                 return False
         elif self.local_resource_update.value.type != resource_ref.type:
             return False
@@ -295,7 +296,7 @@ class FieldComparator:
                     child_type
                 )
             )
-        if parent_type not in [parent.value.type for parent in parent_resources]:
+        if not any(parent.value.type == parent_type for parent in parent_resources):
             # Resulting referenced resource patterns cannot be resolved identical.
             self.finding_container.addFinding(
                 category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
