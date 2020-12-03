@@ -16,12 +16,13 @@ import enum
 
 
 class FindingCategory(enum.Enum):
+    # TODO(xiaozhenliu): renumber the enum values
+    # once they are all verified in use.
     ENUM_VALUE_ADDITION = 1
     ENUM_VALUE_REMOVAL = 2
     ENUM_VALUE_NAME_CHANGE = 3
     ENUM_ADDITION = 4
     ENUM_REMOVAL = 5
-    ENUM_NAME_CHANGE = 6
     FIELD_ADDITION = 7
     FIELD_REMOVAL = 8
     FIELD_NAME_CHANGE = 9
