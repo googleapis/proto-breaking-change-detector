@@ -59,6 +59,7 @@ class WithLocation:
 class EnumValue:
     """Description of an enum value.
 
+    enum_value_pb: the descriptor of EnumValue.
     proto_file_name: the proto file where the EnumValue exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the EnumValue, by querying the above dictionary using the path,
@@ -75,7 +76,7 @@ class EnumValue:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of EnumValue definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
@@ -83,6 +84,7 @@ class EnumValue:
 class Enum:
     """Description of an enum.
 
+    enum_pb: the descriptor of Enum.
     proto_file_name: the proto file where the Enum exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the Enum, by querying the above dictionary using the path,
@@ -104,13 +106,13 @@ class Enum:
         Returns:
             Dict[int, EnumValue]: EnumValue is identified by number.
         """
-        # EnumDescriptorProto.value has field number 2.
-        # So we append (2, value_index) to the path.
         return {
             enum_value.number: EnumValue(
                 enum_value,
                 self.proto_file_name,
                 self.source_code_locations,
+                # EnumDescriptorProto.value has field number 2.
+                # So we append (2, value_index) to the path.
                 self.path + (2, i),
             )
             for i, enum_value in enumerate(self.enum_pb.value)
@@ -118,17 +120,22 @@ class Enum:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of Enum definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Field:
     """Description of a field.
 
+    field_pb: the descriptor of Field.
     proto_file_name: the proto file where the Field exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the Field, by querying the above dictionary using the path,
           we can get the location information.
+    resource_database: global resource database that contains all file-level resource definitions
+                           and message-level resource options.
+    message_resource: message-level resource definition.
+    api_version: the version of the API definition files.
     """
 
     def __init__(
@@ -139,21 +146,18 @@ class Field:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
-        file_resources: ResourceDatabase = None,
+        resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
     ):
-        """file_resources: file-level resource definitions.
-        message_resource: message-level resource definition.
 
-        We need the resource database information to determine if the resource_reference
-        annotation removal or change is breaking or not.
-        """
         self.field_pb = field_pb
         self.proto_file_name = proto_file_name
         self.source_code_locations = source_code_locations
         self.path = path
-        self.file_resources = file_resources
+        # We need the resource database information to determine if the removal or change
+        # of the resource_reference annotation is breaking or not.
+        self.resource_database = resource_database
         self.message_resource = message_resource
         self.api_version = api_version
 
@@ -162,6 +166,7 @@ class Field:
 
     @property
     def name(self):
+        """Return the name of the field."""
         return self.field_pb.name
 
     @property
@@ -177,7 +182,6 @@ class Field:
             bool: Whether this field is repeated.
         """
         # For proto3, only LABEL_REPEATED is explicitly specified which has a path.
-        # For "LABEL_OPTIONAL" and "LABEL_REQUIRED", return the path of the field.
         label_repeated = (
             FieldDescriptorProto().Label.Name(self.field_pb.label) == "LABEL_REPEATED"
         )
@@ -203,6 +207,9 @@ class Field:
         return WithLocation(
             required,
             self.source_code_locations,
+            # FieldOption has field number 8, field_behavior has field
+            # number 1052. One field can have multiple behaviors and
+            # required attribute has index 0.
             self.path + (8, 1052, 0),
         )
         # fmt: on
@@ -210,29 +217,31 @@ class Field:
     @property
     def proto_type(self):
         """Return the proto type constant e.g. `TYPE_ENUM`"""
-        # FieldDescriptorProto.type has field number 5.
         return WithLocation(
             FieldDescriptorProto().Type.Name(self.field_pb.type),
             self.source_code_locations,
+            # FieldDescriptorProto.type has field number 5.
             self.path + (5,),
         )
 
     @property
     def is_primitive_type(self):
-        """Return true if the proto _type is primitive python type like `TYPE_STRING`"""
+        """Return true if the proto_type is primitive python type like `TYPE_STRING`"""
         NON_PRIMITIVE_TYPE = ["TYPE_ENUM", "TYPE_MESSAGE", "TYPE_GROUP"]
         return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
 
     @property
     def type_name(self):
         """Return the type_name if the proto_type is not primitive, return `None` otherwise.
-        For message and enum types, this is the name of the type like `.tutorial.example.Enum`"""
-        # FieldDescriptorProto.type_name has field number 6.
+        For message and enum types, this is the name of full type like `.tutorial.example.Enum`"""
         return (
             None
             if self.is_primitive_type
             else WithLocation(
-                self.field_pb.type_name, self.source_code_locations, self.path + (6,)
+                # FieldDescriptorProto.type_name has field number 6.
+                self.field_pb.type_name,
+                self.source_code_locations,
+                self.path + (6,),
             )
         )
 
@@ -254,7 +263,7 @@ class Field:
             self.path + (8, 1055, 1) if resource_ref.type else self.path + (8, 1055, 2)
         )
         # In some proto definitions, the reference `type` and `child_type` share
-        # the same field number is 1055.
+        # the same field number 1055.
         if resource_ref_path not in self.source_code_locations:
             resource_ref_path = self.path + (8, 1055)
         return WithLocation(resource_ref, self.source_code_locations, resource_ref_path)
@@ -267,17 +276,21 @@ class Field:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of Field definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Message:
     """Description of a message (defined with the ``message`` keyword).
 
+    message_pb: the descriptor of Message.
     proto_file_name: the proto file where the Message exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the Message, by querying the above dictionary using the path,
           we can get the location information.
+    resource_database: global resource database that contains all file-level resource definitions
+                           and message-level resource options.
+    api_version: the version of the API definition files.
     """
 
     def __init__(
@@ -288,14 +301,14 @@ class Message:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
-        file_resources: ResourceDatabase = None,
+        resource_database: ResourceDatabase = None,
         api_version: str = None,
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
         self.source_code_locations = source_code_locations
         self.path = path
-        self.file_resources = file_resources
+        self.resource_database = resource_database
         self.api_version = api_version
 
     def __getattr__(self, name):
@@ -303,6 +316,7 @@ class Message:
 
     @property
     def name(self) -> str:
+        """Return the name of this message."""
         return self.message_pb.name
 
     # fmt: off
@@ -313,15 +327,15 @@ class Message:
         Returns:
             Dict[int, Field]: Field is identified by number.
         """
-        # DescriptorProto.field has field number 2.
-        # So we append (2, field_index) to the path.
         return {
             field.number: Field(
                 field,
                 self.proto_file_name,
                 self.source_code_locations,
+                # DescriptorProto.field has field number 2.
+                # So we append (2, field_index) to the path.
                 self.path + (2, i,),
-                self.file_resources,
+                self.resource_database,
                 self.resource,
                 self.api_version,
             )
@@ -331,15 +345,15 @@ class Message:
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
         """Return the nested messsages in the message. Message is identified by name."""
-        # DescriptorProto.nested_type has field number 3.
-        # So we append (3, nested_message_index) to the path.
         return {
             message.name: Message(
                 message,
                 self.proto_file_name,
                 self.source_code_locations,
+                # DescriptorProto.nested_type has field number 3.
+                # So we append (3, nested_message_index) to the path.
                 self.path + (3, i,),
-                self.file_resources,
+                self.resource_database,
             )
             for i, message in enumerate(self.message_pb.nested_type)
         }
@@ -347,13 +361,13 @@ class Message:
     @property
     def nested_enums(self) -> Dict[str, Enum]:
         """Return the nested enums in the message. Enum is identified by name."""
-        # DescriptorProto.enum_type has field number 4.
-        # So we append (4, nested_enum_index) to the path.
         return {
             enum.name: Enum(
                 enum,
                 self.proto_file_name,
                 self.source_code_locations,
+                # DescriptorProto.enum_type has field number 4.
+                # So we append (4, nested_enum_index) to the path.
                 self.path + (4, i,),
             )
             for i, enum in enumerate(self.message_pb.enum_type)
@@ -374,19 +388,24 @@ class Message:
         return WithLocation(
             resource,
             self.source_code_locations,
+            # MessageOptions has field nnumber 7 and resource options
+            # take the field number 1053.
             self.path + (7, 1053),
             self.proto_file_name,
         )
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of Message definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Method:
     """Description of a method (defined with the ``rpc`` keyword).
 
+    method_pb: the descriptor of Method.
+    messages_map: the map that contains all messages defined in the API definition files and
+                  the dependencies. The key is message name, and value is the Message class.
     proto_file_name: the proto file where the Method exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the Method, by querying the above dictionary using the path,
@@ -411,6 +430,7 @@ class Method:
 
     @property
     def name(self):
+        """Return the name of this method."""
         return self.method_pb.name
 
     @property
@@ -581,17 +601,21 @@ class Method:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of method definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
 class Service:
     """Description of a service (defined with the ``service`` keyword).
 
+    service_pb: the decriptor of service.
+    messages_map: the map that contains all messages defined in the API definition files and
+                  the dependencies. The key is message name, and value is the Message class.
     proto_file_name: the proto file where the Service exists.
     source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
     path: the path to the MethServiceod, by querying the above dictionary using the path,
           we can get the location information.
+    api_version: the version of the API definition files.
     """
 
     def __init__(
@@ -614,13 +638,12 @@ class Service:
 
     @property
     def name(self):
+        """Return the name of the service."""
         return self.service_pb.name
 
     @property
     def methods(self) -> Dict[str, Method]:
         """Return the methods defined in the service. Method is identified by name."""
-        # ServiceDescriptorProto.method has field number 2.
-        # So we append (2, method_index) to the path.
         # fmt: off
         return {
             method.name: Method(
@@ -628,6 +651,8 @@ class Service:
                 self.messages_map,
                 self.proto_file_name,
                 self.source_code_locations,
+                # ServiceDescriptorProto.method has field number 2.
+                # So we append (2, method_index) to the path.
                 self.path + (2, i,),
             )
             for i, method in enumerate(self.service_pb.method)
@@ -652,7 +677,6 @@ class Service:
         Returns:
             Sequence[str]: A sequence of OAuth scopes.
         """
-        # Return the OAuth scopes, split on comma.
         # fmt: off
         oauth_scopes = []
         for scope in self.service_pb.options.Extensions[client_pb2.oauth_scopes].split(","):
@@ -670,7 +694,7 @@ class Service:
 
     @property
     def source_code_line(self):
-        """Return the start line number of source code in the proto file."""
+        """Return the start line number of service definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
 
 

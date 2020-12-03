@@ -57,8 +57,8 @@ class FieldComparator:
             )
             return
 
-        self.global_resources_original = self.field_original.file_resources
-        self.global_resources_update = self.field_update.file_resources
+        self.global_resources_original = self.field_original.resource_database
+        self.global_resources_update = self.field_update.resource_database
         self.local_resource_original = self.field_original.message_resource
         self.local_resource_update = self.field_update.message_resource
 
