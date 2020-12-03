@@ -158,7 +158,44 @@ class CliDetectTest(unittest.TestCase):
                 + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
             )
 
-    def test_oslogin_proto(self):
+    def test_oslogin_proto_alpha(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    f"--original_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=test/testdata/protos/google/cloud/oslogin/v1/oslogin.proto",
+                    "--update_proto_files=test/testdata/protos/google/cloud/oslogin/v1alpha/oslogin.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                # client.proto is no longer imported by alpha version, so the packaging options is removed.
+                "google/api/client.proto L23: An exisiting packaging option `ClientProto` for `java_outer_classname` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L51: An existing method_signature is removed from method `DeletePosixAccount`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L59: An existing method_signature is removed from method `DeleteSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L68: An existing method_signature is removed from method `GetLoginProfile`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L76: An existing method_signature is removed from method `GetSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature is removed from method `ImportSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature is removed from method `UpdateSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L123: A resource reference option of the field `name` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L136: A resource reference option of the field `name` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L147: A resource reference option of the field `name` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L153: An existing field `project_id` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L156: An existing field `system_id` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L166: A resource reference option of the field `name` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L177: A resource reference option of the field `parent` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L202: A resource reference option of the field `name` is removed.\n"
+            )
+
+    def test_oslogin_proto_beta(self):
         with patch("sys.stdout", new=StringIO()):
             runner = CliRunner()
             result = runner.invoke(
