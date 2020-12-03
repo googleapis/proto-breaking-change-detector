@@ -174,6 +174,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
+                # TODO(xiaozhenliu): use googleapis submodule for more integration tests.
                 # client.proto is no longer imported by alpha version, so the packaging options is removed.
                 "google/api/client.proto L23: An exisiting packaging option `ClientProto` for `java_outer_classname` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
