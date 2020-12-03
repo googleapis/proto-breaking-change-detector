@@ -156,7 +156,7 @@ class FieldComparator:
         # 6. Check `google.api.resource_reference` annotation.
         self._compare_resource_reference(self.field_original, self.field_update)
 
-    def _compare_resource_reference(self, field_original, field_update):
+    def _compare_resource_reference(self):
         resource_ref_original = self.field_original.resource_reference
         resource_ref_update = self.field_update.resource_reference
         # No resource_reference annotations found for the field in both versions.
@@ -165,23 +165,9 @@ class FieldComparator:
         # A `google.api.resource_reference` annotation is added.
         if not resource_ref_original and resource_ref_update:
             # Check whether the new resource reference is in the database.
-            resource_in_database = True
-            if field_update.child_type and self.global_resources_update:
-                parent_resources = (
-                    self.global_resources_update.get_parent_resources_by_child_type(
-                        resource_ref_update.value.child_type
-                    )
-                )
-                if not parent_resources:
-                    resource_in_database = False
-            elif not field_update.child_type and self.global_resources_update:
-                resources = self.global_resources_update.get_resource_by_type(
-                    resource_ref_update.value.type
-                )
-                if not resources:
-                    resource_in_database = False
+            resource_in_database = self._resource_in_database(resource_ref_update)
             # If the new resource reference is not in the database, breaking change.
-            if not resource_in_database or not self.global_resources_update:
+            if not resource_in_database:
                 self.finding_container.addFinding(
                     category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                     proto_file_name=field_update.proto_file_name,
@@ -256,6 +242,26 @@ class FieldComparator:
                 False,
                 resource_ref_update.source_code_line,
             )
+
+    def _resource_in_database(self, resource_ref) -> bool:
+        # Check whether the added resource reference is in the database.
+        if not self.global_resources_update:
+            return False
+        if self.field_update.child_type:
+            parent_resources = (
+                self.global_resources_update.get_parent_resources_by_child_type(
+                    resource_ref.value.child_type
+                )
+            )
+            if not parent_resources:
+                return False
+        else:
+            resources = self.global_resources_update.get_resource_by_type(
+                resource_ref.value.type
+            )
+            if not resources:
+                return  False
+        return True
 
     def _resource_ref_in_local(self, resource_ref):
         """Check if the resource type is in the local resources defined by a message option."""
