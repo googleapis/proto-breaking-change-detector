@@ -373,7 +373,9 @@ class FieldComparatorTest(unittest.TestCase):
             resource_type="example.v1/Foo", is_child_type=True
         )
         field_with_reference_child = make_field(
-            name="Test", options=field_options_child, resource_database=resource_database
+            name="Test",
+            options=field_options_child,
+            resource_database=resource_database,
         )
 
         # The update field is defined by parent type.
@@ -381,7 +383,9 @@ class FieldComparatorTest(unittest.TestCase):
             resource_type="example.v1/Bar", is_child_type=False
         )
         field_with_reference_parent = make_field(
-            name="Test", options=field_options_parent, resource_database=resource_database
+            name="Test",
+            options=field_options_parent,
+            resource_database=resource_database,
         )
         # The two resources can be resolved to the identical resource.
         FieldComparator(
@@ -421,7 +425,9 @@ class FieldComparatorTest(unittest.TestCase):
             resource_type="example.v1/Bar", is_child_type=True
         )
         field_with_reference_child = make_field(
-            name="Test", options=field_options_child, resource_database=resource_database
+            name="Test",
+            options=field_options_child,
+            resource_database=resource_database,
         )
 
         # The update field is defined by parent type.
@@ -429,7 +435,9 @@ class FieldComparatorTest(unittest.TestCase):
             resource_type="example.v1/Foo", is_child_type=False
         )
         field_with_reference_parent = make_field(
-            name="Test", options=field_options_parent, resource_database=resource_database
+            name="Test",
+            options=field_options_parent,
+            resource_database=resource_database,
         )
         # The two resources can nnot be resolved to the identical resource.
         FieldComparator(

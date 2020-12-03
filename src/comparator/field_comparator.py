@@ -18,8 +18,9 @@ from src.comparator.wrappers import Field
 
 
 class FieldComparator:
-    # global_resources: file-level resource definitions.
-    # local_resource: message-level resource definition.
+    # resource_database: global resource database that contains all file-level resource definitions
+    #                    and message-level resource options.
+    # message_resource: message-level resource definition.
     # We need the resource database information to determine if the resource_reference
     # annotation removal or change is breaking or not.
     def __init__(
@@ -56,11 +57,6 @@ class FieldComparator:
                 change_type=ChangeType.MAJOR,
             )
             return
-
-        self.global_resources_original = self.field_original.resource_database
-        self.global_resources_update = self.field_update.resource_database
-        self.local_resource_original = self.field_original.message_resource
-        self.local_resource_update = self.field_update.message_resource
 
         # 3. If both FieldDescriptors are existing, check
         # if the name is changed.
@@ -102,7 +98,7 @@ class FieldComparator:
                 message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.proto_type.value}` to `{self.field_update.proto_type.value}`.",
                 change_type=ChangeType.MAJOR,
             )
-        # If field has the same primitive type, then the type is identical.
+        # If field has the same primitive type, then the type should be identical.
         # If field has the same non-primitive type like `TYPE_ENUM`.
         # Check the type_name of the field.
         elif self.field_original.type_name and (
@@ -154,6 +150,10 @@ class FieldComparator:
                 )
 
         # 6. Check `google.api.resource_reference` annotation.
+        self.rb_original = self.field_original.resource_database
+        self.rb_update = self.field_update.resource_database
+        self.mr_update = self.field_update.message_resource
+
         self._compare_resource_reference(self.field_original, self.field_update)
 
     def _compare_resource_reference(self, field_original, field_update):
@@ -245,22 +245,20 @@ class FieldComparator:
 
     def _resource_in_database(self, resource_ref) -> bool:
         # Check whether the added resource reference is in the database.
-        if not self.global_resources_update:
+        if not self.rb_update:
             return False
         resources = (
-            self.global_resources_update.get_parent_resource_by_child_type(
+            self.rb_update.get_parent_resource_by_child_type(
                 resource_ref.value.child_type
             )
             if self.field_update.child_type
-            else self.global_resources_update.get_resource_by_type(
-                resource_ref.value.type
-            )
+            else self.rb_update.get_resource_by_type(resource_ref.value.type)
         )
         return bool(resources)
 
     def _resource_ref_in_local(self, resource_ref):
         """Check if the resource type is in the local resources defined by a message option."""
-        if not self.local_resource_update:
+        if not self.mr_update:
             return False
         checked_type = resource_ref.type or resource_ref.child_type
         if not checked_type:
@@ -268,17 +266,15 @@ class FieldComparator:
                 "In a resource_reference annotation, either `type` or `child_type` field should be defined"
             )
         if self.field_original.child_type:
-            parent_resources = (
-                self.global_resources_update.get_parent_resources_by_child_type(
-                    resource_ref.child_type
-                )
+            parent_resources = self.rb_update.get_parent_resources_by_child_type(
+                resource_ref.child_type
             )
             if not any(
-                self.local_resource_update.value.type == resource.value.type
+                self.mr_update.value.type == resource.value.type
                 for resource in parent_resources
             ):
                 return False
-        elif self.local_resource_update.value.type != resource_ref.type:
+        elif self.mr_update.value.type != resource_ref.type:
             return False
         return True
 
@@ -286,16 +282,12 @@ class FieldComparator:
         self, child_type, parent_type, original_is_child, source_code_line
     ):
         if original_is_child:
-            parent_resources = (
-                self.global_resources_original.get_parent_resources_by_child_type(
-                    child_type
-                )
+            parent_resources = self.rb_original.get_parent_resources_by_child_type(
+                child_type
             )
         else:
-            parent_resources = (
-                self.global_resources_update.get_parent_resources_by_child_type(
-                    child_type
-                )
+            parent_resources = self.rb_update.get_parent_resources_by_child_type(
+                child_type
             )
         if not any(parent.value.type == parent_type for parent in parent_resources):
             # Resulting referenced resource patterns cannot be resolved identical.
