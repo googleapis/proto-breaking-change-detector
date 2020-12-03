@@ -156,9 +156,9 @@ class FieldComparator:
         # 6. Check `google.api.resource_reference` annotation.
         self._compare_resource_reference(self.field_original, self.field_update)
 
-    def _compare_resource_reference(self):
-        resource_ref_original = self.field_original.resource_reference
-        resource_ref_update = self.field_update.resource_reference
+    def _compare_resource_reference(self, field_original, field_update):
+        resource_ref_original = field_original.resource_reference
+        resource_ref_update = field_update.resource_reference
         # No resource_reference annotations found for the field in both versions.
         if not resource_ref_original and not resource_ref_update:
             return
@@ -260,7 +260,7 @@ class FieldComparator:
                 resource_ref.value.type
             )
             if not resources:
-                return  False
+                return False
         return True
 
     def _resource_ref_in_local(self, resource_ref):
