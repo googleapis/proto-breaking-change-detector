@@ -247,21 +247,16 @@ class FieldComparator:
         # Check whether the added resource reference is in the database.
         if not self.global_resources_update:
             return False
-        if self.field_update.child_type:
-            parent_resources = (
-                self.global_resources_update.get_parent_resources_by_child_type(
-                    resource_ref.value.child_type
-                )
+        resources = (
+            self.global_resources_update.get_parent_resource_by_child_type(
+                resource_ref.value.child_type
             )
-            if not parent_resources:
-                return False
-        else:
-            resources = self.global_resources_update.get_resource_by_type(
+            if self.field_update.child_type
+            else self.global_resources_update.get_resource_by_type(
                 resource_ref.value.type
             )
-            if not resources:
-                return False
-        return True
+        )
+        return bool(resources)
 
     def _resource_ref_in_local(self, resource_ref):
         """Check if the resource type is in the local resources defined by a message option."""
@@ -278,9 +273,10 @@ class FieldComparator:
                     resource_ref.child_type
                 )
             )
-            if self.local_resource_update.value.type not in [
-                resource.value.type for resource in parent_resources
-            ]:
+            if not any(
+                self.local_resource_update.value.type == resource.value.type
+                for resource in parent_resources
+            ):
                 return False
         elif self.local_resource_update.value.type != resource_ref.type:
             return False
