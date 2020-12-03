@@ -45,6 +45,50 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.message, "A new field `Foo` is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
 
+    def test_name_change(self):
+        field_foo = make_field("Foo")
+        field_bar = make_field("Bar")
+        FieldComparator(field_foo, field_bar, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Name of an existing field is changed from `Foo` to `Bar`.",
+        )
+        self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
+
+    def test_repeated_label_change(self):
+        field_repeated = make_field(repeated=True)
+        field_non_repeated = make_field(repeated=False)
+        FieldComparator(
+            field_repeated, field_non_repeated, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Repeated state of an existing field `my_field` is changed.",
+        )
+        self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
+
+    def test_field_behavior_change(self):
+        field_required = make_field(required=True)
+        field_non_required = make_field(required=False)
+        # Required to optional, non-breaking change.
+        FieldComparator(
+            field_required, field_non_required, self.finding_container
+        ).compare()
+        findings = self.finding_container.getAllFindings()
+        self.assertFalse(findings)
+        # Required to optional, non-breaking change.
+        FieldComparator(
+            field_non_required, field_required, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Field behavior of an existing field `my_field` is changed.",
+        )
+        self.assertEqual(finding.category.name, "FIELD_BEHAVIOR_CHANGE")
+
     def test_primitive_type_change(self):
         field_int = make_field(proto_type="TYPE_INT32")
         field_string = make_field(proto_type="TYPE_STRING")
@@ -80,57 +124,21 @@ class FieldComparatorTest(unittest.TestCase):
         findings = self.finding_container.getAllFindings()
         self.assertFalse(findings)
 
-    def test_repeated_label_change(self):
-        field_repeated = make_field(repeated=True)
-        field_non_repeated = make_field(repeated=False)
-        FieldComparator(
-            field_repeated, field_non_repeated, self.finding_container
-        ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Repeated state of an existing field `my_field` is changed.",
-        )
-        self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
-
-    def test_field_behavior_change(self):
-        field_required = make_field(required=True)
-        field_non_required = make_field(required=False)
-        # Required to optional, non-breaking change.
-        FieldComparator(
-            field_required, field_non_required, self.finding_container
-        ).compare()
-        findings = self.finding_container.getAllFindings()
-        self.assertFalse(findings)
-        # Required to optional, non-breaking change.
-        FieldComparator(
-            field_non_required, field_required, self.finding_container
-        ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Field behavior of an existing field `my_field` is changed.",
-        )
-        self.assertEqual(finding.category.name, "FIELD_BEHAVIOR_CHANGE")
-
-    def test_name_change(self):
-        field_foo = make_field("Foo")
-        field_bar = make_field("Bar")
-        FieldComparator(field_foo, field_bar, self.finding_container).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Name of an existing field is changed from `Foo` to `Bar`.",
-        )
-        self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
-
-    def test_oneof_change(self):
+    def test_out_oneof(self):
         field_oneof = make_field(name="Foo", oneof=True)
         field_not_oneof = make_field(name="Foo")
         FieldComparator(field_oneof, field_not_oneof, self.finding_container).compare()
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings["An existing field `Foo` is moved out of One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
+
+    def test_into_oneof(self):
+        field_oneof = make_field(name="Foo", oneof=True)
+        field_not_oneof = make_field(name="Foo")
+        FieldComparator(field_not_oneof, field_oneof, self.finding_container).compare()
+        findings = {f.message: f for f in self.finding_container.getAllFindings()}
+        finding = findings["An existing field `Foo` is moved into One-of."]
+        self.assertEqual(finding.category.name, "FIELD_ONEOF_ADDITION")
 
     def test_resource_reference_addition_breaking(self):
         # The added resource reference is not in the database. Breaking change.
