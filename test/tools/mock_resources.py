@@ -59,17 +59,6 @@ def make_field_annotation_resource_reference(resource_type: str, is_child_type: 
     return field_options
 
 
-def make_resource_ref(
-    resource_type: str, is_child_type: bool
-) -> resource_pb2.ResourceReference:
-    resource_ref = resource_pb2.ResourceReference()
-    if is_child_type:
-        resource_ref.child_type = resource_type
-    else:
-        resource_ref.type = resource_type
-    return WithLocation(resource_ref, None, None)
-
-
 def make_resource_descriptor(
     resource_type: str, resource_patterns: [str]
 ) -> resource_pb2.ResourceDescriptor:
