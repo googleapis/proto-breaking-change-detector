@@ -13,6 +13,10 @@
 # limitations under the License.
 
 import unittest
+from test.tools.mock_resources import (
+    make_file_options_resource_definition,
+    make_message_options_resource_definition,
+)
 from test.tools.mock_descriptors import (
     make_service,
     make_method,
@@ -89,25 +93,15 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
     def test_resources_existing_pattern_change(self):
-        options_original = descriptor_pb2.FileOptions()
-        options_original.Extensions[resource_pb2.resource_definition].append(
-            resource_pb2.ResourceDescriptor(
-                type=".example.v1.Bar",
-                pattern=[
-                    "foo/{foo}/bar/{bar}",
-                ],
-            )
+        options_original = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar", resource_patterns=["foo/{foo}/bar/{bar}"]
         )
         file_pb2 = make_file_pb2(
             name="foo.proto", package=".example.v1", options=options_original
         )
         file_set_original = make_file_set(files=[file_pb2])
-        options_update = descriptor_pb2.FileOptions()
-        options_update.Extensions[resource_pb2.resource_definition].append(
-            resource_pb2.ResourceDescriptor(
-                type=".example.v1.Bar",
-                pattern=["foo/{foo}/bar/"],
-            )
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar", resource_patterns=["foo/{foo}/bar/"]
         )
         file_pb2 = make_file_pb2(
             name="foo.proto", package=".example.v1", options=options_update
@@ -134,12 +128,8 @@ class FileSetComparatorTest(unittest.TestCase):
             files=[make_file_pb2(name="foo.proto", package=".example.v1")]
         )
 
-        options_update = descriptor_pb2.FileOptions()
-        options_update.Extensions[resource_pb2.resource_definition].append(
-            resource_pb2.ResourceDescriptor(
-                type=".example.v1.Bar",
-                pattern=["foo/{foo}/bar/{bar}"],
-            )
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar", resource_patterns=["foo/{foo}/bar/{bar}"]
         )
         file_pb2 = make_file_pb2(
             name="foo.proto", package=".example.v1", options=options_update
@@ -163,11 +153,10 @@ class FileSetComparatorTest(unittest.TestCase):
 
     def test_resources_removal(self):
         # Create message with resource options.
-        message_options = descriptor_pb2.MessageOptions()
-        resource = message_options.Extensions[resource_pb2.resource]
-        resource.pattern.append("user/{user}")
-        resource.pattern.append("user/{user}/bar/")
-        resource.type = "example.v1/Bar"
+        message_options = make_message_options_resource_definition(
+            resource_type="example.v1/Bar",
+            resource_patterns=["user/{user}", "user/{user}/bar/"],
+        )
         message = make_message("Test", options=message_options)
         # Original file set with one resource defined at message level.
         file_set_original = make_file_set(
