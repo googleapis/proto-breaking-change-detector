@@ -164,13 +164,40 @@ class FieldComparator:
             return
         # A `google.api.resource_reference` annotation is added.
         if not resource_ref_original and resource_ref_update:
-            self.finding_container.addFinding(
-                category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
-                proto_file_name=field_update.proto_file_name,
-                source_code_line=resource_ref_update.source_code_line,
-                message=f"A resource reference option is added to the field `{field_original.name}`.",
-                change_type=ChangeType.MINOR,
-            )
+            # Check whether the new resource reference is in the database.
+            resource_in_database = True
+            if field_update.child_type and self.global_resources_update:
+                parent_resources = (
+                    self.global_resources_update.get_parent_resources_by_child_type(
+                        resource_ref_update.value.child_type
+                    )
+                )
+                if not parent_resources:
+                    resource_in_database = False
+            elif not field_update.child_type and self.global_resources_update:
+                resources = self.global_resources_update.get_resource_by_type(
+                    resource_ref_update.value.type
+                )
+                if not resources:
+                    resource_in_database = False
+            # If the new resource reference is not in the database, breaking change.
+            if not resource_in_database or not self.global_resources_update:
+                self.finding_container.addFinding(
+                    category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
+                    proto_file_name=field_update.proto_file_name,
+                    source_code_line=resource_ref_update.source_code_line,
+                    message=f"A resource reference option is added to the field `{field_original.name}`, but it is not defined anywhere",
+                    change_type=ChangeType.MAJOR,
+                )
+            # If the new resource reference is in the database, no breaking change.
+            else:
+                self.finding_container.addFinding(
+                    category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
+                    proto_file_name=field_update.proto_file_name,
+                    source_code_line=resource_ref_update.source_code_line,
+                    message=f"A resource reference option is added to the field `{field_original.name}`.",
+                    change_type=ChangeType.MINOR,
+                )
             return
         # Resource annotation is removed, check if it is added as a message resource.
         if resource_ref_original and not resource_ref_update:
@@ -181,6 +208,14 @@ class FieldComparator:
                     source_code_line=resource_ref_original.source_code_line,
                     message=f"A resource reference option of the field `{field_original.name}` is removed.",
                     change_type=ChangeType.MAJOR,
+                )
+            else:
+                self.finding_container.addFinding(
+                    category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
+                    proto_file_name=field_original.proto_file_name,
+                    source_code_line=resource_ref_original.source_code_line,
+                    message=f"A resource reference option of the field `{field_original.name}` is removed, but added back to the message options.",
+                    change_type=ChangeType.MINOR,
                 )
             return
         # Resource annotation is both existing in the field for original and update versions.
@@ -198,7 +233,7 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
-                    message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}`` to `{update_type}`.",
+                    message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}` to `{update_type}`.",
                     actionabel=True,
                 )
             return
@@ -207,7 +242,6 @@ class FieldComparator:
         # in that case it is not considered breaking.
         # Register the message-level resource into the global resource database,
         # so that we can query the parent resources for child_type.
-        self._register_local_resource()
         if field_original.child_type:
             self._is_parent_type(
                 resource_ref_original.value.child_type,
@@ -232,18 +266,20 @@ class FieldComparator:
             raise TypeError(
                 "In a resource_reference annotation, either `type` or `child_type` field should be defined"
             )
-        if self.local_resource_update.value.type != checked_type:
+        if self.field_original.child_type:
+            parent_resources = (
+                self.global_resources_update.get_parent_resources_by_child_type(
+                    resource_ref.child_type
+                )
+            )
+            if not any(
+                self.local_resource_update.value.type == resource.value.type
+                for resource in parent_resources
+            ):
+                return False
+        elif self.local_resource_update.value.type != resource_ref.type:
             return False
         return True
-
-    def _register_local_resource(self):
-        # Add message-level resource definition to the global resource database for query.
-        if self.local_resource_original:
-            self.global_resources_original.register_resource(
-                self.local_resource_original
-            )
-        if self.local_resource_update:
-            self.global_resources_update.register_resource(self.local_resource_update)
 
     def _is_parent_type(
         self, child_type, parent_type, original_is_child, source_code_line
