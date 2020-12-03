@@ -253,6 +253,10 @@ class Field:
         resource_ref_path = (
             self.path + (8, 1055, 1) if resource_ref.type else self.path + (8, 1055, 2)
         )
+        # In some proto definitions, the reference `type` and `child_type` share
+        # the same field number is 1055.
+        if resource_ref_path not in self.source_code_locations:
+            resource_ref_path = self.path + (8, 1055)
         return WithLocation(resource_ref, self.source_code_locations, resource_ref_path)
 
     @property
