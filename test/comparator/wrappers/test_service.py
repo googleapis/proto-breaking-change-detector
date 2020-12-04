@@ -39,11 +39,11 @@ class ServiceTest(unittest.TestCase):
 
     def test_service_host(self):
         service = make_service(host="thingdoer.googleapis.com")
-        self.assertEqual(service.host, "thingdoer.googleapis.com")
+        self.assertEqual(service.host.value, "thingdoer.googleapis.com")
 
     def test_service_no_host(self):
         service = make_service()
-        self.assertEqual(service.host, "")
+        self.assertFalse(service.host)
 
     def test_service_scopes(self):
         service = make_service(scopes=("https://foo/user/", "https://foo/admin/"))

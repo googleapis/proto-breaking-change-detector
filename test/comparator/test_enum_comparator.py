@@ -53,8 +53,9 @@ class EnumComparatorTest(unittest.TestCase):
     def test_enum_removal(self):
         EnumComparator(self.enum_foo, None, self.finding_container).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "An Enum `Foo` is removed.")
+        self.assertEqual(finding.message, "An existing Enum `Foo` is removed.")
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
@@ -63,6 +64,7 @@ class EnumComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new Enum `Bar` is added.")
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
@@ -71,6 +73,7 @@ class EnumComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new EnumValue `VALUE2` is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 3)
 

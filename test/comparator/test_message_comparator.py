@@ -30,6 +30,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "An existing message `Message` is removed.")
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_message_addition(self):
@@ -37,9 +38,10 @@ class DescriptorComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new message `Message` is added.")
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
-    def test_field_change(self):
+    def test_nested_field_change(self):
         field_int = make_field(proto_type="TYPE_INT32")
         field_string = make_field(proto_type="TYPE_STRING")
         message1 = make_message(fields=[field_int])
@@ -50,6 +52,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_nested_message_change(self):
@@ -64,6 +67,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["An existing field `nested_field` is removed."]
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_nested_enum_change(self):
@@ -88,6 +92,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map["A new EnumValue `BLUE` is added."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
 

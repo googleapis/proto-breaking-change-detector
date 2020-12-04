@@ -88,7 +88,7 @@ class FileSetComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings_map["An EnumValue `BLUE` is removed."]
+        finding = findings_map["An existing EnumValue `BLUE` is removed."]
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 

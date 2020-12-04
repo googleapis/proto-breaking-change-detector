@@ -32,6 +32,55 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
+    def test_service_host_addition(self):
+        service_without_host = make_service()
+        service_with_host = make_service(host="api.google.com")
+        ServiceComparator(
+            service_without_host,
+            service_with_host,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "A new default host `api.google.com` is added."
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_service_host_removal(self):
+        service_without_host = make_service()
+        service_with_host = make_service(host="api.google.com")
+        ServiceComparator(
+            service_with_host,
+            service_without_host,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "An existing default host `api.google.com` is removed."
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_service_host_change(self):
+        service_original = make_service(host="default.host")
+        service_update = make_service(host="default.host.update")
+        ServiceComparator(
+            service_original,
+            service_update,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "An existing default host is updated from `default.host` to `default.host.update`.",
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
     def test_service_oauth_scopes_change(self):
         service_original = make_service(
             scopes=("https://foo/user/", "https://foo/admin/")
@@ -54,6 +103,7 @@ class ServiceComparatorTest(unittest.TestCase):
             "An existing oauth_scope `https://foo/admin/` is removed."
         ]
         self.assertEqual(finding.category.name, "OAUTH_SCOPE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_method_removal(self):
@@ -64,9 +114,24 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             service_original, service_update, self.finding_container
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings_map["An existing rpc method `bar` is removed."]
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "An existing rpc method `bar` is removed.")
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_method_addition(self):
+        method_foo = make_method(name="foo")
+        method_bar = make_method(name="bar")
+        service_original = make_service(methods=(method_foo,))
+        service_update = make_service(methods=(method_foo, method_bar))
+        ServiceComparator(
+            service_original, service_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "A new rpc method `bar` is added.")
+        self.assertEqual(finding.category.name, "METHOD_ADDTION")
+        self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_method_input_type_change(self):
@@ -86,6 +151,7 @@ class ServiceComparatorTest(unittest.TestCase):
             "Input type of an existing method `Foo` is changed from `FooRequest` to `BarRequest`."
         ]
         self.assertEqual(finding.category.name, "METHOD_INPUT_TYPE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_method_output_type_change(self):
@@ -111,6 +177,7 @@ class ServiceComparatorTest(unittest.TestCase):
             "Output type of an existing method `Foo` is changed from `FooResponse` to `BarResponse`."
         ]
         self.assertEqual(finding.category.name, "METHOD_RESPONSE_TYPE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_method_streaming_state_change(self):
@@ -137,6 +204,7 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(
             server_streaming_finding.category.name, "METHOD_SERVER_STREAMING_CHANGE"
         )
+        self.assertEqual(server_streaming_finding.change_type.name, "MAJOR")
         self.assertEqual(server_streaming_finding.location.proto_file_name, "foo")
 
     def test_method_paginated_state_change(self):
@@ -220,9 +288,78 @@ class ServiceComparatorTest(unittest.TestCase):
             "An existing method_signature for method `notInteresting` is changed from `sig1` to `sig2`."
         ]
         self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
-    def test_lro_annotation_change(self):
+    def test_method_signature_removal(self):
+        ServiceComparator(
+            make_service(
+                methods=(
+                    make_method(name="notInteresting", signatures=["sig1", "sig2"]),
+                )
+            ),
+            make_service(
+                methods=(make_method(name="notInteresting", signatures=["sig1"]),)
+            ),
+            self.finding_container,
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        finding = findings_map[
+            "An existing method_signature is removed from method `notInteresting`."
+        ]
+        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_lro_annotation_error(self):
+        lro_output_msg = make_message(name=".google.longrunning.Operation")
+        method_lro = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+            lro_response_type="response_type",
+            lro_metadata_type="FooMetadata",
+        )
+        method_not_lro = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+        )
+        # TypeError throws since the method returns a google.longrunning.Operation
+        # but is missing a response type or metadata type.
+        with self.assertRaises(TypeError):
+            ServiceComparator(
+                make_service(methods=(method_lro,)),
+                make_service(methods=(method_not_lro,)),
+                self.finding_container,
+            ).compare()
+
+    def test_lro_annotation_response_change(self):
+        lro_output_msg = make_message(name=".google.longrunning.Operation")
+        method_original = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+            lro_response_type="response_type",
+            lro_metadata_type="FooMetadata",
+        )
+        method_update = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+            lro_response_type="response_type_update",
+            lro_metadata_type="FooMetadata",
+        )
+        ServiceComparator(
+            make_service(methods=(method_original,)),
+            make_service(methods=(method_update,)),
+            self.finding_container,
+        ).compare()
+        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        finding = findings_map[
+            "The response_type of an existing LRO operation_info annotation for method `Method` is changed from `response_type` to `response_type_update`."
+        ]
+        self.assertEqual(finding.category.name, "LRO_RESPONSE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_lro_annotation_metadata_change(self):
         lro_output_msg = make_message(name=".google.longrunning.Operation")
         method_original = make_method(
             name="Method",
@@ -247,6 +384,49 @@ class ServiceComparatorTest(unittest.TestCase):
         ]
         self.assertEqual(finding.category.name, "LRO_METADATA_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_http_annotation_addition(self):
+        method_without_http_annotation = make_method(
+            name="Method",
+        )
+        method_with_http_annotation = make_method(
+            name="Method",
+            http_uri="http_uri_update",
+            http_body="http_body",
+        )
+        ServiceComparator(
+            make_service(methods=(method_without_http_annotation,)),
+            make_service(methods=(method_with_http_annotation,)),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "HTTP_ANNOTATION_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(
+            finding.message, "A google.api.http annotation is added to method `Method`."
+        )
+
+    def test_http_annotation_removal(self):
+        method_without_http_annotation = make_method(
+            name="Method",
+        )
+        method_with_http_annotation = make_method(
+            name="Method",
+            http_uri="http_uri_update",
+            http_body="http_body",
+        )
+        ServiceComparator(
+            make_service(methods=(method_with_http_annotation,)),
+            make_service(methods=(method_without_http_annotation,)),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "HTTP_ANNOTATION_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(
+            finding.message,
+            "The google.api.http annotation for existing method `Method` is removed.",
+        )
 
     def test_http_annotation_change(self):
         method_original = make_method(
