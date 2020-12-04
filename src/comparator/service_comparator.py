@@ -41,6 +41,7 @@ class ServiceComparator:
             return
         # 2. If updated service is None, then the original service is removed.
         if self.service_update is None:
+            print("removed service")
             self.finding_container.addFinding(
                 category=FindingCategory.SERVICE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
