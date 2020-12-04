@@ -51,12 +51,47 @@ class ServiceComparator:
             return
         self.messages_map_original = self.service_original.messages_map
         self.messages_map_update = self.service_update.messages_map
+        self._compare_host()
         self._compare_oauth_scopes()
         # 3. Check the methods list
         self._compareRpcMethods(
             self.messages_map_original,
             self.messages_map_update,
         )
+
+    def _compare_host(self):
+        if not self.service_original.host and not self.service_update.host:
+            return
+        if not self.service_original.host:
+            host = self.service_update.host
+            self.finding_container.addFinding(
+                category=FindingCategory.SERVICE_HOST_ADDITION,
+                proto_file_name=host.proto_file_name,
+                source_code_line=host.source_code_line,
+                message=f"A new default host `{host.value}` is added.",
+                change_type=ChangeType.MINOR,
+            )
+            return
+        if not self.service_update.host:
+            host = self.service_original.host
+            self.finding_container.addFinding(
+                category=FindingCategory.SERVICE_HOST_REMOVAL,
+                proto_file_name=host.proto_file_name,
+                source_code_line=host.source_code_line,
+                message=f"An existing default host `{host.value}` is removed.",
+                change_type=ChangeType.MAJOR,
+            )
+            return
+        host_original = self.service_original.host
+        host_update = self.service_update.host
+        if host_original.value != host_update.value:
+            self.finding_container.addFinding(
+                category=FindingCategory.SERVICE_HOST_CHANGE,
+                proto_file_name=host_update.proto_file_name,
+                source_code_line=host_update.source_code_line,
+                message=f"An existing default host is updated from `{host_original.value}` to `{host_update.value}`.",
+                change_type=ChangeType.MAJOR,
+            )
 
     def _compare_oauth_scopes(self):
         oauth_scopes_original = {
