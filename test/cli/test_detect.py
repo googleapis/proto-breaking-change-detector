@@ -34,7 +34,8 @@ class CliDetectTest(unittest.TestCase):
             )
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
-                result.output, "enum_v1.proto L5: An Enum `BookType` is removed.\n"
+                result.output,
+                "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
             )
 
     def test_single_directory_enum(self):
@@ -54,7 +55,8 @@ class CliDetectTest(unittest.TestCase):
             )
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
-                result.output, "enum_v1.proto L5: An Enum `BookType` is removed.\n"
+                result.output,
+                "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
             )
 
     def test_single_directory_message(self):
@@ -155,7 +157,7 @@ class CliDetectTest(unittest.TestCase):
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
                 + "message_v1.proto L18: An existing field `type` is removed.\n"
-                + "enum_v1.proto L5: An Enum `BookType` is removed.\n",
+                + "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
             )
 
     def test_oslogin_proto_alpha(self):
