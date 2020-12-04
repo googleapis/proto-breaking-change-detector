@@ -62,7 +62,7 @@ class ServiceComparator:
     def _compare_host(self):
         if not self.service_original.host and not self.service_update.host:
             return
-        if not self.service_original.host and self.service_update.host:
+        if not self.service_original.host:
             host = self.service_update.host
             self.finding_container.addFinding(
                 category=FindingCategory.SERVICE_HOST_ADDITION,
@@ -72,7 +72,7 @@ class ServiceComparator:
                 change_type=ChangeType.MINOR,
             )
             return
-        if self.service_original.host and not self.service_update.host:
+        if not self.service_update.host:
             host = self.service_original.host
             self.finding_container.addFinding(
                 category=FindingCategory.SERVICE_HOST_REMOVAL,
