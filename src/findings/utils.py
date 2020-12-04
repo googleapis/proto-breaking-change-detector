@@ -70,7 +70,6 @@ class FindingCategory(enum.Enum):
     OAUTH_SCOPE_REMOVAL = 43
 
 
-
 class ChangeType(enum.Enum):
     MAJOR = 1
     MINOR = 2
