@@ -44,9 +44,12 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(services=[service_update])]),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings_map["An existing rpc method `DoThing` is removed."]
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "An existing rpc method `DoThing` is removed."
+        )
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
     def test_message_change(self):
@@ -59,10 +62,12 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(messages=[message_update])]),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings_map[
-            "Name of an existing field is changed from `field_one` to `field_two`."
-        ]
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Name of an existing field is changed from `field_one` to `field_two`.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
@@ -87,9 +92,10 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(enums=[enum_update])]),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings_map["An EnumValue `BLUE` is removed."]
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "An EnumValue `BLUE` is removed.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
     def test_resources_existing_pattern_change(self):
@@ -111,15 +117,48 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        file_resource_pattern_change = findings_map[
-            "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`."
-        ]
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
-            file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
+            finding.message,
+            "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`.",
         )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
         self.assertEqual(
-            file_resource_pattern_change.location.proto_file_name,
+            finding.location.proto_file_name,
+            "foo.proto",
+        )
+
+    def test_resources_existing_pattern_removal(self):
+        options_original = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["bar/{bar}", "foo/{foo}/bar"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_original
+        )
+        file_set_original = make_file_set(files=[file_pb2])
+
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar", resource_patterns=["bar/{bar}"]
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "An existing pattern value of the resource definition `.example.v1.Bar` is removed.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
+        self.assertEqual(
+            finding.location.proto_file_name,
             "foo.proto",
         )
 
@@ -138,16 +177,18 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        file_resource_addition = findings_map[
-            "A new resource definition `.example.v1.Bar` has been added."
-        ]
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
-            file_resource_addition.category.name,
+            finding.message,
+            "A new resource definition `.example.v1.Bar` has been added.",
+        )
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(
+            finding.category.name,
             "RESOURCE_DEFINITION_ADDITION",
         )
         self.assertEqual(
-            file_resource_addition.location.proto_file_name,
+            finding.location.proto_file_name,
             "foo.proto",
         )
 
@@ -217,6 +258,7 @@ class FileSetComparatorTest(unittest.TestCase):
             finding.message,
             "An exisiting packaging option `Foo` for `java_outer_classname` is removed.",
         )
+        self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_packaging_options_change(self):
         file_options_original = descriptor_pb2.FileOptions()
@@ -297,7 +339,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[file_update]),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        findings_map = self.finding_container.getAllFindings()
         # No breaking changes since there are only minor version updates.
         self.assertFalse(findings_map)
 
