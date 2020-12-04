@@ -18,11 +18,14 @@ import enum
 class FindingCategory(enum.Enum):
     # TODO(xiaozhenliu): renumber the enum values
     # once they are all verified in use.
+    # Enums
     ENUM_VALUE_ADDITION = 1
     ENUM_VALUE_REMOVAL = 2
     ENUM_VALUE_NAME_CHANGE = 3
     ENUM_ADDITION = 4
     ENUM_REMOVAL = 5
+    # Fields
+    FIELD_BEHAVIOR_CHANGE = 6
     FIELD_ADDITION = 7
     FIELD_REMOVAL = 8
     FIELD_NAME_CHANGE = 9
@@ -30,6 +33,11 @@ class FindingCategory(enum.Enum):
     FIELD_TYPE_CHANGE = 11
     FIELD_ONEOF_REMOVAL = 12
     FIELD_ONEOF_ADDITION = 13
+    # Field annotations
+    RESOURCE_REFERENCE_REMOVAL = 37
+    RESOURCE_REFERENCE_ADDITION = 38
+    RESOURCE_REFERENCE_CHANGE = 39
+
     MESSAGE_ADDITION = 14
     MESSAGE_REMOVAL = 15
     MESSAGE_NAME_CHANEG = 16
@@ -54,17 +62,12 @@ class FindingCategory(enum.Enum):
     RESOURCE_DEFINITION_ADDITION = 34
     RESOURCE_DEFINITION_CHANGE = 35
     RESOURCE_DEFINITION_REMOVAL = 36
-    RESOURCE_REFERENCE_REMOVAL = 37
-    RESOURCE_REFERENCE_ADDITION = 38
-    RESOURCE_REFERENCE_CHANGE = 39
     # Packaging options
     PACKAGING_OPTION_REMOVAL = 40
     PACKAGING_OPTION_ADDITION = 41
     PACKAGING_OPTION_CHANGE = 42
     # Service options
     OAUTH_SCOPE_REMOVAL = 43
-    # Field Options
-    FIELD_BEHAVIOR_CHANGE = 44
 
 
 class ChangeType(enum.Enum):
