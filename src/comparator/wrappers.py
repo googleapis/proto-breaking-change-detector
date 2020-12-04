@@ -724,12 +724,13 @@ class FileSet:
         self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
         self.file_set_pb = file_set_pb
+
         self.api_version = self._get_api_version(file_set_pb)
-        path = ()
         source_code_locations_map = self._get_source_code_locations_map(file_set_pb)
         self.resources_database = self._get_resource_database(
             file_set_pb, source_code_locations_map
         )
+        path = ()
         for fd in file_set_pb.file:
             source_code_locations = source_code_locations_map[fd.name]
             # Create packaging options map and duplicate the per-language rules for namespaces.

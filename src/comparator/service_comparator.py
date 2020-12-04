@@ -137,7 +137,7 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_ADDTION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
-                message=f"An rpc method `{name}` is added.",
+                message=f"A new rpc method `{name}` is added.",
                 change_type=ChangeType.MINOR,
             )
         for name in methods_update_keys & methods_original_keys:
@@ -288,7 +288,7 @@ class ServiceComparator:
         if not lro_original and not lro_update:
             return
         # LRO operation_info annotation addition.
-        if not lro_original and lro_update:
+        if not lro_original:
             self.finding_container.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
                 proto_file_name=method_update.proto_file_name,
@@ -298,7 +298,7 @@ class ServiceComparator:
             )
             return
         # LRO operation_info annotation removal.
-        if lro_original and not lro_update:
+        if not lro_update:
             self.finding_container.addFinding(
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
