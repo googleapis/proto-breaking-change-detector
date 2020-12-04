@@ -719,17 +719,18 @@ class FileSet:
         # The default value for every language package option is a dict.
         # whose key is the option str, and value is the WithLocation object with
         # sourec code information.
+        self.file_set_pb = file_set_pb
+        # Create source code location map, key is the file name, value is the
+        # source code information of every field.
+        source_code_locations_map = self._get_source_code_locations_map()
+        # Register all resources in the database.
+        self.resources_database = self._get_resource_database(source_code_locations_map)
+        self.api_version = self._get_api_version()
+        self.messages_map = self._get_messages_map(source_code_locations_map)
+
         self.packaging_options_map = defaultdict(dict)
         self.services_map: Dict[str, Service] = {}
-        self.messages_map: Dict[str, Message] = {}
         self.enums_map: Dict[str, Enum] = {}
-        self.file_set_pb = file_set_pb
-
-        self.api_version = self._get_api_version(file_set_pb)
-        source_code_locations_map = self._get_source_code_locations_map(file_set_pb)
-        self.resources_database = self._get_resource_database(
-            file_set_pb, source_code_locations_map
-        )
         path = ()
         for fd in file_set_pb.file:
             source_code_locations = source_code_locations_map[fd.name]
@@ -738,21 +739,6 @@ class FileSet:
                 fd.options, fd.name, source_code_locations, path + (8,)
             )
             # fmt: off
-            # FileDescriptorProto.message_type has field number 4
-            self.messages_map.update(
-                (
-                    message.name,
-                    Message(
-                        message,
-                        fd.name,
-                        source_code_locations,
-                        path + (4, i,),
-                        self.resources_database,
-                        self.api_version,
-                    ),
-                )
-                for i, message in enumerate(fd.message_type)
-            )
             # FileDescriptorProto.service has field number 6
             self.services_map.update(
                 (
@@ -783,11 +769,33 @@ class FileSet:
             )
             # fmt: on
 
-    def _get_api_version(
-        self, file_set: descriptor_pb2.FileDescriptorSet
-    ) -> Optional[str]:
+    def _get_messages_map(self, source_code_locations_map) -> Dict[str, Message]:
+        messages_map: Dict[str, Message] = {}
+        for fd in self.file_set_pb.file:
+            source_code_locations = source_code_locations_map[fd.name]
+            # FileDescriptorProto.message_type has field number 4.
+            messages_map.update(
+                (
+                    message.name,
+                    Message(
+                        message,
+                        fd.name,
+                        source_code_locations,
+                        (
+                            4,
+                            i,
+                        ),
+                        self.resources_database,
+                        self.api_version,
+                    ),
+                )
+                for i, message in enumerate(fd.message_type)
+            )
+        return messages_map
+
+    def _get_api_version(self) -> Optional[str]:
         dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
-        for fd in file_set.file:
+        for fd in self.file_set_pb.file:
             # Put the fileDescriptor and its dependencies to the dependency map.
             for dep in fd.dependency:
                 dependency_map[dep].append(fd)
@@ -802,10 +810,10 @@ class FileSet:
         return re.search(version, package).group()
 
     def _get_source_code_locations_map(
-        self, file_set: descriptor_pb2.FileDescriptorSet
+        self,
     ) -> Dict[str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]]:
         source_code_locations_map = {}
-        for fd in file_set.file:
+        for fd in self.file_set_pb.file:
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -821,13 +829,12 @@ class FileSet:
 
     def _get_resource_database(
         self,
-        file_set: descriptor_pb2.FileDescriptorSet,
         source_code_locations_map: Dict[
             str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
         ],
     ):
         resources_database = ResourceDatabase()
-        for fd in file_set.file:
+        for fd in self.file_set_pb.file:
             source_code_locations = source_code_locations_map[fd.name]
             # Register file-level resource definitions in database.
             for i, resource in enumerate(
