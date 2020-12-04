@@ -666,9 +666,17 @@ class Service:
         Returns:
             str: The hostname, with no protocol and no trailing ``/``.
         """
-        if self.service_pb.options.Extensions[client_pb2.default_host]:
-            return self.service_pb.options.Extensions[client_pb2.default_host]
-        return ""
+        if not self.service_pb.options.Extensions[client_pb2.default_host]:
+            return None
+        default_host = self.service_pb.options.Extensions[client_pb2.default_host]
+        return WithLocation(
+            value=default_host,
+            source_code_locations=self.source_code_locations,
+            # The ServiceOptions has field number 3, and default
+            # host option has field number 1049.
+            path=self.path + (3, 1049),
+            proto_file_name=self.proto_file_name,
+        )
 
     @property
     def oauth_scopes(self) -> Optional[Sequence[str]]:

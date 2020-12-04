@@ -32,6 +32,55 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
+    def test_service_host_addition(self):
+        service_without_host = make_service()
+        service_with_host = make_service(host="api.google.com")
+        ServiceComparator(
+            service_without_host,
+            service_with_host,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "A new default host `api.google.com` is added."
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_service_host_removal(self):
+        service_without_host = make_service()
+        service_with_host = make_service(host="api.google.com")
+        ServiceComparator(
+            service_with_host,
+            service_without_host,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "An existing default host `api.google.com` is removed."
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_service_host_change(self):
+        service_original = make_service(host="default.host")
+        service_update = make_service(host="default.host.update")
+        ServiceComparator(
+            service_original,
+            service_update,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "An existing default host is updated from `default.host` to `default.host.update`.",
+        )
+        self.assertEqual(finding.category.name, "SERVICE_HOST_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
     def test_service_oauth_scopes_change(self):
         service_original = make_service(
             scopes=("https://foo/user/", "https://foo/admin/")

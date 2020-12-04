@@ -180,6 +180,7 @@ class CliDetectTest(unittest.TestCase):
                 # client.proto is no longer imported by alpha version, so the packaging options is removed.
                 "google/api/client.proto L23: An exisiting packaging option `ClientProto` for `java_outer_classname` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L51: An existing method_signature is removed from method `DeletePosixAccount`.\n"
