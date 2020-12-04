@@ -56,11 +56,19 @@ proto-breaking-change-detector --help
 
 # Example usage1:
 # Detect breaking changes for two versions proto API definition files in test/testdata/protos/enum
-proto-breaking-change-detector --original_api_definition_dirs=test/testdata/protos/enum/v1 --update_api_definition_dirs=test/testdata/protos/enum/v1beta1 --original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto --update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto --human_readable_message
+proto-breaking-change-detector \
+--original_api_definition_dirs=test/testdata/protos/enum/v1 \
+--update_api_definition_dirs=test/testdata/protos/enum/v1beta1 \
+--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto \
+--update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto \
+--human_readable_message
 
 # Example usage2:
 # Detect breaking changes for two versions of proto API descriptor files.
-proto-breaking-change-detector  --original_descriptor_set_file_path=test/testdata/protos/enum/v1/enum_descriptor_set.pb --update_descriptor_set_file_path=test/testdata/protos/enum/v1beta1/enum_descriptor_set.pb --human_readable_message
+proto-breaking-change-detector  \
+--original_descriptor_set_file_path=test/testdata/protos/enum/v1/enum_descriptor_set.pb \
+--update_descriptor_set_file_path=test/testdata/protos/enum/v1beta1/enum_descriptor_set.pb \
+--human_readable_message
 
 # Example usage3:
 # Detect breaking changes for two versions proto API definition files defined in two directories.
