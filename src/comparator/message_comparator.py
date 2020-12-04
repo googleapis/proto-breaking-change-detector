@@ -75,6 +75,7 @@ class DescriptorComparator:
                 message_update.nested_messages,
             )
         # 5. Check breaking changes in nested enum.
+        # Enums are identified by names.
         if message_original.nested_enums or message_update.nested_enums:
             self._compare_nested_enums(
                 message_original.nested_enums,
