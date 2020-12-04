@@ -725,7 +725,9 @@ class FileSet:
         source_code_locations_map = self._get_source_code_locations_map()
         # Register all resources in the database.
         self.resources_database = self._get_resource_database(source_code_locations_map)
+        # Get API version from definition files.
         self.api_version = self._get_api_version()
+        # Get all messages in the map.
         self.messages_map = self._get_messages_map(source_code_locations_map)
 
         self.packaging_options_map = defaultdict(dict)
