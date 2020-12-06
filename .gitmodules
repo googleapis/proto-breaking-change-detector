@@ -5,3 +5,6 @@
 [submodule "api-common-protos"]
 	path = api-common-protos
 	url = https://github.com/googleapis/api-common-protos.git
+[submodule "googleapis"]
+	path = googleapis
+	url = https://github.com/googleapis/googleapis.git

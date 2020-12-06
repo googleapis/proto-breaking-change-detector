@@ -166,10 +166,10 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    f"--original_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
-                    f"--update_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
-                    "--original_proto_files=test/testdata/protos/google/cloud/oslogin/v1/oslogin.proto",
-                    "--update_proto_files=test/testdata/protos/google/cloud/oslogin/v1alpha/oslogin.proto",
+                    f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=googleapis/google/cloud/oslogin/v1/oslogin.proto",
+                    "--update_proto_files=googleapis/google/cloud/oslogin/v1alpha/oslogin.proto",
                     "--human_readable_message",
                 ],
             )
@@ -205,10 +205,10 @@ class CliDetectTest(unittest.TestCase):
             result = runner.invoke(
                 detect,
                 [
-                    f"--original_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
-                    f"--update_api_definition_dirs=test/testdata/protos,{self.COMMON_PROTOS_DIR}",
-                    "--original_proto_files=test/testdata/protos/google/cloud/oslogin/v1/oslogin.proto",
-                    "--update_proto_files=test/testdata/protos/google/cloud/oslogin/v1beta/oslogin.proto",
+                    f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=googleapis/google/cloud/oslogin/v1/oslogin.proto",
+                    "--update_proto_files=googleapis/google/cloud/oslogin/v1beta/oslogin.proto",
                     "--human_readable_message",
                 ],
             )
