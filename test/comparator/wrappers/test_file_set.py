@@ -210,7 +210,7 @@ class FileSetTest(unittest.TestCase):
         file2 = make_file_pb2(name="proto2", options=option2)
         file_set = make_file_set(files=[file1, file2])
         self.assertTrue(file_set.packaging_options_map)
-
+        # fmt: off
         self.assertEqual(
             list(file_set.packaging_options_map["java_package"].keys()),
             ["com.google.example.v1"],
@@ -218,11 +218,7 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             file_set.packaging_options_map["java_package"][
                 "com.google.example.v1"
-            ].path,
-            (
-                8,
-                1,
-            ),
+            ].path, (8, 1,),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["php_namespace"].keys()),
@@ -231,11 +227,7 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             file_set.packaging_options_map["php_namespace"][
                 "Google\\Cloud\\Example\\V1"
-            ].path,
-            (
-                8,
-                41,
-            ),
+            ].path, (8, 41,),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["java_outer_classname"].keys()),
@@ -243,17 +235,11 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["java_outer_classname"]["Foo"].path,
-            (
-                8,
-                8,
-            ),
+            (8, 8),
         )
         self.assertEqual(
             file_set.packaging_options_map["java_outer_classname"]["Bar"].path,
-            (
-                8,
-                8,
-            ),
+            (8, 8),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["php_metadata_namespace"].keys()),
@@ -263,10 +249,7 @@ class FileSetTest(unittest.TestCase):
             file_set.packaging_options_map["php_metadata_namespace"][
                 "php_metadata_namespace"
             ].path,
-            (
-                8,
-                44,
-            ),
+            (8, 44),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["php_class_prefix"].keys()),
@@ -274,10 +257,7 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["php_class_prefix"]["php_class_prefix"].path,
-            (
-                8,
-                40,
-            ),
+            (8, 40),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["ruby_package"].keys()),
@@ -285,10 +265,7 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["ruby_package"]["ruby_package"].path,
-            (
-                8,
-                45,
-            ),
+            (8, 45),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["go_package"].keys()),
@@ -296,10 +273,7 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["go_package"]["go_package"].path,
-            (
-                8,
-                11,
-            ),
+            (8, 11),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["csharp_namespace"].keys()),
@@ -307,10 +281,7 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["csharp_namespace"]["csharp_namespace"].path,
-            (
-                8,
-                37,
-            ),
+            (8, 37),
         )
         self.assertEqual(
             list(file_set.packaging_options_map["swift_prefix"].keys()),
@@ -318,11 +289,9 @@ class FileSetTest(unittest.TestCase):
         )
         self.assertEqual(
             file_set.packaging_options_map["swift_prefix"]["swift_prefix"].path,
-            (
-                8,
-                39,
-            ),
+            (8, 39),
         )
+        # fmt: on
 
     def test_file_set_api_version(self):
         dep1 = make_file_pb2(name="dep1", package=".example.external")
