@@ -127,8 +127,12 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(len(map_message.fields.keys()), 1)
         self.assertEqual(map_message.fields[1].name, "first_field")
         self.assertEqual(list(map_message.map_entries.keys()), ["FirstFieldEntry"])
-        self.assertTrue(isinstance(map_message.map_entries["FirstFieldEntry"]["key"], Field))
-        self.assertTrue(isinstance(map_message.map_entries["FirstFieldEntry"]["value"], Field))
+        self.assertTrue(
+            isinstance(map_message.map_entries["FirstFieldEntry"]["key"], Field)
+        )
+        self.assertTrue(
+            isinstance(map_message.map_entries["FirstFieldEntry"]["value"], Field)
+        )
         # It should not put into the nested message, so the nested message map is empty.
         self.assertFalse(map_message.nested_messages)
 
@@ -161,7 +165,9 @@ class WrappersTest(unittest.TestCase):
         self.assertTrue(map_field.map_entry)
         self.assertTrue(map_field.is_map_type)
         self.assertEqual(map_field.map_entry_type["key"], "TYPE_STRING")
-        self.assertEqual(map_field.map_entry_type["value"], ".example.v1alpha.FooMetadata")
+        self.assertEqual(
+            map_field.map_entry_type["value"], ".example.v1alpha.FooMetadata"
+        )
 
     def test_enum_wrapper(self):
         enum = self._FILE_SET.enums_map["Enum1"]

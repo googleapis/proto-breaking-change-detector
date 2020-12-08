@@ -150,7 +150,7 @@ class Field:
         resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
-        map_entry = None,
+        map_entry=None,
     ):
 
         self.field_pb = field_pb
