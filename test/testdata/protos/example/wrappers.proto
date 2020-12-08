@@ -72,3 +72,7 @@ enum Enum1 {
   b = 1;
 }
 
+message MapMessage {
+  map<string, FooMetadata> first_field = 1;
+}
+

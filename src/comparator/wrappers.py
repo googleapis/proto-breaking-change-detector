@@ -150,7 +150,7 @@ class Field:
         resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
-        map_entry: Dict[str, Field] = None,
+        map_entry = None,
     ):
 
         self.field_pb = field_pb
@@ -236,7 +236,7 @@ class Field:
     @property
     def is_map_type(self):
         """Return true if the field is map type."""
-        return not self.map_entry
+        return self.map_entry
 
     @property
     def type_name(self):
@@ -257,14 +257,14 @@ class Field:
     def map_entry_type(self):
         if self.is_map_type:
             key_type = (
-                self.map_entry["key"].proto_type
+                self.map_entry["key"].proto_type.value
                 if self.map_entry["key"].is_primitive_type
-                else self.map_entry["key"].type_name
+                else self.map_entry["key"].type_name.value
             )
             value_type = (
-                self.map_entry["value"].proto_type
+                self.map_entry["value"].proto_type.value
                 if self.map_entry["value"].is_primitive_type
-                else self.map_entry["value"].type_name
+                else self.map_entry["value"].type_name.value
             )
             return {"key": key_type, "value": value_type}
 
@@ -364,7 +364,7 @@ class Message:
                 field_pb=field,
                 proto_file_name=self.proto_file_name,
                 source_code_locations=self.source_code_locations,
-                path=path,
+                path=self.path + (2, i),
                 resource_database=self.resource_database,
                 message_resource=self.resource,
                 api_version=self.api_version,
