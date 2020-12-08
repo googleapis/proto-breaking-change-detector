@@ -44,7 +44,7 @@ class MessageTest(unittest.TestCase):
         field_one = message.fields[1]
         self.assertTrue(isinstance(field_one, wrappers.Field))
         self.assertEqual(field_one.name, "field_one")
-    
+
     def test_map_entry_option(self):
         message = make_message("Foo", map_entry=True)
         self.assertTrue(message.options.map_entry)
@@ -79,7 +79,7 @@ class MessageTest(unittest.TestCase):
         self.assertEqual(
             outer_msg.nested_messages["InnerMessage"].fields[1].name, "hidden_message"
         )
-    
+
     def test_nested_map_entries(self):
         # Create the inner message.
         inner_msg = [
@@ -95,7 +95,7 @@ class MessageTest(unittest.TestCase):
                         number=2,
                     ),
                 ),
-                map_entry=True
+                map_entry=True,
             ),
         ]
         field = make_field("field", type_name="FieldEntry", repeated=True, number=1)
