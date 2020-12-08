@@ -140,21 +140,22 @@ class FieldComparator:
                     change_type=ChangeType.MAJOR,
                 )
             # Both fields are map type, compare the key and value type.
-            else:
-                key_original = self.field_original.map_entry["key"]
-                value_original = self.field_original.map_entry["value"]
-                key_update = self.field_update.map_entry["key"]
-                value_update = self.field_update.map_entry["value"]
-                identical_key_value = (
-                    key_original == key_update and value_original == value_update
-                )
+            elif self.field_original.is_map_type and self.field_update.is_map_type:
+                key_original = self.field_original.map_entry_type["key"]
+                value_original = self.field_original.map_entry_type["value"]
+                key_update = self.field_update.map_entry_type["key"]
+                value_update = self.field_update.map_entry_type["value"]
                 # If the key, value are not primitive type, then it should allow
                 # minor version updates for TYPE_MESSAGE.
-                transformed_identical_key_value = (
-                    self._transformed_type_name(key_original) == key_update
-                    and self._transformed_type_name(value_original) == value_update
+                identical_key_type = (
+                    key_original == key_update
+                    or self._transformed_type_name(key_original) == key_update
                 )
-                if not identical_key_value or transformed_identical_key_value:
+                identical_value_type = (
+                    value_original == value_update
+                    or self._transformed_type_name(value_original) == value_update
+                )
+                if not (identical_key_type and identical_value_type):
                     self.finding_container.addFinding(
                         category=FindingCategory.FIELD_TYPE_CHANGE,
                         proto_file_name=self.field_update.proto_file_name,
@@ -287,7 +288,7 @@ class FieldComparator:
         api_version_original = self.field_original.api_version
         api_version_update = self.field_update.api_version
         transformed_type_name = (
-            type_name.value.replace(api_version_original, api_version_update)
+            type_name.replace(api_version_original, api_version_update)
             if api_version_original
             else None
         )
