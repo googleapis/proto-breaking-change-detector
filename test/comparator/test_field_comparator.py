@@ -193,7 +193,7 @@ class FieldComparatorTest(unittest.TestCase):
             proto_type="TYPE_MESSAGE", number=1, type_name=".example.key"
         )
         value_update = make_field(
-            proto_type="TYPE_STRING", number=2, type_name=".example.value"
+            proto_type="TYPE_MESSAGE", number=2, type_name=".example.value"
         )
         field_update = make_field(
             proto_type="TYPE_MESSAGE",
@@ -205,7 +205,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of an existing field `my_field` is changed from `map<TYPE_STRING, TYPE_STRING>` to `map<.example.key, TYPE_STRING>`.",
+            "Type of an existing field `my_field` is changed from `map<TYPE_STRING, TYPE_STRING>` to `map<.example.key, .example.value>`.",
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
