@@ -292,7 +292,7 @@ class Message:
                            and message-level resource options.
     api_version: the version of the API definition files.
     map: whether the message is an automatically generated map entry type for the maps field.
-        
+
         For maps fields:
         map<KeyType, ValueType> map_field = 1;
         The parsed descriptor looks like:
@@ -423,7 +423,7 @@ class Message:
             self.path + (7, 1053),
             self.proto_file_name,
         )
-    
+
     @property
     def map(self) -> bool:
         return self.message_pb.options.map_entry
