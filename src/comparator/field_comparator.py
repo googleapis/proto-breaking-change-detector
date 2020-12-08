@@ -120,9 +120,9 @@ class FieldComparator:
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
                     change_type=ChangeType.MAJOR,
                 )
-        # If the fields have the same type_name. While if they are map type,
+        # If the fields have the same type_name, but they are map type,
         # the key type and value type should also be identical.
-        else:
+        elif self.field_original.type_name:
             if self.field_original.is_map_type and not self.field_update.is_map_type:
                 self.finding_container.addFinding(
                     category=FindingCategory.FIELD_TYPE_CHANGE,
@@ -139,14 +139,14 @@ class FieldComparator:
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to a map.",
                     change_type=ChangeType.MAJOR,
                 )
-            # Both fields are map type, compare the key and value type.
+            # Both fields are map types, compare the key and value type.
             elif self.field_original.is_map_type and self.field_update.is_map_type:
                 key_original = self.field_original.map_entry_type["key"]
                 value_original = self.field_original.map_entry_type["value"]
                 key_update = self.field_update.map_entry_type["key"]
                 value_update = self.field_update.map_entry_type["value"]
-                # If the key, value are not primitive type, then it should allow
-                # minor version updates for TYPE_MESSAGE.
+                # If either the key, value is not primitive type, then it should allow
+                # minor version updates.
                 identical_key_type = (
                     key_original == key_update
                     or self._transformed_type_name(key_original) == key_update

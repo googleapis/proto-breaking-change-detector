@@ -220,6 +220,7 @@ class Field:
     @property
     def proto_type(self):
         """Return the proto type constant e.g. `TYPE_ENUM`"""
+        # TODO(xiaozhenliu): convert proto type `TYPE_STRING` to `string`.
         return WithLocation(
             FieldDescriptorProto().Type.Name(self.field_pb.type),
             self.source_code_locations,
