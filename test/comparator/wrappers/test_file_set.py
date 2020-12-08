@@ -195,7 +195,14 @@ class FileSetTest(unittest.TestCase):
         option1 = descriptor_pb2.FileOptions()
         option1.java_package = "com.google.example.v1"
         option1.php_namespace = "Google\\Cloud\\Example\\V1"
+        option1.php_metadata_namespace = "php_metadata_namespace"
+        option1.php_class_prefix = "php_class_prefix"
+        option1.ruby_package = "ruby_package"
         option1.java_outer_classname = "Foo"
+        option1.go_package = "go_package"
+        option1.csharp_namespace = "csharp_namespace"
+        option1.swift_prefix = "swift_prefix"
+
         option2 = descriptor_pb2.FileOptions()
         option2.java_outer_classname = "Bar"
         # Two proto files have the same packging options.
@@ -209,12 +216,96 @@ class FileSetTest(unittest.TestCase):
             ["com.google.example.v1"],
         )
         self.assertEqual(
+            file_set.packaging_options_map["java_package"][
+                "com.google.example.v1"
+            ].path,
+            (8, 1,),
+        )
+        self.assertEqual(
             list(file_set.packaging_options_map["php_namespace"].keys()),
             ["Google\\Cloud\\Example\\V1"],
         )
         self.assertEqual(
+            file_set.packaging_options_map["php_namespace"][
+                "Google\\Cloud\\Example\\V1"
+            ].path,
+            (8, 41,),
+        )
+        self.assertEqual(
             list(file_set.packaging_options_map["java_outer_classname"].keys()),
             ["Foo", "Bar"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["java_outer_classname"][
+                "Foo"
+            ].path,
+            (8, 8,),
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["java_outer_classname"][
+                "Bar"
+            ].path,
+            (8, 8,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["php_metadata_namespace"].keys()),
+            ["php_metadata_namespace"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["php_metadata_namespace"][
+                "php_metadata_namespace"
+            ].path,
+            (8, 44,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["php_class_prefix"].keys()),
+            ["php_class_prefix"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["php_class_prefix"][
+                "php_class_prefix"
+            ].path,
+            (8, 40,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["ruby_package"].keys()),
+            ["ruby_package"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["ruby_package"][
+                "ruby_package"
+            ].path,
+            (8, 45,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["go_package"].keys()),
+            ["go_package"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["go_package"][
+                "go_package"
+            ].path,
+            (8, 11,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["csharp_namespace"].keys()),
+            ["csharp_namespace"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["csharp_namespace"][
+                "csharp_namespace"
+            ].path,
+            (8, 37,),
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["swift_prefix"].keys()),
+            ["swift_prefix"],
+        )
+        self.assertEqual(
+            file_set.packaging_options_map["swift_prefix"][
+                "swift_prefix"
+            ].path,
+            (8, 39,),
         )
 
     def test_file_set_api_version(self):
