@@ -167,6 +167,7 @@ def make_message(
     resource_database: ResourceDatabase = None,
     options: desc.MessageOptions = None,
     api_version: str = None,
+    map_entry: bool = False,
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -177,6 +178,8 @@ def make_message(
         options=options,
         **kwargs,
     )
+    if map_entry:
+        message_pb.options.map_entry = True
 
     source_code_locations = {tuple(location.path): location for location in locations}
 
