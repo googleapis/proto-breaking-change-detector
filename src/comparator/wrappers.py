@@ -468,10 +468,6 @@ class Message:
         )
 
     @property
-    def map(self) -> bool:
-        return self.message_pb.options.map_entry
-
-    @property
     def source_code_line(self):
         """Return the start line number of Message definition in the proto file."""
         return _get_source_code_line(self.source_code_locations, self.path)
