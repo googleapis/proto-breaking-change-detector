@@ -906,8 +906,8 @@ class FileSet:
         packaging_options_path = {
             "java_package": (1,),
             "java_outer_classname": (8,),
-            "csharp_namespace": (11,),
-            "go_package": (37,),
+            "csharp_namespace": (37,),
+            "go_package": (11,),
             "swift_prefix": (39,),
             "php_namespace": (41,),
             "php_metadata_namespace": (44,),
