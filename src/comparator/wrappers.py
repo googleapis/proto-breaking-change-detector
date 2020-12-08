@@ -136,6 +136,7 @@ class Field:
                            and message-level resource options.
     message_resource: message-level resource definition.
     api_version: the version of the API definition files.
+    map_entry: type of the field if it is a map.
     """
 
     def __init__(
@@ -149,6 +150,7 @@ class Field:
         resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
+        map_entry: Dict[str, Field] = None,
     ):
 
         self.field_pb = field_pb
@@ -160,6 +162,7 @@ class Field:
         self.resource_database = resource_database
         self.message_resource = message_resource
         self.api_version = api_version
+        self.map_entry = map_entry
 
     def __getattr__(self, name):
         return getattr(self.field_pb, name)
@@ -231,6 +234,11 @@ class Field:
         return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
 
     @property
+    def is_map_type(self):
+        """Return true if the field is map type."""
+        return not self.map_entry
+
+    @property
     def type_name(self):
         """Return the type_name if the proto_type is not primitive, return `None` otherwise.
         For message and enum types, this is the name of full type like `.tutorial.example.Enum`"""
@@ -244,6 +252,21 @@ class Field:
                 self.path + (6,),
             )
         )
+
+    @property
+    def map_entry_type(self):
+        if self.is_map_type:
+            key_type = (
+                self.map_entry["key"].proto_type
+                if self.map_entry["key"].is_primitive_type
+                else self.map_entry["key"].type_name
+            )
+            value_type = (
+                self.map_entry["value"].proto_type
+                if self.map_entry["value"].is_primitive_type
+                else self.map_entry["value"].type_name
+            )
+            return {"key": key_type, "value": value_type}
 
     @property
     def oneof(self) -> bool:
@@ -291,17 +314,6 @@ class Message:
     resource_database: global resource database that contains all file-level resource definitions
                            and message-level resource options.
     api_version: the version of the API definition files.
-    map: whether the message is an automatically generated map entry type for the maps field.
-
-        For maps fields:
-        map<KeyType, ValueType> map_field = 1;
-        The parsed descriptor looks like:
-            message MapFieldEntry {
-                option map_entry = true;
-                optional KeyType key = 1;
-                optional ValueType value = 2;
-            }
-            repeated MapFieldEntry map_field = 1;
     """
 
     def __init__(
@@ -314,7 +326,6 @@ class Message:
         path: Tuple[int],
         resource_database: ResourceDatabase = None,
         api_version: str = None,
-        map: bool = False,
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
@@ -322,7 +333,6 @@ class Message:
         self.path = path
         self.resource_database = resource_database
         self.api_version = api_version
-        self.map = map
 
     def __getattr__(self, name):
         return getattr(self.message_pb, name)
@@ -332,7 +342,6 @@ class Message:
         """Return the name of this message."""
         return self.message_pb.name
 
-    # fmt: off
     @property
     def fields(self) -> Dict[int, Field]:
         """Return fields in this message.
@@ -342,7 +351,15 @@ class Message:
         """
         fields_map = {}
         for i, field in enumerate(self.message_pb.field):
-            path = self.path if self.map else self.path + (2, i,)
+            # Convert field name to Pascal case.
+            field_map_entry_name = (
+                field.name.replace("_", " ").title().replace(" ", "") + "Entry"
+            )
+            map_entry = (
+                self.map_entries[field_map_entry_name]
+                if field_map_entry_name in self.map_entries
+                else None
+            )
             fields_map[field.number] = Field(
                 field_pb=field,
                 proto_file_name=self.proto_file_name,
@@ -350,47 +367,73 @@ class Message:
                 path=path,
                 resource_database=self.resource_database,
                 message_resource=self.resource,
-                api_version=self.api_version
+                api_version=self.api_version,
+                map_entry=map_entry,
             )
         return fields_map
 
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
         """Return the nested messsages in the message. Message is identified by name."""
-        nested_map = {}
-        field_names_map = {field.name.capitalize() + "Entry": field for field in self.fields.values()}
-        for i, message in enumerate(self.message_pb.nested_type):
-            if not message.options.map_entry:
-                nested_map[message.name] = Message(
-                    message,
-                    self.proto_file_name,
-                    self.source_code_locations,
-                    # DescriptorProto.nested_type has field number 3.
-                    # So we append (3, nested_message_index) to the path.
-                    self.path + (3, i,),
-                    self.resource_database,
-                )
-            else:
-                # If the nested message is auto-generated map entry, it does not have real
-                # source code locations. We can use the field definition where generates
-                # this map entry. The map entry should have the name of fieldName + 'Entry'.
-                map_entry_name = message.name
-                if map_entry_name not in field_names_map:
-                    raise TypeError(f"The map entry message name `{map_entry_name}` does not exist in the fields.")
-                nested_map[message.name] = Message(
-                    message_pb=message,
-                    proto_file_name=self.proto_file_name,
-                    source_code_locations=self.source_code_locations,
-                    path=field_names_map[map_entry_name].path,
-                    resource_database=self.resource_database,
-                    map=True,
-                )
-            return nested_map
+        # fmt: off
+        return {
+            message.name: Message(
+                message,
+                self.proto_file_name,
+                self.source_code_locations,
+                # DescriptorProto.nested_type has field number 3.
+                # So we append (3, nested_message_index) to the path.
+                self.path + (3, i),
+                self.resource_database,
+            )
+            # Exclude the auto-generated map_entries message.
+            for i, message in enumerate(self.message_pb.nested_type)
+            if not message.options.map_entry
+        }
+        # fmt: on
 
+    @property
+    def map_entries(self) -> Dict[str, Dict[str, Field]]:
+        # If the nested message is auto-generated map entry for the maps field,
+        # the message name is fieldName + 'Entry', and it has two nested fields (key, value).
+        #
+        # For maps fields:
+        # map<KeyType, ValueType> map_field = 1;
+        # The parsed descriptor looks like:
+        #    message MapFieldEntry {
+        #        option map_entry = true;
+        #        optional KeyType key = 1;
+        #        optional ValueType value = 2;
+        #    }
+        #    repeated MapFieldEntry map_field = 1;
+        map_entries = {}
+        for message in self.message_pb.nested_type:
+            if message.options.map_entry:
+                fields = {field.name: field for field in message.field}
+                if not fields["key"] or not fields["value"]:
+                    raise TypeError(
+                        "The auto-generated map entry message should have key and value fields"
+                    )
+                map_entries[message.name] = {
+                    "key": Field(
+                        field_pb=fields["key"],
+                        source_code_locations=self.source_code_locations,
+                        proto_file_name=self.proto_file_name,
+                        path=self.path,
+                    ),
+                    "value": Field(
+                        field_pb=fields["value"],
+                        source_code_locations=self.source_code_locations,
+                        proto_file_name=self.proto_file_name,
+                        path=self.path,
+                    ),
+                }
+        return map_entries
 
     @property
     def nested_enums(self) -> Dict[str, Enum]:
         """Return the nested enums in the message. Enum is identified by name."""
+        # fmt: off
         return {
             enum.name: Enum(
                 enum,
@@ -398,11 +441,11 @@ class Message:
                 self.source_code_locations,
                 # DescriptorProto.enum_type has field number 4.
                 # So we append (4, nested_enum_index) to the path.
-                self.path + (4, i,),
+                self.path + (4, i),
             )
             for i, enum in enumerate(self.message_pb.enum_type)
         }
-    # fmt: on
+        # fmt: on
 
     @property
     def oneof_fields(self) -> Sequence[Field]:
