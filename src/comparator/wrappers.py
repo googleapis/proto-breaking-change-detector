@@ -267,6 +267,7 @@ class Field:
                 else self.map_entry["value"].type_name.value
             )
             return {"key": key_type, "value": value_type}
+        return None
 
     @property
     def oneof(self) -> bool:
@@ -351,7 +352,9 @@ class Message:
         """
         fields_map = {}
         for i, field in enumerate(self.message_pb.field):
-            # Convert field name to Pascal case.
+            # Convert field name to pascal case.
+            # The auto-generated nested message uses the transformed
+            # name of the field (name `first_field` is converted to `FirstFieldEntry`)
             field_map_entry_name = (
                 field.name.replace("_", " ").title().replace(" ", "") + "Entry"
             )
@@ -383,10 +386,13 @@ class Message:
                 self.source_code_locations,
                 # DescriptorProto.nested_type has field number 3.
                 # So we append (3, nested_message_index) to the path.
-                self.path + (3, i),
+                self.path + (3, i,),
                 self.resource_database,
             )
-            # Exclude the auto-generated map_entries message.
+            # Exclude the auto-generated map_entries message, since
+            # the generated message does not have real source code location.
+            # Including those messages in the comparator will fail the source code
+            # information extraction.
             for i, message in enumerate(self.message_pb.nested_type)
             if not message.options.map_entry
         }
@@ -412,7 +418,7 @@ class Message:
                 fields = {field.name: field for field in message.field}
                 if not fields["key"] or not fields["value"]:
                     raise TypeError(
-                        "The auto-generated map entry message should have key and value fields"
+                        "The auto-generated map entry message should have key and value fields."
                     )
                 map_entries[message.name] = {
                     "key": Field(
