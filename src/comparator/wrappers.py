@@ -259,8 +259,11 @@ class Field:
         def get_type(name):
             field = self.map_entry[name]
             return (
-                field.proto_type.value if field.is_primitive_type else field.type_name.value
+                field.proto_type.value
+                if field.is_primitive_type
+                else field.type_name.value
             )
+
         if self.is_map_type:
             return {name: get_type(name) for name in ("key", "value")}
         return None
@@ -412,7 +415,7 @@ class Message:
         for message in self.message_pb.nested_type:
             if message.options.map_entry:
                 fields = {field.name: field for field in message.field}
-                if not fields["key"] or not fields["value"]:
+                if not {"key", "value"} <= fields.keys():
                     raise TypeError(
                         "The auto-generated map entry message should have key and value fields."
                     )
