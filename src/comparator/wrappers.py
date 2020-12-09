@@ -220,7 +220,6 @@ class Field:
     @property
     def proto_type(self):
         """Return the proto type constant e.g. `enum`"""
-        # TODO(xiaozhenliu): convert proto type `TYPE_STRING` to `string`.
         return WithLocation(
             cast(str, FieldDescriptorProto().Type.Name(self.field_pb.type))[
                 len("TYPE_") :
@@ -232,7 +231,7 @@ class Field:
 
     @property
     def is_primitive_type(self):
-        """Return true if the proto_type is primitive python type like `TYPE_STRING`"""
+        """Return true if the proto_type is primitive python type like `string`"""
         NON_PRIMITIVE_TYPE = ["enum", "message", "group"]
         return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
 
