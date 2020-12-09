@@ -255,18 +255,14 @@ class Field:
 
     @property
     def map_entry_type(self):
+        # Get the key and value type for the map entry.
+        def get_type(name):
+            field = self.map_entry[name]
+            return (
+                field.proto_type.value if field.is_primitive_type else field.type_name.value
+            )
         if self.is_map_type:
-            key_type = (
-                self.map_entry["key"].proto_type.value
-                if self.map_entry["key"].is_primitive_type
-                else self.map_entry["key"].type_name.value
-            )
-            value_type = (
-                self.map_entry["value"].proto_type.value
-                if self.map_entry["value"].is_primitive_type
-                else self.map_entry["value"].type_name.value
-            )
-            return {"key": key_type, "value": value_type}
+            return {name: get_type(name) for name in ("key", "value")}
         return None
 
     @property
