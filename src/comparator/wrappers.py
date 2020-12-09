@@ -31,7 +31,7 @@ from google.longrunning import operations_pb2
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.comparator.resource_database import ResourceDatabase
-from typing import Dict, Sequence, Optional, Tuple
+from typing import Dict, Sequence, Optional, Tuple, cast
 
 
 def _get_source_code_line(source_code_locations, path):
@@ -219,10 +219,12 @@ class Field:
 
     @property
     def proto_type(self):
-        """Return the proto type constant e.g. `TYPE_ENUM`"""
+        """Return the proto type constant e.g. `enum`"""
         # TODO(xiaozhenliu): convert proto type `TYPE_STRING` to `string`.
         return WithLocation(
-            FieldDescriptorProto().Type.Name(self.field_pb.type),
+            cast(str, FieldDescriptorProto().Type.Name(self.field_pb.type))[
+                len("TYPE_") :
+            ].lower(),
             self.source_code_locations,
             # FieldDescriptorProto.type has field number 5.
             self.path + (5,),
@@ -231,7 +233,7 @@ class Field:
     @property
     def is_primitive_type(self):
         """Return true if the proto_type is primitive python type like `TYPE_STRING`"""
-        NON_PRIMITIVE_TYPE = ["TYPE_ENUM", "TYPE_MESSAGE", "TYPE_GROUP"]
+        NON_PRIMITIVE_TYPE = ["enum", "message", "group"]
         return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
 
     @property
@@ -587,9 +589,9 @@ class Method:
         request_fields_map = {f.name: f for f in request_message.fields.values()}
 
         for page_field in (
-            (request_fields_map, "TYPE_INT32", "page_size"),
-            (request_fields_map, "TYPE_STRING", "page_token"),
-            (response_fields_map, "TYPE_STRING", "next_page_token"),
+            (request_fields_map, "int32", "page_size"),
+            (request_fields_map, "string", "page_token"),
+            (response_fields_map, "string", "next_page_token"),
         ):
             field = page_field[0].get(page_field[2], None)
             if not field or field.proto_type.value != page_field[1]:

@@ -88,6 +88,7 @@ class MethodTest(unittest.TestCase):
             output_message=response_message,
             messages_map=messages_map,
         )
+        print(method.paged_result_field)
         self.assertEqual(method.paged_result_field.name, "repeated_field")
         self.assertEqual(method.longrunning, False)
 

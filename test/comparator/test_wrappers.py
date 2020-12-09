@@ -142,7 +142,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(enum_field.api_version, "v1alpha")
         self.assertFalse(enum_field.repeated.value)
         self.assertFalse(enum_field.required.value)
-        self.assertEqual(enum_field.proto_type.value, "TYPE_ENUM")
+        self.assertEqual(enum_field.proto_type.value, "enum")
         self.assertEqual(enum_field.type_name.value, ".example.v1alpha.Enum1")
         self.assertEqual(enum_field.is_primitive_type, False)
         self.assertEqual(enum_field.oneof, False)
@@ -164,7 +164,7 @@ class WrappersTest(unittest.TestCase):
         map_field = self._FILE_SET.messages_map["MapMessage"].fields[1]
         self.assertTrue(map_field.map_entry)
         self.assertTrue(map_field.is_map_type)
-        self.assertEqual(map_field.map_entry_type["key"], "TYPE_STRING")
+        self.assertEqual(map_field.map_entry_type["key"], "string")
         self.assertEqual(
             map_field.map_entry_type["value"], ".example.v1alpha.FooMetadata"
         )
