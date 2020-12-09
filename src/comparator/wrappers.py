@@ -221,9 +221,9 @@ class Field:
     def proto_type(self):
         """Return the proto type constant e.g. `enum`"""
         return WithLocation(
-            cast(str, FieldDescriptorProto().Type.Name(self.field_pb.type))[
-                len("TYPE_") :
-            ].lower(),
+            FieldDescriptorProto()
+            .Type.Name(self.field_pb.type)[len("TYPE_") :]
+            .lower(),
             self.source_code_locations,
             # FieldDescriptorProto.type has field number 5.
             self.path + (5,),
@@ -233,7 +233,7 @@ class Field:
     def is_primitive_type(self):
         """Return true if the proto_type is primitive python type like `string`"""
         NON_PRIMITIVE_TYPE = ["enum", "message", "group"]
-        return False if self.proto_type.value in NON_PRIMITIVE_TYPE else True
+        return self.proto_type.value not in NON_PRIMITIVE_TYPE
 
     @property
     def is_map_type(self):
