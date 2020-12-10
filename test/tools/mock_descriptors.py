@@ -180,8 +180,7 @@ def make_message(
         options=options,
         **kwargs,
     )
-    if map_entry:
-        message_pb.options.map_entry = True
+    message_pb.options.map_entry = map_entry
 
     source_code_locations = {tuple(location.path): location for location in locations}
 
