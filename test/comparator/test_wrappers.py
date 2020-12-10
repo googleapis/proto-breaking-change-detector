@@ -15,7 +15,7 @@
 import unittest
 import os
 from src.detector.loader import Loader
-from src.comparator.wrappers import FileSet
+from src.comparator.wrappers import FileSet, Field
 
 
 class WrappersTest(unittest.TestCase):
@@ -122,6 +122,20 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(resource.value.pattern, ["foo/{foo}/bar/{bar}"])
         self.assertEqual(resource.value.type, "example.googleapis.com/Foo")
 
+        # The message has auto-generated map entries (nested type) for fields that is map type.
+        map_message = messages_map["MapMessage"]
+        self.assertEqual(len(map_message.fields.keys()), 1)
+        self.assertEqual(map_message.fields[1].name, "first_field")
+        self.assertEqual(list(map_message.map_entries.keys()), ["FirstFieldEntry"])
+        self.assertTrue(
+            isinstance(map_message.map_entries["FirstFieldEntry"]["key"], Field)
+        )
+        self.assertTrue(
+            isinstance(map_message.map_entries["FirstFieldEntry"]["value"], Field)
+        )
+        # It should not put into the nested message, so the nested message map is empty.
+        self.assertFalse(map_message.nested_messages)
+
     def test_field_wrapper(self):
         foo_response_message = self._FILE_SET.messages_map["FooResponse"]
         enum_field = foo_response_message.fields[1]
@@ -146,6 +160,14 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(name_field.name, "name")
         self.assertFalse(name_field.repeated.value)
         self.assertTrue(name_field.required.value)
+
+        map_field = self._FILE_SET.messages_map["MapMessage"].fields[1]
+        self.assertTrue(map_field.map_entry)
+        self.assertTrue(map_field.is_map_type)
+        self.assertEqual(map_field.map_entry_type["key"], "TYPE_STRING")
+        self.assertEqual(
+            map_field.map_entry_type["value"], ".example.v1alpha.FooMetadata"
+        )
 
     def test_enum_wrapper(self):
         enum = self._FILE_SET.enums_map["Enum1"]
