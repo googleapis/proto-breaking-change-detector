@@ -45,6 +45,10 @@ class MessageTest(unittest.TestCase):
         self.assertTrue(isinstance(field_one, wrappers.Field))
         self.assertEqual(field_one.name, "field_one")
 
+    def test_map_entry_option(self):
+        message = make_message("Foo", map_entry=True)
+        self.assertTrue(message.options.map_entry)
+
     def test_nested_types(self):
         # Create the inner message.
         inner_msg = [
@@ -75,6 +79,32 @@ class MessageTest(unittest.TestCase):
         self.assertEqual(
             outer_msg.nested_messages["InnerMessage"].fields[1].name, "hidden_message"
         )
+
+    def test_nested_map_entries(self):
+        # Create the inner message.
+        inner_msg = [
+            make_message(
+                "FieldEntry",
+                fields=(
+                    make_field(
+                        name="key",
+                        number=1,
+                    ),
+                    make_field(
+                        name="value",
+                        number=2,
+                    ),
+                ),
+                map_entry=True,
+            ),
+        ]
+        field = make_field("field", type_name="FieldEntry", repeated=True, number=1)
+        outer_msg = make_message(fields=[field], nested_messages=inner_msg)
+        self.assertEqual(list(outer_msg.map_entries.keys()), ["FieldEntry"])
+        self.assertTrue(outer_msg.map_entries["FieldEntry"]["key"])
+        self.assertTrue(outer_msg.map_entries["FieldEntry"]["value"])
+        self.assertFalse(outer_msg.nested_messages)
+        self.assertTrue(outer_msg.fields[1].map_entry)
 
     def test_resource_path(self):
         options = descriptor_pb2.MessageOptions()

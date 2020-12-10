@@ -103,6 +103,7 @@ def make_field(
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
     api_version: str = None,
+    map_entry=None,
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
@@ -135,6 +136,7 @@ def make_field(
         resource_database=resource_database,
         message_resource=message_resource,
         api_version=api_version,
+        map_entry=map_entry,
     )
 
 
@@ -167,6 +169,7 @@ def make_message(
     resource_database: ResourceDatabase = None,
     options: desc.MessageOptions = None,
     api_version: str = None,
+    map_entry: bool = False,
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -177,6 +180,7 @@ def make_message(
         options=options,
         **kwargs,
     )
+    message_pb.options.map_entry = map_entry
 
     source_code_locations = {tuple(location.path): location for location in locations}
 

@@ -28,6 +28,7 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(field.oneof, False)
         self.assertEqual(field.proto_file_name, "foo")
         self.assertEqual(field.api_version, None)
+        self.assertEqual(field.map_entry, None)
 
     def test_api_version(self):
         field = make_field("Foo", api_version="v1")
@@ -103,6 +104,21 @@ class FieldTest(unittest.TestCase):
         )
         self.assertEqual(field.source_code_line, 2)
         self.assertEqual(field.proto_file_name, "test.proto")
+
+    def test_map_entry(self):
+        # Key in map fields cannot be float/double, bytes, enums or message types.
+        key_field = make_field(name="key", number=1, proto_type="TYPE_STRING")
+        value_field = make_field(name="value", number=2, type_name=".example.foo")
+        map_field = make_field(
+            name="map_field",
+            proto_type="TYPE_MESSAGE",
+            type_name="MapFieldEntry",
+            map_entry={"key": key_field, "value": value_field},
+        )
+        self.assertTrue(map_field.is_map_type)
+        self.assertTrue(map_field.map_entry_type)
+        self.assertEqual(map_field.map_entry_type["key"], "TYPE_STRING")
+        self.assertEqual(map_field.map_entry_type["value"], ".example.foo")
 
 
 if __name__ == "__main__":
