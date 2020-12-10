@@ -307,5 +307,29 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(file_set.api_version, "v1beta")
 
 
+    def test_file_set_root_package(self):
+        dep1 = make_file_pb2(name="dep1", package="example.external")
+        dep2 = make_file_pb2(name="dep2", package="example.external")
+        file1 = make_file_pb2(
+            name="proto1", dependency=["dep1", "dep2"], package="example.common"
+        )
+        file2 = make_file_pb2(
+            name="proto2", dependency=["proto1"], package="example.tutorial"
+        )
+        file3 = make_file_pb2(
+            name="proto3", dependency=["proto2", "dep1"], package="example.tutorial"
+        )
+        file_set = make_file_set(files=[file1, file2, file3, dep1, dep2])
+        self.assertEqual(file_set.root_package, "example.tutorial")
+        # The package name `example.tutorial` does not have any match for a version.
+        self.assertFalse(file_set.api_version)
+        # The `proto2` and `proto3` are API definition files, others are dependencies.
+        self.assertEqual([f.name for f in file_set.definition_files], ["proto2", "proto3"])
+        # If the files are totally not related, the root_package will be the first file package.
+        file_set = make_file_set(files=[dep1, dep2])
+        self.assertEqual(file_set.root_package, "example.external")
+        self.assertFalse(file_set.api_version)
+
+
 if __name__ == "__main__":
     unittest.main()
