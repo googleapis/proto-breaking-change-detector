@@ -24,7 +24,7 @@ class FieldTest(unittest.TestCase):
         field = make_field("Foo")
         self.assertEqual(field.name, "Foo")
         self.assertEqual(field.number, 1)
-        self.assertEqual(field.proto_type.value, "TYPE_MESSAGE")
+        self.assertEqual(field.proto_type.value, "message")
         self.assertEqual(field.oneof, False)
         self.assertEqual(field.proto_file_name, "foo")
         self.assertEqual(field.api_version, None)
@@ -38,22 +38,14 @@ class FieldTest(unittest.TestCase):
     def test_field_is_primitive(self):
         primitive_field = make_field(proto_type="TYPE_INT32")
         self.assertEqual(primitive_field.is_primitive_type, True)
-        self.assertEqual(primitive_field.proto_type.value, "TYPE_INT32")
+        self.assertEqual(primitive_field.proto_type.value, "int32")
+        self.assertEqual(make_field(proto_type="TYPE_FLOAT").proto_type.value, "float")
+        self.assertEqual(make_field(proto_type="TYPE_INT64").proto_type.value, "int64")
+        self.assertEqual(make_field(proto_type="TYPE_BOOL").proto_type.value, "bool")
         self.assertEqual(
-            make_field(proto_type="TYPE_FLOAT").proto_type.value, "TYPE_FLOAT"
+            make_field(proto_type="TYPE_STRING").proto_type.value, "string"
         )
-        self.assertEqual(
-            make_field(proto_type="TYPE_INT64").proto_type.value, "TYPE_INT64"
-        )
-        self.assertEqual(
-            make_field(proto_type="TYPE_BOOL").proto_type.value, "TYPE_BOOL"
-        )
-        self.assertEqual(
-            make_field(proto_type="TYPE_STRING").proto_type.value, "TYPE_STRING"
-        )
-        self.assertEqual(
-            make_field(proto_type="TYPE_BYTES").proto_type.value, "TYPE_BYTES"
-        )
+        self.assertEqual(make_field(proto_type="TYPE_BYTES").proto_type.value, "bytes")
 
     def test_field_not_primitive(self):
         non_primitive_field = make_field(
@@ -61,7 +53,7 @@ class FieldTest(unittest.TestCase):
             type_name=".example.Enum",
         )
         self.assertEqual(non_primitive_field.is_primitive_type, False)
-        self.assertEqual(non_primitive_field.proto_type.value, "TYPE_ENUM")
+        self.assertEqual(non_primitive_field.proto_type.value, "enum")
         self.assertEqual(non_primitive_field.type_name.value, ".example.Enum")
 
     def test_repeated(self):
@@ -117,7 +109,7 @@ class FieldTest(unittest.TestCase):
         )
         self.assertTrue(map_field.is_map_type)
         self.assertTrue(map_field.map_entry_type)
-        self.assertEqual(map_field.map_entry_type["key"], "TYPE_STRING")
+        self.assertEqual(map_field.map_entry_type["key"], "string")
         self.assertEqual(map_field.map_entry_type["value"], ".example.foo")
 
 

@@ -75,7 +75,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
+                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `int32` to `string`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
@@ -152,7 +152,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `TYPE_INT32` to `TYPE_STRING`.\n"
+                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `int32` to `string`.\n"
                 + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
                 + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
                 + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"

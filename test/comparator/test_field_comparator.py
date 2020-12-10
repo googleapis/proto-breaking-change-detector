@@ -96,7 +96,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`.",
+            "Type of an existing field `my_field` is changed from `int32` to `string`.",
         )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
@@ -205,7 +205,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Type of an existing field `my_field` is changed from `map<TYPE_STRING, TYPE_STRING>` to `map<.example.key, .example.value>`.",
+            "Type of an existing field `my_field` is changed from `map<string, string>` to `map<.example.key, .example.value>`.",
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")

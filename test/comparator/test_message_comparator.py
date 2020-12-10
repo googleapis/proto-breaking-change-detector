@@ -49,7 +49,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(message1, message2, self.finding_container).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
-            "Type of an existing field `my_field` is changed from `TYPE_INT32` to `TYPE_STRING`."
+            "Type of an existing field `my_field` is changed from `int32` to `string`."
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.change_type.name, "MAJOR")
