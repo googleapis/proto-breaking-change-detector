@@ -256,18 +256,17 @@ class Field:
 
     @property
     def map_entry_type(self):
+        # Get the key and value type for the map entry.
+        def get_type(name):
+            field = self.map_entry[name]
+            return (
+                field.proto_type.value
+                if field.is_primitive_type
+                else field.type_name.value
+            )
+
         if self.is_map_type:
-            key_type = (
-                self.map_entry["key"].proto_type.value
-                if self.map_entry["key"].is_primitive_type
-                else self.map_entry["key"].type_name.value
-            )
-            value_type = (
-                self.map_entry["value"].proto_type.value
-                if self.map_entry["value"].is_primitive_type
-                else self.map_entry["value"].type_name.value
-            )
-            return {"key": key_type, "value": value_type}
+            return {name: get_type(name) for name in ("key", "value")}
         return None
 
     @property
@@ -417,7 +416,7 @@ class Message:
         for message in self.message_pb.nested_type:
             if message.options.map_entry:
                 fields = {field.name: field for field in message.field}
-                if not fields["key"] or not fields["value"]:
+                if not {"key", "value"} <= fields.keys():
                     raise TypeError(
                         "The auto-generated map entry message should have key and value fields."
                     )
@@ -986,8 +985,8 @@ class FileSet:
         packaging_options_path = {
             "java_package": (1,),
             "java_outer_classname": (8,),
-            "csharp_namespace": (11,),
-            "go_package": (37,),
+            "csharp_namespace": (37,),
+            "go_package": (11,),
             "swift_prefix": (39,),
             "php_namespace": (41,),
             "php_metadata_namespace": (44,),
