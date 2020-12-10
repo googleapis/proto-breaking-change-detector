@@ -106,14 +106,8 @@ class FieldComparator:
         ):
             # Version update is allowed here, for example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
             # But from `.example.v1.Enum` to `.example.v2.EnumUpdate` is breaking.
-            api_version_original = self.field_original.api_version
-            api_version_update = self.field_update.api_version
-            transformed_type_name = (
-                self.field_original.type_name.value.replace(
-                    api_version_original, api_version_update
-                )
-                if api_version_original
-                else None
+            transformed_type_name = self._transformed_type_name(
+                self.field_original.type_name.value
             )
             if (
                 not transformed_type_name
@@ -126,6 +120,50 @@ class FieldComparator:
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
                     change_type=ChangeType.MAJOR,
                 )
+        # If the fields have the same type_name, but they are map type,
+        # the key type and value type should also be identical.
+        elif self.field_original.type_name:
+            if self.field_original.is_map_type and not self.field_update.is_map_type:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_TYPE_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.type_name.source_code_line,
+                    message=f"Type of an existing field `{self.field_original.name}` is changed from a map to `{self.field_update.type_name.value}`.",
+                    change_type=ChangeType.MAJOR,
+                )
+            elif not self.field_original.is_map_type and self.field_update.is_map_type:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_TYPE_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.type_name.source_code_line,
+                    message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to a map.",
+                    change_type=ChangeType.MAJOR,
+                )
+            # Both fields are map types, compare the key and value type.
+            elif self.field_original.is_map_type and self.field_update.is_map_type:
+                key_original = self.field_original.map_entry_type["key"]
+                value_original = self.field_original.map_entry_type["value"]
+                key_update = self.field_update.map_entry_type["key"]
+                value_update = self.field_update.map_entry_type["value"]
+                # If either the key, value is not primitive type, then it should allow
+                # minor version updates.
+                identical_key_type = (
+                    key_original == key_update
+                    or self._transformed_type_name(key_original) == key_update
+                )
+                identical_value_type = (
+                    value_original == value_update
+                    or self._transformed_type_name(value_original) == value_update
+                )
+                if not (identical_key_type and identical_value_type):
+                    self.finding_container.addFinding(
+                        category=FindingCategory.FIELD_TYPE_CHANGE,
+                        proto_file_name=self.field_update.proto_file_name,
+                        source_code_line=self.field_update.type_name.source_code_line,
+                        message=f"Type of an existing field `{self.field_original.name}` is changed from `map<{key_original}, {value_original}>` to `map<{key_update}, {value_update}>`.",
+                        change_type=ChangeType.MAJOR,
+                    )
+
         # 6. Check the oneof_index of the field.
         if self.field_original.oneof != self.field_update.oneof:
             proto_file_name = self.field_update.proto_file_name
@@ -242,6 +280,19 @@ class FieldComparator:
                 False,
                 resource_ref_update.source_code_line,
             )
+
+    def _transformed_type_name(self, type_name):
+        # Tranform type name to allow minor version update.
+        # For example from `.example.v1.Enum` to `.example.v1beta1.Enum`.
+        # But from `.example.v1.Enum` to `.example.v2.EnumUpdate` is breaking.
+        api_version_original = self.field_original.api_version
+        api_version_update = self.field_update.api_version
+        transformed_type_name = (
+            type_name.replace(api_version_original, api_version_update)
+            if api_version_original
+            else None
+        )
+        return transformed_type_name
 
     def _resource_in_database(self, resource_ref) -> bool:
         # Check whether the added resource reference is in the database.

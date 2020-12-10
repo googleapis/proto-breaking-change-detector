@@ -181,7 +181,6 @@ def make_message(
         **kwargs,
     )
     message_pb.options.map_entry = map_entry
-
     source_code_locations = {tuple(location.path): location for location in locations}
 
     return wrappers.Message(

@@ -124,6 +124,123 @@ class FieldComparatorTest(unittest.TestCase):
         findings = self.finding_container.getAllFindings()
         self.assertFalse(findings)
 
+    def test_type_change_map_entry1(self):
+        # Existing field is message_type, while the update field type is map. Breaking change.
+        # Normally it will catch by type_name comparison. But in case we have a
+        # message name as `{FieldName}Entry` which is the same as auto-generated nested message name,
+        # we still consider the condition that the type of an existing field is changed from
+        # normal message (`{FieldName}Entry`) to map entry message (`{FieldName}Entry`).
+        field_no_map = make_field(
+            proto_type="TYPE_MESSAGE", type_name=".exmaple.MapEntry"
+        )
+        # [Constructing] map<string, string> field
+        key_field = make_field(proto_type="TYPE_STRING", number=1)
+        value_field = make_field(proto_type="TYPE_STRING", number=2)
+        field_map = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_field, "value": value_field},
+        )
+        FieldComparator(field_no_map, field_map, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of an existing field `my_field` is changed from `.exmaple.MapEntry` to a map.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_type_change_map_entry2(self):
+        # Existing field type is a map, while the update field type is a normal message. Breaking change.
+        # Normally it will catch by type_name comparison. But in case we have a
+        # message name as `{FieldName}Entry` which is the same as auto-generated nested message name,
+        # we still consider the condition that the type of an existing field is changed from
+        # map entry message (`{FieldName}Entry`) to normal message (`{FieldName}Entry`).
+        field_no_map = make_field(
+            proto_type="TYPE_MESSAGE", type_name=".exmaple.MapEntry"
+        )
+        # [Constructing] map<string, string> field
+        key_field = make_field(proto_type="TYPE_STRING", number=1)
+        value_field = make_field(proto_type="TYPE_STRING", number=2)
+        field_map = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_field, "value": value_field},
+        )
+        FieldComparator(field_map, field_no_map, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of an existing field `my_field` is changed from a map to `.exmaple.MapEntry`.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_type_change_map_entry3(self):
+        # Both fields are map type. But the key, value types are not identical. Breaking change.
+        # [Constructing] map<string, string> field
+        key_original = make_field(proto_type="TYPE_STRING", number=1)
+        value_original = make_field(proto_type="TYPE_STRING", number=2)
+        field_original = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_original, "value": value_original},
+        )
+        # [Constructing] map<key, value> field
+        key_update = make_field(
+            proto_type="TYPE_MESSAGE", number=1, type_name=".example.key"
+        )
+        value_update = make_field(
+            proto_type="TYPE_MESSAGE", number=2, type_name=".example.value"
+        )
+        field_update = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_update, "value": value_update},
+        )
+
+        FieldComparator(field_original, field_update, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of an existing field `my_field` is changed from `map<TYPE_STRING, TYPE_STRING>` to `map<.example.key, .example.value>`.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_type_change_map_entry4(self):
+        # Both fields are map type. But the key, value types are not identical.
+        # But only the versions pare are different. Non-breaking change.
+        # [Constructing] map<string, .example.v1.value> field
+        key_original = make_field(proto_type="TYPE_STRING", number=1)
+        value_original = make_field(
+            proto_type="TYPE_MESSAGE", type_name=".example.v1.value", number=2
+        )
+        field_original = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_original, "value": value_original},
+            api_version="v1",
+        )
+        # [Constructing] map<string, .example.v1beta1.value> field
+        key_update = make_field(proto_type="TYPE_STRING", number=1)
+        value_update = make_field(
+            proto_type="TYPE_MESSAGE", number=2, type_name=".example.v1beta1.value"
+        )
+        field_update = make_field(
+            proto_type="TYPE_MESSAGE",
+            type_name=".exmaple.MapEntry",
+            map_entry={"key": key_update, "value": value_update},
+            api_version="v1beta1",
+        )
+
+        FieldComparator(field_original, field_update, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()
+        self.assertFalse(finding)
+
     def test_out_oneof(self):
         field_oneof = make_field(name="Foo", oneof=True)
         field_not_oneof = make_field(name="Foo")
