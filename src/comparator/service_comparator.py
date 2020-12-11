@@ -146,7 +146,11 @@ class ServiceComparator:
             # 3.3 The request type of an RPC method is changed.
             input_type_original = method_original.input.value
             input_type_update = method_update.input.value
-            if input_type_original != input_type_update:
+            if (
+                input_type_original != input_type_update
+                and self._get_version_update_name(input_type_original)
+                != input_type_update
+            ):
                 self.finding_container.addFinding(
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
@@ -157,7 +161,11 @@ class ServiceComparator:
             # 3.4 The response type of an RPC method is changed.
             response_type_original = method_original.output.value
             response_type_update = method_update.output.value
-            if response_type_original != response_type_update:
+            if (
+                response_type_original != response_type_update
+                and self._get_version_update_name(response_type_original)
+                != response_type_update
+            ):
                 self.finding_container.addFinding(
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
@@ -265,11 +273,7 @@ class ServiceComparator:
         # Compare http URI, minor version updates are allowed if not identical.
         if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
             annotation_value = http_annotation_original["http_uri"]
-            transformed_value = (
-                annotation_value.replace(api_version_original, api_version_update)
-                if annotation_value and api_version_original
-                else None
-            )
+            transformed_value = self._get_version_update_name(annotation_value)
             if (
                 not transformed_value
                 or transformed_value != http_annotation_update["http_uri"]
@@ -308,7 +312,11 @@ class ServiceComparator:
             )
             return
         # The response_type value of LRO operation_info is changed.
-        if lro_original.value["response_type"] != lro_update.value["response_type"]:
+        if (
+            lro_original.value["response_type"] != lro_update.value["response_type"]
+            and self._get_version_update_name(lro_original.value["response_type"])
+            != lro_update.value["response_type"]
+        ):
             self.finding_container.addFinding(
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
                 proto_file_name=method_update.proto_file_name,
@@ -317,7 +325,11 @@ class ServiceComparator:
                 change_type=ChangeType.MAJOR,
             )
         # The metadata_type value of LRO operation_info is changed.
-        if lro_original.value["metadata_type"] != lro_update.value["metadata_type"]:
+        if (
+            lro_original.value["metadata_type"] != lro_update.value["metadata_type"]
+            and self._get_version_update_name(lro_original.value["metadata_type"])
+            != lro_update.value["metadata_type"]
+        ):
             self.finding_container.addFinding(
                 category=FindingCategory.LRO_METADATA_CHANGE,
                 proto_file_name=method_update.proto_file_name,
@@ -346,3 +358,10 @@ class ServiceComparator:
                     message=f"An existing method_signature for method `{method_update.name}` is changed from `{old_sig}` to `{new_sig}`.",
                     change_type=ChangeType.MAJOR,
                 )
+
+    def _get_version_update_name(self, name):
+        original_version = self.service_original.api_version
+        update_version = self.service_update.api_version
+        if not original_version or not update_version:
+            return None
+        return name.replace(original_version, update_version)

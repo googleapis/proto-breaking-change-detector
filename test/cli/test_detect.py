@@ -103,8 +103,8 @@ class CliDetectTest(unittest.TestCase):
                 + "service_v1.proto L22: An existing field `page_token` is removed.\n"
                 + "service_v1.proto L26: An existing field `content` is removed.\n"
                 + "service_v1.proto L27: An existing field `next_page_token` is removed.\n"
-                + "service_v1beta1.proto L7: Input type of an existing method `Foo` is changed from `FooRequest` to `FooRequestUpdate`.\n"
-                + "service_v1beta1.proto L7: Output type of an existing method `Foo` is changed from `FooResponse` to `FooResponseUpdate`.\n"
+                + "service_v1beta1.proto L7: Input type of an existing method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate`.\n"
+                + "service_v1beta1.proto L7: Output type of an existing method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate`.\n"
                 + "service_v1beta1.proto L9: The request streaming type of an existing method `Bar` is changed.\n"
                 + "service_v1beta1.proto L9: The response streaming type of an existing method `Bar` is changed.\n"
                 + "service_v1beta1.proto L11: The paginated response of an existing method `paginatedMethod` is changed.\n",
@@ -134,32 +134,6 @@ class CliDetectTest(unittest.TestCase):
                 + "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n",
             )
 
-    def test_mutiple_directories(self):
-        # Mock the stdout so that the unit test does not
-        # print anything to the console.
-        with patch("sys.stdout", new=StringIO()):
-            runner = CliRunner()
-            result = runner.invoke(
-                detect,
-                [
-                    "--original_api_definition_dirs=test/testdata/protos/enum/v1,test/testdata/protos/message/v1",
-                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1,test/testdata/protos/message/v1beta1",
-                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto,test/testdata/protos/message/v1/message_v1.proto",
-                    "--update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto,test/testdata/protos/message/v1beta1/message_v1beta1.proto",
-                    "--human_readable_message",
-                ],
-            )
-            self.assertEqual(result.exit_code, 0)
-            self.assertEqual(
-                result.output,
-                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `int32` to `string`.\n"
-                + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
-                + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
-                + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
-                + "message_v1.proto L18: An existing field `type` is removed.\n"
-                + "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
-            )
-
     def test_oslogin_proto_alpha(self):
         with patch("sys.stdout", new=StringIO()):
             runner = CliRunner()
@@ -177,9 +151,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 # TODO(xiaozhenliu): use googleapis submodule for more integration tests.
-                # client.proto is no longer imported by alpha version, so the packaging options is removed.
-                "google/api/client.proto L23: An exisiting packaging option `ClientProto` for `java_outer_classname` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
+                "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed.\n"

@@ -28,18 +28,29 @@ from google.protobuf import descriptor_pb2
 
 class FileSetTest(unittest.TestCase):
     def test_file_set_properties(self):
+        input_message = make_message(name="request", full_name=".example.v1.request")
+        output_message = make_message(name="response", full_name=".example.v1.response")
+        messages = [
+            make_message(
+                "InnerMessage",
+                fields=(
+                    make_field(
+                        name="hidden_message", number=1, type_name=".example.v1.request"
+                    ),
+                ),
+                full_name=".example.v1.InnerMessage",
+            ),
+            input_message,
+            output_message,
+        ]
         services = [
             make_service(
                 name="ThingDoer",
                 methods=(
                     make_method(
                         name="DoThing",
-                    ),
-                    make_method(
-                        name="Jump",
-                    ),
-                    make_method(
-                        name="Yawn",
+                        input_message=input_message,
+                        output_message=output_message,
                     ),
                 ),
             )
@@ -54,19 +65,12 @@ class FileSetTest(unittest.TestCase):
                 ),
             )
         ]
-        messages = [
-            make_message(
-                "InnerMessage",
-                fields=(
-                    make_field(
-                        name="hidden_message",
-                        number=1,
-                    ),
-                ),
-            )
-        ]
         file_foo = make_file_pb2(
-            name="foo.proto", package="example.v1", services=services, enums=enums
+            name="foo.proto",
+            package="example.v1",
+            services=services,
+            enums=enums,
+            dependency=["bar.proto"],
         )
         file_bar = make_file_pb2(
             name="bar.proto", package="example.v1", messages=messages
@@ -74,22 +78,29 @@ class FileSetTest(unittest.TestCase):
         file_set = make_file_set(files=[file_bar, file_foo])
         # Default to be empty.
         self.assertFalse(file_set.packaging_options_map)
-        self.assertEqual(list(file_set.messages_map.keys()), ["InnerMessage"])
-        self.assertEqual(list(file_set.enums_map.keys()), ["Irrelevant"])
+        self.assertEqual(
+            list(file_set.messages_map.keys()),
+            [".example.v1.InnerMessage", ".example.v1.request", ".example.v1.response"],
+        )
+        self.assertEqual(list(file_set.enums_map.keys()), [".example.v1.Irrelevant"])
         self.assertEqual(list(file_set.services_map.keys()), ["ThingDoer"])
         self.assertEqual(
-            file_set.messages_map["InnerMessage"].fields[1].name, "hidden_message"
+            file_set.messages_map[".example.v1.InnerMessage"].fields[1].name,
+            "hidden_message",
         )
-        self.assertEqual(file_set.enums_map["Irrelevant"].values[2].name, "GREEN")
+        self.assertEqual(
+            file_set.enums_map[".example.v1.Irrelevant"].values[2].name, "GREEN"
+        )
         self.assertEqual(
             list(file_set.services_map["ThingDoer"].methods.keys()),
-            ["DoThing", "Jump", "Yawn"],
+            ["DoThing"],
         )
         self.assertEqual(
             list(file_set.global_enums_map.keys()), [".example.v1.Irrelevant"]
         )
         self.assertEqual(
-            list(file_set.global_messages_map.keys()), [".example.v1.InnerMessage"]
+            list(file_set.global_messages_map.keys()),
+            [".example.v1.response", ".example.v1.request", ".example.v1.InnerMessage"],
         )
 
     def test_file_set_resources(self):
@@ -174,23 +185,25 @@ class FileSetTest(unittest.TestCase):
         file_pb2 = make_file_pb2(messages=messages, locations=locations)
         file_set = make_file_set(files=[file_pb2])
         self.assertEqual(
-            file_set.messages_map["OuterMessage"].fields[1].proto_type.source_code_line,
+            file_set.messages_map[".example.v1.OuterMessage"]
+            .fields[1]
+            .proto_type.source_code_line,
             6,
         )
         self.assertEqual(
-            file_set.messages_map["OuterMessage"]
+            file_set.messages_map[".example.v1.OuterMessage"]
             .nested_messages["InterMessage"]
             .source_code_line,
             7,
         )
         self.assertEqual(
-            file_set.messages_map["OuterMessage"]
+            file_set.messages_map[".example.v1.OuterMessage"]
             .nested_enums["InterEnum"]
             .source_code_line,
             8,
         )
         self.assertEqual(
-            file_set.messages_map["OuterMessage"]
+            file_set.messages_map[".example.v1.OuterMessage"]
             .nested_enums["InterEnum"]
             .values[2]
             .source_code_line,

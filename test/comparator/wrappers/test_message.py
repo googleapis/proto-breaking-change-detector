@@ -29,7 +29,7 @@ class MessageTest(unittest.TestCase):
             message.source_code_line,
             "No source code line can be identified by path ().",
         )
-        self.assertEqual(message.full_name, ".example.foo.my_message")
+        self.assertEqual(message.full_name, ".example.v1.my_message")
 
     def test_api_version(self):
         message = make_message("Foo", api_version="v1")

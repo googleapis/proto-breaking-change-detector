@@ -37,10 +37,27 @@ class FileSetComparatorTest(unittest.TestCase):
         self.finding_container = FindingContainer()
 
     def test_service_change(self):
-        service_original = make_service(methods=(make_method(name="DoThing"),))
+        input_message = make_message(name="request", full_name=".example.v1.request")
+        output_message = make_message(name="response", full_name=".example.v1.response")
+        service_original = make_service(
+            methods=[
+                make_method(
+                    name="DoThing",
+                    input_message=input_message,
+                    output_message=output_message,
+                )
+            ]
+        )
         service_update = make_service()
         FileSetComparator(
-            make_file_set(files=[make_file_pb2(services=[service_original])]),
+            make_file_set(
+                files=[
+                    make_file_pb2(
+                        services=[service_original],
+                        messages=[input_message, output_message],
+                    )
+                ]
+            ),
             make_file_set(files=[make_file_pb2(services=[service_update])]),
             self.finding_container,
         ).compare()
