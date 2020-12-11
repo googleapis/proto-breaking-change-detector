@@ -66,10 +66,10 @@ class FileSetTest(unittest.TestCase):
             )
         ]
         file_foo = make_file_pb2(
-            name="foo.proto", package=".example.v1", services=services, enums=enums
+            name="foo.proto", package="example.v1", services=services, enums=enums
         )
         file_bar = make_file_pb2(
-            name="bar.proto", package=".example.v1", messages=messages
+            name="bar.proto", package="example.v1", messages=messages
         )
         file_set = make_file_set(files=[file_bar, file_foo])
         # Default to be empty.
@@ -84,6 +84,12 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             list(file_set.services_map["ThingDoer"].methods.keys()),
             ["DoThing", "Jump", "Yawn"],
+        )
+        self.assertEqual(
+            list(file_set.global_enums_map.keys()), [".example.v1.Irrelevant"]
+        )
+        self.assertEqual(
+            list(file_set.global_messages_map.keys()), [".example.v1.InnerMessage"]
         )
 
     def test_file_set_resources(self):
