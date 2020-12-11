@@ -832,7 +832,7 @@ class FileSet:
         ]
         # Create global messages/enums map to have all messages/enums registered from the file
         # set including the nested messages/enums, since they could also be referenced.
-        # Key is the full name of the message and value if the Message object.
+        # Key is the full name of the message/enum and value is the Message/Enum object.
         self._get_global_info_map(source_code_locations_map)
         # Get all messages in the map.
         # TODO(xiaozhenliu): update the map when global messages map is in place.
@@ -894,7 +894,7 @@ class FileSet:
                     proto_file_name=fd.name,
                     source_code_locations=source_code_locations,
                     path=(5, i),
-                    full_name=self._get_full_name(fd.package, enum.name),
+                    full_name=full_name,
                 )
             # Register first level messages.
             message_stack = [
