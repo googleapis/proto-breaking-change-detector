@@ -27,6 +27,7 @@ class EnumTest(unittest.TestCase):
             enum.source_code_line,
             "No source code line can be identified by path ().",
         )
+        self.assertEqual(enum.full_name, ".example.foo.enum")
 
     def test_enum_value_properties(self):
         enum_type = make_enum(

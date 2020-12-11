@@ -56,6 +56,46 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(len(self._FILE_SET.definition_files), 1)
         self.assertEqual(self._FILE_SET.definition_files[0].name, "wrappers.proto")
         self.assertEqual(self._FILE_SET.api_version, "v1alpha")
+        # Check the global messages/enums map
+        self.assertEqual(
+            [
+                message_name
+                for message_name in self._FILE_SET.global_messages_map.keys()
+                if message_name.startswith(".example.v1alpha")
+            ],
+            [
+                ".example.v1alpha.MapMessage",
+                ".example.v1alpha.FooMetadata",
+                ".example.v1alpha.FooResponse",
+                ".example.v1alpha.FooRequest",
+                ".example.v1alpha.FooRequest.NestedMessage",
+            ],
+        )
+        self.assertEqual(
+            [
+                message_name
+                for message_name in self._FILE_SET.global_messages_map.keys()
+                if message_name.startswith(".google.api")
+            ],
+            [
+                ".google.api.ResourceReference",
+                ".google.api.ResourceDescriptor",
+                ".google.api.CustomHttpPattern",
+                ".google.api.HttpRule",
+                ".google.api.Http",
+            ],
+        )
+        self.assertEqual(
+            [
+                enum_name
+                for enum_name in self._FILE_SET.global_enums_map.keys()
+                if enum_name.startswith(".example.v1alpha")
+            ],
+            [
+                ".example.v1alpha.Enum1",
+                ".example.v1alpha.FooRequest.NestedEnum",
+            ],
+        )
 
     def test_service_wrapper(self):
         service = self._FILE_SET.services_map["Example"]
