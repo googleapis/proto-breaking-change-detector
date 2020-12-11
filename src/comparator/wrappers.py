@@ -95,6 +95,7 @@ class Enum:
     proto_file_name: str
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
     path: Tuple[int]
+    full_name: str
 
     def __getattr__(self, name):
         return getattr(self.enum_pb, name)
@@ -333,6 +334,7 @@ class Message:
         path: Tuple[int],
         resource_database: ResourceDatabase = None,
         api_version: str = None,
+        full_name: str = None,
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
@@ -340,6 +342,7 @@ class Message:
         self.path = path
         self.resource_database = resource_database
         self.api_version = api_version
+        self.full_name = full_name
 
     def __getattr__(self, name):
         return getattr(self.message_pb, name)
@@ -387,13 +390,15 @@ class Message:
         # fmt: off
         return {
             message.name: Message(
-                message,
-                self.proto_file_name,
-                self.source_code_locations,
+                message_pb=message,
+                proto_file_name= self.proto_file_name,
+                source_code_locations=self.source_code_locations,
                 # DescriptorProto.nested_type has field number 3.
                 # So we append (3, nested_message_index) to the path.
-                self.path + (3, i,),
-                self.resource_database,
+                path=self.path + (3, i,),
+                resource_database=self.resource_database,
+                api_version=self.api_version,
+                full_name=self.full_name + "." + message.name,
             )
             # Exclude the auto-generated map_entries message, since
             # the generated message does not have real source code location.
@@ -448,12 +453,13 @@ class Message:
         # fmt: off
         return {
             enum.name: Enum(
-                enum,
-                self.proto_file_name,
-                self.source_code_locations,
+                enum_pb=enum,
+                proto_file_name=self.proto_file_name,
+                source_code_locations=self.source_code_locations,
                 # DescriptorProto.enum_type has field number 4.
                 # So we append (4, nested_enum_index) to the path.
-                self.path + (4, i),
+                path=self.path + (4, i),
+                full_name=self.full_name + "." + enum.name,
             )
             for i, enum in enumerate(self.message_pb.enum_type)
         }
@@ -824,7 +830,12 @@ class FileSet:
         self.definition_files = [
             f for f in file_set_pb.file if f.package == self.root_package
         ]
+        # Create global messages/enums map to have all messages/enums registered from the file
+        # set including the nested messages/enums, since they could also be referenced.
+        # Key is the full name of the message and value if the Message object.
+        self._get_global_info_map(source_code_locations_map)
         # Get all messages in the map.
+        # TODO(xiaozhenliu): update the map when global messages map is in place.
         self.messages_map = self._get_messages_map(source_code_locations_map)
 
         self.packaging_options_map = defaultdict(dict)
@@ -862,11 +873,57 @@ class FileSet:
                         fd.name,
                         source_code_locations,
                         path + (5, i,),
+                        self._get_full_message_name(fd.package, enum.name),
                     ),
                 )
                 for i, enum in enumerate(fd.enum_type)
             )
             # fmt: on
+
+    def _get_global_info_map(self, source_code_locations_map):
+        self.global_messages_map = {}
+        self.global_enums_map = {}
+        for fd in self.file_set_pb.file:
+            source_code_locations = source_code_locations_map[fd.name]
+            # Register first level enums.
+            for i, enum in enumerate(fd.enum_type):
+                self.global_enums_map[
+                    self._get_full_message_name(fd.package, enum.name)
+                ] = Enum(
+                    enum_pb=enum,
+                    proto_file_name=fd.name,
+                    source_code_locations=source_code_locations,
+                    path=(
+                        5,
+                        i,
+                    ),
+                    full_name=self._get_full_message_name(fd.package, enum.name),
+                )
+            # Register first level messages.
+            message_stack = [
+                Message(
+                    message_pb=message,
+                    proto_file_name=fd.name,
+                    source_code_locations=source_code_locations,
+                    path=(
+                        4,
+                        i,
+                    ),
+                    resource_database=self.resources_database,
+                    api_version=self.api_version,
+                    # `.package.outer_message.nested_message`
+                    full_name=self._get_full_message_name(fd.package, message.name),
+                )
+                for i, message in enumerate(fd.message_type)
+            ]
+            # Iterate for nested messages and enums.
+            while message_stack:
+                message = message_stack.pop()
+                self.global_messages_map[message.full_name] = message
+                message_stack.extend(message.nested_messages.values())
+                self.global_enums_map.update(
+                    (enum.full_name, enum) for enum in message.nested_enums.values()
+                )
 
     def _get_messages_map(self, source_code_locations_map) -> Dict[str, Message]:
         messages_map: Dict[str, Message] = {}
@@ -886,6 +943,7 @@ class FileSet:
                         ),
                         self.resources_database,
                         self.api_version,
+                        self._get_full_message_name(fd.package, message.name),
                     ),
                 )
                 for i, message in enumerate(fd.message_type)
@@ -1019,3 +1077,6 @@ class FileSet:
                     path + packaging_options_path[option],
                     proto_file_name,
                 )
+
+    def _get_full_message_name(self, package_name, name) -> str:
+        return "." + package_name + "." + name

@@ -58,11 +58,14 @@ def make_enum(
     proto_file_name: str = "foo",
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
+    full_name: str = ".example.foo.enum",
 ) -> wrappers.Enum:
     """Mock an Enum object."""
     source_code_locations = {tuple(location.path): location for location in locations}
     enum_pb = make_enum_pb2(name, values)
-    return wrappers.Enum(enum_pb, proto_file_name, source_code_locations, path)
+    return wrappers.Enum(
+        enum_pb, proto_file_name, source_code_locations, path, full_name
+    )
 
 
 def make_field_pb2(
@@ -170,6 +173,7 @@ def make_message(
     options: desc.MessageOptions = None,
     api_version: str = None,
     map_entry: bool = False,
+    full_name: str = ".example.foo.my_message",
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -190,6 +194,7 @@ def make_message(
         path=path,
         resource_database=resource_database,
         api_version=api_version,
+        full_name=full_name,
         **kwargs,
     )
 
