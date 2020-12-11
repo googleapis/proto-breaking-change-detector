@@ -821,7 +821,9 @@ class FileSet:
         )
         # Get API definition files. This helps us to compare only the definition files
         # and imported dependency information.
-        self.definition_files = [f for f in file_set_pb.file if f.package == self.root_package]
+        self.definition_files = [
+            f for f in file_set_pb.file if f.package == self.root_package
+        ]
         # Get all messages in the map.
         self.messages_map = self._get_messages_map(source_code_locations_map)
 
@@ -890,7 +892,7 @@ class FileSet:
             )
         return messages_map
 
-    def _get_root_package(self) -> Optional[str]:
+    def _get_root_package(self) -> str:
         dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
         for fd in self.file_set_pb.file:
             # Put the fileDescriptor and its dependencies to the dependency map.
@@ -900,10 +902,8 @@ class FileSet:
         for f, deps in dependency_map.items():
             for dep in deps:
                 if dep.name not in dependency_map:
-                    # match = re.search(version, dep.package)
                     return dep.package
         return self.file_set_pb.file[0].package
-        # return re.search(version, package).group()
 
     def _get_source_code_locations_map(
         self,
