@@ -52,6 +52,9 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(
             list(self._FILE_SET.services_map.keys()), ["Operations", "Example"]
         )
+        self.assertEqual(self._FILE_SET.root_package, "example.v1alpha")
+        self.assertEqual(len(self._FILE_SET.definition_files), 1)
+        self.assertEqual(self._FILE_SET.definition_files[0].name, "wrappers.proto")
         self.assertEqual(self._FILE_SET.api_version, "v1alpha")
 
     def test_service_wrapper(self):
