@@ -873,7 +873,7 @@ class FileSet:
                         fd.name,
                         source_code_locations,
                         path + (5, i,),
-                        self._get_full_message_name(fd.package, enum.name),
+                        self._get_full_name(fd.package, enum.name),
                     ),
                 )
                 for i, enum in enumerate(fd.enum_type)
@@ -886,18 +886,15 @@ class FileSet:
         for fd in self.file_set_pb.file:
             source_code_locations = source_code_locations_map[fd.name]
             # Register first level enums.
+            # fmt: off
             for i, enum in enumerate(fd.enum_type):
-                self.global_enums_map[
-                    self._get_full_message_name(fd.package, enum.name)
-                ] = Enum(
+                full_name = self._get_full_name(fd.package, enum.name)
+                self.global_enums_map[full_name] = Enum(
                     enum_pb=enum,
                     proto_file_name=fd.name,
                     source_code_locations=source_code_locations,
-                    path=(
-                        5,
-                        i,
-                    ),
-                    full_name=self._get_full_message_name(fd.package, enum.name),
+                    path=(5, i),
+                    full_name=self._get_full_name(fd.package, enum.name),
                 )
             # Register first level messages.
             message_stack = [
@@ -905,17 +902,15 @@ class FileSet:
                     message_pb=message,
                     proto_file_name=fd.name,
                     source_code_locations=source_code_locations,
-                    path=(
-                        4,
-                        i,
-                    ),
+                    path=(4, i),
                     resource_database=self.resources_database,
                     api_version=self.api_version,
                     # `.package.outer_message.nested_message`
-                    full_name=self._get_full_message_name(fd.package, message.name),
+                    full_name=self._get_full_name(fd.package, message.name),
                 )
                 for i, message in enumerate(fd.message_type)
             ]
+            # fmt: on
             # Iterate for nested messages and enums.
             while message_stack:
                 message = message_stack.pop()
@@ -943,7 +938,7 @@ class FileSet:
                         ),
                         self.resources_database,
                         self.api_version,
-                        self._get_full_message_name(fd.package, message.name),
+                        self._get_full_name(fd.package, message.name),
                     ),
                 )
                 for i, message in enumerate(fd.message_type)
@@ -1078,5 +1073,5 @@ class FileSet:
                     proto_file_name,
                 )
 
-    def _get_full_message_name(self, package_name, name) -> str:
+    def _get_full_name(self, package_name, name) -> str:
         return "." + package_name + "." + name
