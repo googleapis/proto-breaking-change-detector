@@ -899,7 +899,6 @@ class FileSet:
         elif register_type in self.global_enums_map:
             self.enums_map[register_type] = self.global_enums_map[register_type]
 
-
     def _get_global_info_map(self, source_code_locations_map):
         self.global_messages_map = {}
         self.global_enums_map = {}
