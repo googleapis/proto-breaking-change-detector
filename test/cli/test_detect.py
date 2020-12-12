@@ -205,11 +205,29 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/pubsub/v1/pubsub.proto L160: Field behavior of an existing field `name` is changed.\n",
-                +"google/pubsub/v1/pubsub.proto L221: Field behavior of an existing field `topic` is changed.\n"
+                "google/pubsub/v1/pubsub.proto L160: Field behavior of an existing field `name` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L221: Field behavior of an existing field `topic` is changed.\n"
                 + "google/pubsub/v1/pubsub.proto L245: Field behavior of an existing field `topic` is changed.\n"
                 + "google/pubsub/v1/pubsub.proto L250: Field behavior of an existing field `messages` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L266: Field behavior of an existing field `project` is changed.",
+                + "google/pubsub/v1/pubsub.proto L266: Field behavior of an existing field `project` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L267: A resource reference option is added to the field `project`, but it is not defined anywhere\n"
+                + "google/pubsub/v1/pubsub.proto L296: Field behavior of an existing field `topic` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L356: Field behavior of an existing field `topic` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L617: Field behavior of an existing field `name` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L623: Field behavior of an existing field `topic` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L880: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L903: Field behavior of an existing field `project` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L904: A resource reference option is added to the field `project`, but it is not defined anywhere\n"
+                + "google/pubsub/v1/pubsub.proto L934: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L946: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L958: Field behavior of an existing field `push_config` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L966: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L985: Field behavior of an existing field `max_messages` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L1002: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L1019: Field behavior of an existing field `ack_deadline_seconds` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L1027: Field behavior of an existing field `subscription` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L1036: Field behavior of an existing field `ack_ids` is changed.\n"
+                + "google/pubsub/v1beta2/pubsub.proto L369: An existing field `ack_id` is removed.\n",
             )
 
 
