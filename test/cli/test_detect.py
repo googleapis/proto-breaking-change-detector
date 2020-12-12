@@ -150,7 +150,6 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                # TODO(xiaozhenliu): use googleapis submodule for more integration tests.
                 "google/cloud/oslogin/v1/oslogin.proto L34: An exisiting packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed.\n"
@@ -188,6 +187,29 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "google/cloud/oslogin/v1beta/oslogin.proto L179: Field behavior of an existing field `ssh_public_key` is changed.\n",
+            )
+
+    def test_pubsub_proto(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=googleapis/google/pubsub/v1beta2/pubsub.proto",
+                    "--update_proto_files=googleapis/google/pubsub/v1/pubsub.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "google/pubsub/v1/pubsub.proto L160: Field behavior of an existing field `name` is changed.\n",
+                +"google/pubsub/v1/pubsub.proto L221: Field behavior of an existing field `topic` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L245: Field behavior of an existing field `topic` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L250: Field behavior of an existing field `messages` is changed.\n"
+                + "google/pubsub/v1/pubsub.proto L266: Field behavior of an existing field `project` is changed.",
             )
 
 
