@@ -107,12 +107,13 @@ def make_field(
     path: Tuple[int] = (),
     api_version: str = None,
     map_entry=None,
+    oneof_index: int = None,
+    oneof_name: str = None,
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
     type_value = T.Value(proto_type)
     label = 3 if repeated else 1
-    oneof_index = 0 if oneof else None
 
     field_pb = make_field_pb2(
         name=name,
@@ -140,8 +141,17 @@ def make_field(
         message_resource=message_resource,
         api_version=api_version,
         map_entry=map_entry,
+        oneof_name=oneof_name,
     )
 
+
+def make_oneof_pb2(name: str) -> desc.OneofDescriptorProto:
+    return desc.OneofDescriptorProto(
+        name=name,
+    )
+
+def make_oneof(name: str) -> wrappers.Oneof:
+    return wrappers.Oneof(make_oneof_pb2(name))
 
 def make_message_pb2(
     name: str,
@@ -164,6 +174,7 @@ def make_message_pb2(
 def make_message(
     name: str = "my_message",
     fields: Sequence[wrappers.Field] = (),
+    oneofs: Sequence[wrappers.Oneof] = (),
     nested_enums: Sequence[wrappers.Enum] = (),
     nested_messages: Sequence[wrappers.Message] = (),
     proto_file_name: str = "foo",
@@ -179,6 +190,7 @@ def make_message(
     message_pb = make_message_pb2(
         name=name,
         fields=[i.field_pb for i in fields],
+        oneof_decl=[i.oneof_pb for i in oneofs],
         enum_type=[i.enum_pb for i in nested_enums],
         nested_type=[i.message_pb for i in nested_messages],
         options=options,

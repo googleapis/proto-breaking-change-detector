@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-from test.tools.mock_descriptors import make_message, make_field, make_enum
+from test.tools.mock_descriptors import make_message, make_field, make_enum, make_oneof
 from src.comparator import wrappers
 from google.protobuf import descriptor_pb2
 from google.api import resource_pb2
@@ -120,20 +120,21 @@ class MessageTest(unittest.TestCase):
             message.resource.value.pattern, ["foo/{foo}/bar", "foo/{foo}/bar/{bar}"]
         )
 
-    def test_oneof_fields(self):
-        oneof_field1 = make_field(name="field1", number=1, oneof=True)
-        oneof_field2 = make_field(name="field2", number=2, oneof=True)
-        non_oneof_field3 = make_field(name="field3", number=3, oneof=False)
+    def test_oneofs(self):
+        # Oneof with only one field.
+        oneof = make_oneof(name="not_interesting")
+        oneof_field = make_field(name="first_field", number=1, oneof_index=0, oneof_name="not_interesting")
+        non_oneof_field = make_field(name="second_field", number=2)
         message = make_message(
             name="Message",
             fields=(
-                oneof_field1,
-                oneof_field2,
-                non_oneof_field3,
+                oneof_field,
+                non_oneof_field,
             ),
+            oneofs=(oneof,),
         )
-        self.assertEqual(len(message.oneof_fields), 2)
-        self.assertEqual({x.name for x in message.oneof_fields}, {"field1", "field2"})
+        self.assertEqual(list(message.oneofs.keys()), ["not_interesting"])
+        self.assertEqual({x.name for x in message.fields.values() if x.oneof}, {"first_field"})
 
     def test_resource_annotation(self):
         options = descriptor_pb2.MessageOptions()

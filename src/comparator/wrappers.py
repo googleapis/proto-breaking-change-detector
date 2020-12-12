@@ -138,6 +138,7 @@ class Field:
     message_resource: message-level resource definition.
     api_version: the version of the API definition files.
     map_entry: type of the field if it is a map.
+    oneof_name: set if the field is in oneof.
     """
 
     def __init__(
@@ -151,7 +152,8 @@ class Field:
         resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
-        map_entry=None,
+        map_entry = None,
+        oneof_name: str = None
     ):
 
         self.field_pb = field_pb
@@ -164,6 +166,7 @@ class Field:
         self.message_resource = message_resource
         self.api_version = api_version
         self.map_entry = map_entry
+        self.oneof_name = oneof_name
 
     def __getattr__(self, name):
         return getattr(self.field_pb, name)
@@ -306,6 +309,16 @@ class Field:
         return _get_source_code_line(self.source_code_locations, self.path)
 
 
+@dataclasses.dataclass(frozen=True)
+class Oneof:
+    """Description of a field."""
+
+    oneof_pb: descriptor_pb2.OneofDescriptorProto
+
+    def __getattr__(self, name):
+        return getattr(self.oneof_pb, name)
+
+
 class Message:
     """Description of a message (defined with the ``message`` keyword).
 
@@ -359,6 +372,10 @@ class Message:
             # Convert field name to pascal case.
             # The auto-generated nested message uses the transformed
             # name of the field (name `first_field` is converted to `FirstFieldEntry`)
+            is_oneof = bool(self.oneofs and field.HasField("oneof_index"))
+            # `oneof_index` gives the index of a oneof in the containing type's oneof_decl 
+            # list.  This field is a member of that oneof.
+            oneof_name = list(self.oneofs.keys())[field.oneof_index] if is_oneof else None
             field_map_entry_name = (
                 field.name.replace("_", " ").title().replace(" ", "") + "Entry"
             )
@@ -376,8 +393,16 @@ class Message:
                 message_resource=self.resource,
                 api_version=self.api_version,
                 map_entry=map_entry,
+                oneof_name=oneof_name,
             )
         return fields_map
+
+    @property
+    def oneofs(self) -> Dict[str, Oneof]:
+        """Return a dictionary of wrapped oneofs for the given message. """
+        return {
+            oneof_pb.name: Oneof(oneof_pb) for oneof_pb in self.message_pb.oneof_decl
+        }
 
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
@@ -459,11 +484,6 @@ class Message:
             for i, enum in enumerate(self.message_pb.enum_type)
         }
         # fmt: on
-
-    @property
-    def oneof_fields(self) -> Sequence[Field]:
-        """Return the fields list that are in the oneof."""
-        return [field for field in self.fields.values() if field.oneof]
 
     @property
     def resource(self) -> Optional[resource_pb2.ResourceDescriptor]:
@@ -875,7 +895,7 @@ class FileSet:
                 for field in message.fields.values():
                     # If the field is a map type, the message type is auto-generated.
                     if field.is_map_type:
-                        for entry_type in list(field.map_entry_type.values()):
+                        for entry_type in field.map_entry_type.values():
                             self._register_field(entry_type)
                     elif not field.is_primitive_type:
                         # If the field is not a map and primitive type, add the
