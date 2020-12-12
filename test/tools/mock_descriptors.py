@@ -75,6 +75,7 @@ def make_field_pb2(
     proto_type: int,
     type_name: str = None,
     oneof_index: int = None,
+    proto3_optional: bool = False,
     options: desc.FieldOptions = None,
     **kwargs,
 ) -> desc.FieldDescriptorProto:
@@ -86,6 +87,7 @@ def make_field_pb2(
         type=proto_type,
         type_name=type_name,
         oneof_index=oneof_index,
+        proto3_optional=proto3_optional,
         options=options,
         **kwargs,
     )
@@ -109,6 +111,7 @@ def make_field(
     map_entry=None,
     oneof_index: int = None,
     oneof_name: str = None,
+    proto3_optional: bool = False,
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
@@ -122,6 +125,7 @@ def make_field(
         proto_type=type_value,
         type_name=type_name,
         oneof_index=oneof_index,
+        proto3_optional=proto3_optional,
         options=options,
         **kwargs,
     )

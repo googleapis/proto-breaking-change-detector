@@ -186,8 +186,17 @@ class FieldComparator:
                     message=msg,
                     change_type=ChangeType.MAJOR,
                 )
+        # 6. Check the proto3_optional state of the field.
+        if self.field_original.proto3_optional != self.field_update.proto3_optional:
+            self.finding_container.addFinding(
+                category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.source_code_line,
+                message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed.",
+                change_type=ChangeType.MAJOR,
+            )  
 
-        # 6. Check `google.api.resource_reference` annotation.
+        # 7. Check `google.api.resource_reference` annotation.
         self.rb_original = self.field_original.resource_database
         self.rb_update = self.field_update.resource_database
         self.mr_update = self.field_update.message_resource
