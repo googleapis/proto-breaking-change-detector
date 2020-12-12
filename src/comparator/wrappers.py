@@ -890,7 +890,7 @@ class FileSet:
         parent_type = "."
         for segment in register_type.split("."):
             if parent_type != ".":
-                    parent_type = parent_type + "."
+                parent_type = parent_type + "."
             parent_type = parent_type + segment
             if parent_type in self.messages_map:
                 return
