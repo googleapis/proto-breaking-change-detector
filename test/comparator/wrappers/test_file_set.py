@@ -102,6 +102,12 @@ class FileSetTest(unittest.TestCase):
             list(file_set.global_messages_map.keys()),
             [".example.v1.response", ".example.v1.request", ".example.v1.InnerMessage"],
         )
+        self.assertEqual(
+            list(file_set.global_enums_map.keys()), [".example.v1.Irrelevant"]
+        )
+        self.assertEqual(
+            list(file_set.global_messages_map.keys()), [".example.v1.InnerMessage"]
+        )
 
     def test_file_set_resources(self):
         options = descriptor_pb2.FileOptions()
