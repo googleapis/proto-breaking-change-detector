@@ -242,7 +242,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertFalse(finding)
 
     def test_out_oneof(self):
-        field_oneof = make_field(name="Foo", oneof=True)
+        field_oneof = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
         field_not_oneof = make_field(name="Foo")
         FieldComparator(field_oneof, field_not_oneof, self.finding_container).compare()
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
@@ -250,7 +250,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
 
     def test_into_oneof(self):
-        field_oneof = make_field(name="Foo", oneof=True)
+        field_oneof = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
         field_not_oneof = make_field(name="Foo")
         FieldComparator(field_not_oneof, field_oneof, self.finding_container).compare()
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
