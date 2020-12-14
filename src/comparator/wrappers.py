@@ -242,11 +242,6 @@ class Field:
         return self.map_entry
 
     @property
-    def is_map_type(self):
-        """Return true if the field is map type."""
-        return self.map_entry
-
-    @property
     def type_name(self):
         """Return the type_name if the proto_type is not primitive, return `None` otherwise.
         For message and enum types, this is the name of full type like `.tutorial.example.Enum`"""
@@ -526,29 +521,19 @@ class Method:
 
     @property
     def input(self):
-        """Return the shortened input type of a method. We only need the name
-        of the message to query in the messages_map.
-        For example: `.example.v1.FooRequest` -> `FooRequest`
-        """
-        input_type = self.method_pb.input_type.rsplit(".", 1)[-1]
+        """Return the shortened input type of a method."""
         # MethodDescriptorProto.input_type has field number 2
-        return WithLocation(input_type, self.source_code_locations, self.path + (2,))
+        return WithLocation(
+            self.method_pb.input_type, self.source_code_locations, self.path + (2,)
+        )
 
     @property
     def output(self):
-        """Return the shortened output type of a method. We only need the name
-        of the message to query in the messages_map.
-        For example: `.example.v1.FooResponse` -> `FooResponse`
-
-        If it is a longrunning method, just return `.google.longrunning.Operation`
-        """
-        output_type = (
-            self.method_pb.output_type
-            if self.longrunning
-            else self.method_pb.output_type.rsplit(".", 1)[-1]
-        )
+        """Return the shortened output type of a method."""
         # MethodDescriptorProto.output_type has field number 3
-        return WithLocation(output_type, self.source_code_locations, self.path + (3,))
+        return WithLocation(
+            self.method_pb.output_type, self.source_code_locations, self.path + (3,)
+        )
 
     @property
     def longrunning(self) -> bool:
@@ -586,7 +571,6 @@ class Method:
             return None
         if not self.messages_map or self.output.value not in self.messages_map:
             return None
-
         # API should provide a `string next_page_token` field in response messsage.
         # API should provide `int page_size` and `string page_token` fields in request message.
         # If the request field lacks any of the expected pagination fields,
@@ -834,51 +818,86 @@ class FileSet:
         # set including the nested messages/enums, since they could also be referenced.
         # Key is the full name of the message/enum and value is the Message/Enum object.
         self._get_global_info_map(source_code_locations_map)
-        # Get all messages in the map.
-        # TODO(xiaozhenliu): update the map when global messages map is in place.
-        self.messages_map = self._get_messages_map(source_code_locations_map)
-
+        # Get all **used** information for comparison.
         self.packaging_options_map = defaultdict(dict)
         self.services_map: Dict[str, Service] = {}
         self.enums_map: Dict[str, Enum] = {}
+        self.messages_map: Dict[str, Message] = {}
         path = ()
-        for fd in file_set_pb.file:
+        for fd in self.definition_files:
             source_code_locations = source_code_locations_map[fd.name]
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self._get_packaging_options_map(
                 fd.options, fd.name, source_code_locations, path + (8,)
             )
-            # fmt: off
-            # FileDescriptorProto.service has field number 6
-            self.services_map.update(
-                (
-                    service.name,
-                    Service(
-                        service,
-                        self.messages_map,
-                        fd.name,
-                        source_code_locations,
-                        path + (6, i,),
-                        self.api_version,
-                    ),
+            # Creat services map.
+            for i, service in enumerate(fd.service):
+                # fmt: off
+                service_wrapper = Service(
+                    service_pb=service,
+                    messages_map=self.global_messages_map,
+                    proto_file_name=fd.name,
+                    source_code_locations=source_code_locations,
+                    # FileDescriptorProto.service has field number 6
+                    path=path + (6, i,),
+                    api_version=self.api_version,
                 )
-                for i, service in enumerate(fd.service)
-            )
-            # FileDescriptorProto.service has field number 5
+                # fmt: on
+                self.services_map[service.name] = service_wrapper
+                # Add refered message type for methods into messages map.
+                for method in service_wrapper.methods.values():
+                    self.messages_map[method.input.value] = self.global_messages_map[
+                        method.input.value
+                    ]
+                    self.messages_map[method.output.value] = self.global_messages_map[
+                        method.output.value
+                    ]
+            # All first-level enums defined in the definition files should
+            # add to the enums map.
             self.enums_map.update(
                 (
-                    enum.name,
-                    Enum(
-                        enum,
-                        fd.name,
-                        source_code_locations,
-                        path + (5, i,),
-                        self._get_full_name(fd.package, enum.name),
-                    ),
+                    self._get_full_name(fd.package, enum.name),
+                    self.global_enums_map[self._get_full_name(fd.package, enum.name)],
                 )
-                for i, enum in enumerate(fd.enum_type)
+                for enum in fd.enum_type
             )
-            # fmt: on
+            # Add First-level messages to stack for iteration.
+            # We need to look at the nested fields for the used messages types.
+            message_stack = []
+            for message in fd.message_type:
+                message_full_name = self._get_full_name(fd.package, message.name)
+                self.messages_map[message_full_name] = self.global_messages_map[
+                    message_full_name
+                ]
+                message_stack.append(self.messages_map[message_full_name])
+            while message_stack:
+                message = message_stack.pop()
+                for _, field in message.fields.items():
+                    # If the field is a map type, the message type is auto-generated.
+                    if field.is_map_type:
+                        for _, entry_type in field.map_entry_type.items():
+                            self._register_field(entry_type)
+                    elif not field.is_primitive_type:
+                        # If the field is not a map and primitive type, add the
+                        # referenced type to map.
+                        self._register_field(field.type_name.value)
+                message_stack.extend(list(message.nested_messages.values()))
+
+    def _register_field(self, register_type):
+        # The referenced type could be a message or an enum.
+        # If the parent message type is already registered, we will skip
+        # the child type to avoid duplicate comparison.
+        parent_type = "."
+        for segment in register_type.split("."):
+            if parent_type != ".":
+                parent_type = parent_type + "."
+            parent_type = parent_type + segment
+            if parent_type in self.messages_map:
+                return
+        if register_type in self.global_messages_map:
+            self.messages_map[register_type] = self.global_messages_map[register_type]
+        elif register_type in self.global_enums_map:
+            self.enums_map[register_type] = self.global_enums_map[register_type]
 
     def _get_global_info_map(self, source_code_locations_map):
         self.global_messages_map = {}
@@ -919,31 +938,6 @@ class FileSet:
                 self.global_enums_map.update(
                     (enum.full_name, enum) for enum in message.nested_enums.values()
                 )
-
-    def _get_messages_map(self, source_code_locations_map) -> Dict[str, Message]:
-        messages_map: Dict[str, Message] = {}
-        for fd in self.file_set_pb.file:
-            source_code_locations = source_code_locations_map[fd.name]
-            # FileDescriptorProto.message_type has field number 4.
-            messages_map.update(
-                (
-                    message.name,
-                    Message(
-                        message,
-                        fd.name,
-                        source_code_locations,
-                        (
-                            4,
-                            i,
-                        ),
-                        self.resources_database,
-                        self.api_version,
-                        self._get_full_name(fd.package, message.name),
-                    ),
-                )
-                for i, message in enumerate(fd.message_type)
-            )
-        return messages_map
 
     def _get_root_package(self) -> str:
         dependency_map: Dict[str, Sequence[str]] = defaultdict(list)

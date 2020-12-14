@@ -130,21 +130,33 @@ class FileSetComparator:
     def _compare_messages(self, fs_original, fs_update):
         keys_original = set(fs_original.messages_map.keys())
         keys_update = set(fs_update.messages_map.keys())
-        for name in keys_original - keys_update:
+        compared_update_keys = set()
+        for name in keys_original:
+            if (
+                name in keys_update
+                or self._get_version_update_name(name) in keys_update
+            ):
+                update_name = (
+                    name if name in keys_update else self._get_version_update_name(name)
+                )
+                # Common dependency or same message with version updates.
+                DescriptorComparator(
+                    fs_original.messages_map[name],
+                    fs_update.messages_map[update_name],
+                    self.finding_container,
+                ).compare()
+                compared_update_keys.add(update_name)
+            else:
+                # Message only exits in the original version.
+                DescriptorComparator(
+                    fs_original.messages_map[name],
+                    None,
+                    self.finding_container,
+                ).compare()
+        for name in keys_update - compared_update_keys:
+            # Message only exits in the update version.
             DescriptorComparator(
-                fs_original.messages_map.get(name),
                 None,
-                self.finding_container,
-            ).compare()
-        for name in keys_update - keys_original:
-            DescriptorComparator(
-                None,
-                fs_update.messages_map.get(name),
-                self.finding_container,
-            ).compare()
-        for name in keys_update & keys_original:
-            DescriptorComparator(
-                fs_original.messages_map.get(name),
                 fs_update.messages_map.get(name),
                 self.finding_container,
             ).compare()
@@ -152,21 +164,33 @@ class FileSetComparator:
     def _compare_enums(self, fs_original, fs_update):
         keys_original = set(fs_original.enums_map.keys())
         keys_update = set(fs_update.enums_map.keys())
-        for name in keys_original - keys_update:
+        compared_update_keys = set()
+        for name in keys_original:
+            if (
+                name in keys_update
+                or self._get_version_update_name(name) in keys_update
+            ):
+                update_name = (
+                    name if name in keys_update else self._get_version_update_name(name)
+                )
+                # Common dependency or same enum with version updates.
+                EnumComparator(
+                    fs_original.enums_map.get(name),
+                    fs_update.enums_map.get(update_name),
+                    self.finding_container,
+                ).compare()
+                compared_update_keys.add(update_name)
+            else:
+                # Enum only exits in the original version.
+                EnumComparator(
+                    fs_original.enums_map.get(name),
+                    None,
+                    self.finding_container,
+                ).compare()
+        for name in keys_update - compared_update_keys:
+            # Enum only exits in the update version.
             EnumComparator(
-                fs_original.enums_map.get(name),
                 None,
-                self.finding_container,
-            ).compare()
-        for name in keys_update - keys_original:
-            EnumComparator(
-                None,
-                fs_update.enums_map.get(name),
-                self.finding_container,
-            ).compare()
-        for name in keys_update & keys_original:
-            EnumComparator(
-                fs_original.enums_map.get(name),
                 fs_update.enums_map.get(name),
                 self.finding_container,
             ).compare()
@@ -229,3 +253,10 @@ class FileSetComparator:
                 message=f"An existing resource definition `{resource_type}` has been removed.",
                 change_type=ChangeType.MAJOR,
             )
+
+    def _get_version_update_name(self, name):
+        original_version = self.fs_original.api_version
+        update_version = self.fs_update.api_version
+        if not original_version or not update_version:
+            return None
+        return name.replace(original_version, update_version)

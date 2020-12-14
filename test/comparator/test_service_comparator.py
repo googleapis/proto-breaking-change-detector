@@ -135,8 +135,8 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_method_input_type_change(self):
-        message_foo_request = make_message(name="FooRequest")
-        message_bar_request = make_message(name="BarRequest")
+        message_foo_request = make_message(name="FooRequest", full_name="FooRequest")
+        message_bar_request = make_message(name="BarRequest", full_name="BarRequest")
         service_original = make_service(
             methods=(make_method(name="Foo", input_message=message_foo_request),)
         )
@@ -158,14 +158,20 @@ class ServiceComparatorTest(unittest.TestCase):
         service_original = make_service(
             methods=(
                 make_method(
-                    name="Foo", output_message=make_message(name="FooResponse")
+                    name="Foo",
+                    output_message=make_message(
+                        name="FooResponse", full_name=".example.FooResponse"
+                    ),
                 ),
             )
         )
         service_update = make_service(
             methods=(
                 make_method(
-                    name="Foo", output_message=make_message(name="BarResponse")
+                    name="Foo",
+                    output_message=make_message(
+                        name="BarResponse", full_name=".example.BarResponse"
+                    ),
                 ),
             )
         )
@@ -174,7 +180,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings_map[
-            "Output type of an existing method `Foo` is changed from `FooResponse` to `BarResponse`."
+            "Output type of an existing method `Foo` is changed from `.example.FooResponse` to `.example.BarResponse`."
         ]
         self.assertEqual(finding.category.name, "METHOD_RESPONSE_TYPE_CHANGE")
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -223,6 +229,7 @@ class ServiceComparatorTest(unittest.TestCase):
                     number=2,
                 ),
             ],
+            full_name=".example.v1.PaginatedResponseMessage",
         )
         paginated_request_message = make_message(
             name="PaginatedRequestMessage",
@@ -238,10 +245,11 @@ class ServiceComparatorTest(unittest.TestCase):
                     number=2,
                 ),
             ],
+            full_name=".example.v1.PaginatedRequestMessage",
         )
         messages_map_original = {
-            "PaginatedResponseMessage": paginated_response_message,
-            "PaginatedRequestMessage": paginated_request_message,
+            ".example.v1.PaginatedResponseMessage": paginated_response_message,
+            ".example.v1.PaginatedRequestMessage": paginated_request_message,
         }
         paged_method = make_method(
             name="notInteresting",
@@ -249,8 +257,12 @@ class ServiceComparatorTest(unittest.TestCase):
             output_message=paginated_response_message,
         )
         messages_map_update = {
-            "MethodInput": make_message(name="MethodInput"),
-            "MethodOutput": make_message(name="MethodOutput"),
+            ".example.v1alpha.MethodInput": make_message(
+                name="MethodInput", full_name=".example.v1alpha.MethodInput"
+            ),
+            ".example.v1alpha.MethodOutput": make_message(
+                name="MethodOutput", full_name=".example.v1alpha.MethodOutput"
+            ),
         }
         non_paged_method = make_method(name="notInteresting")
         service_original = make_service(
@@ -312,7 +324,10 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_lro_annotation_error(self):
-        lro_output_msg = make_message(name=".google.longrunning.Operation")
+        lro_output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
         method_lro = make_method(
             name="Method",
             output_message=lro_output_msg,
@@ -333,7 +348,10 @@ class ServiceComparatorTest(unittest.TestCase):
             ).compare()
 
     def test_lro_annotation_response_change(self):
-        lro_output_msg = make_message(name=".google.longrunning.Operation")
+        lro_output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
         method_original = make_method(
             name="Method",
             output_message=lro_output_msg,
@@ -360,7 +378,10 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_lro_annotation_metadata_change(self):
-        lro_output_msg = make_message(name=".google.longrunning.Operation")
+        lro_output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
         method_original = make_method(
             name="Method",
             output_message=lro_output_msg,

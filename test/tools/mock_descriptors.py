@@ -95,7 +95,7 @@ def make_field(
     name: str = "my_field",
     number: int = 1,
     proto_type: str = "TYPE_MESSAGE",
-    type_name: str = None,
+    type_name: str = ".example.v1.foo",  # type_name should be set if the field is message type.
     repeated: bool = False,
     required: bool = False,
     oneof: bool = False,
@@ -173,7 +173,7 @@ def make_message(
     options: desc.MessageOptions = None,
     api_version: str = None,
     map_entry: bool = False,
-    full_name: str = ".example.foo.my_message",
+    full_name: str = ".example.v1.my_message",
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -242,8 +242,8 @@ def make_method(
 
     method_pb = make_method_pb2(
         name=name,
-        input_type=input_message.name,
-        output_type=output_message.name,
+        input_type=input_message.full_name,
+        output_type=output_message.full_name,
         client_streaming=client_streaming,
         server_streaming=server_streaming,
         **kwargs,

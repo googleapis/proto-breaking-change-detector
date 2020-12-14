@@ -49,9 +49,7 @@ class WrappersTest(unittest.TestCase):
         )
         # The service from imported dependency `google/longrunning/operations`
         # is included in the file set.
-        self.assertEqual(
-            list(self._FILE_SET.services_map.keys()), ["Operations", "Example"]
-        )
+        self.assertEqual(list(self._FILE_SET.services_map.keys()), ["Example"])
         self.assertEqual(self._FILE_SET.root_package, "example.v1alpha")
         self.assertEqual(len(self._FILE_SET.definition_files), 1)
         self.assertEqual(self._FILE_SET.definition_files[0].name, "wrappers.proto")
@@ -96,6 +94,23 @@ class WrappersTest(unittest.TestCase):
                 ".example.v1alpha.FooRequest.NestedEnum",
             ],
         )
+        # Check the used messages map.
+        used_messages_name = [
+            ".example.v1alpha.FooRequest",
+            ".example.v1alpha.FooResponse",
+            ".google.longrunning.Operation",
+            ".example.v1alpha.FooMetadata",
+            ".example.v1alpha.MapMessage",
+            ".google.rpc.Status",
+        ]
+        self.assertTrue(
+            set(self._FILE_SET.messages_map.keys())
+            <= set(self._FILE_SET.global_messages_map.keys())
+        )
+        self.assertEqual(list(self._FILE_SET.messages_map.keys()), used_messages_name)
+        self.assertEqual(
+            list(self._FILE_SET.enums_map.keys()), [".example.v1alpha.Enum1"]
+        )
 
     def test_service_wrapper(self):
         service = self._FILE_SET.services_map["Example"]
@@ -111,8 +126,8 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(service.oauth_scopes[0].source_code_line, 21)
         foo_method = service.methods["Foo"]
         bar_method = service.methods["Bar"]
-        self.assertEqual(foo_method.input.value, "FooRequest")
-        self.assertEqual(foo_method.output.value, "FooResponse")
+        self.assertEqual(foo_method.input.value, ".example.v1alpha.FooRequest")
+        self.assertEqual(foo_method.output.value, ".example.v1alpha.FooResponse")
         self.assertEqual(foo_method.paged_result_field, None)
         self.assertEqual(foo_method.method_signatures.value, ["content", "error"])
         self.assertEqual(
@@ -123,7 +138,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_method.source_code_line, 23)
         self.assertEqual(foo_method.proto_file_name, "wrappers.proto")
 
-        self.assertEqual(bar_method.input.value, "FooRequest")
+        self.assertEqual(bar_method.input.value, ".example.v1alpha.FooRequest")
         self.assertEqual(bar_method.output.value, ".google.longrunning.Operation")
         self.assertEqual(bar_method.paged_result_field, None)
         self.assertTrue(bar_method.longrunning)
@@ -141,7 +156,7 @@ class WrappersTest(unittest.TestCase):
 
     def test_message_wrapper(self):
         messages_map = self._FILE_SET.messages_map
-        foo_request_message = messages_map["FooRequest"]
+        foo_request_message = messages_map[".example.v1alpha.FooRequest"]
         # Message `FooRequest` is defined at Line43 in .proto file.
         self.assertEqual(foo_request_message.source_code_line, 43)
         self.assertEqual(foo_request_message.api_version, "v1alpha")
@@ -166,7 +181,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(resource.value.type, "example.googleapis.com/Foo")
 
         # The message has auto-generated map entries (nested type) for fields that is map type.
-        map_message = messages_map["MapMessage"]
+        map_message = messages_map[".example.v1alpha.MapMessage"]
         self.assertEqual(len(map_message.fields.keys()), 1)
         self.assertEqual(map_message.fields[1].name, "first_field")
         self.assertEqual(list(map_message.map_entries.keys()), ["FirstFieldEntry"])
@@ -180,7 +195,9 @@ class WrappersTest(unittest.TestCase):
         self.assertFalse(map_message.nested_messages)
 
     def test_field_wrapper(self):
-        foo_response_message = self._FILE_SET.messages_map["FooResponse"]
+        foo_response_message = self._FILE_SET.messages_map[
+            ".example.v1alpha.FooResponse"
+        ]
         enum_field = foo_response_message.fields[1]
         self.assertEqual(enum_field.api_version, "v1alpha")
         self.assertFalse(enum_field.repeated.value)
@@ -197,14 +214,16 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(enum_field.source_code_line, 59)
         self.assertEqual(enum_field.proto_file_name, "wrappers.proto")
 
-        foo_metadata_message = self._FILE_SET.messages_map["FooMetadata"]
+        foo_metadata_message = self._FILE_SET.messages_map[
+            ".example.v1alpha.FooMetadata"
+        ]
         # Field `name` has `google.api.field_behavior` option as `required`.
         name_field = foo_metadata_message.fields[1]
         self.assertEqual(name_field.name, "name")
         self.assertFalse(name_field.repeated.value)
         self.assertTrue(name_field.required.value)
 
-        map_field = self._FILE_SET.messages_map["MapMessage"].fields[1]
+        map_field = self._FILE_SET.messages_map[".example.v1alpha.MapMessage"].fields[1]
         self.assertTrue(map_field.map_entry)
         self.assertTrue(map_field.is_map_type)
         self.assertEqual(map_field.map_entry_type["key"], "string")
@@ -213,7 +232,7 @@ class WrappersTest(unittest.TestCase):
         )
 
     def test_enum_wrapper(self):
-        enum = self._FILE_SET.enums_map["Enum1"]
+        enum = self._FILE_SET.enums_map[".example.v1alpha.Enum1"]
         self.assertEqual(enum.values[0].name, "a")
         self.assertEqual(enum.values[1].name, "b")
         # EnumValue `a` and `b` are defined at Line71 in .proto file.

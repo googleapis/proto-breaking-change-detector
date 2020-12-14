@@ -27,12 +27,12 @@ class MethodTest(unittest.TestCase):
         )
 
     def test_method_types(self):
-        input_msg = make_message(name="Input")
-        output_msg = make_message(name="Output")
+        input_msg = make_message(name="Input", full_name=".example.v1.input")
+        output_msg = make_message(name="Output", full_name=".example.v1.output")
         method = make_method("DoSomething", input_msg, output_msg)
         self.assertEqual(method.name, "DoSomething")
-        self.assertEqual(method.input.value, "Input")
-        self.assertEqual(method.output.value, "Output")
+        self.assertEqual(method.input.value, ".example.v1.input")
+        self.assertEqual(method.output.value, ".example.v1.output")
 
     def test_method_streaming(self):
         method = make_method("F", client_streaming=True, server_streaming=True)
@@ -40,11 +40,14 @@ class MethodTest(unittest.TestCase):
         self.assertEqual(method.server_streaming.value, True)
 
     def test_method_longrunning(self):
-        input_msg = make_message(name="Input")
-        output_msg = make_message(name=".google.longrunning.Operation")
+        input_msg = make_message(name="Input", full_name=".example.v1.input")
+        output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
         method = make_method("DoSomething", input_msg, output_msg)
         self.assertEqual(method.name, "DoSomething")
-        self.assertEqual(method.input.value, "Input")
+        self.assertEqual(method.input.value, ".example.v1.input")
         self.assertEqual(method.output.value, ".google.longrunning.Operation")
         self.assertEqual(method.longrunning, True)
 
@@ -63,6 +66,7 @@ class MethodTest(unittest.TestCase):
         response_message = make_message(
             name="ResponseMessage",
             fields=[field_repeated, field_next_page_token],
+            full_name=".example.v1.ResponseMessage",
         )
         field_page_size = make_field(
             name="page_size",
@@ -77,10 +81,11 @@ class MethodTest(unittest.TestCase):
         request_message = make_message(
             name="RequestMessage",
             fields=[field_page_size, field_page_token],
+            full_name=".example.v1.RequestMessage",
         )
         messages_map = {
-            "ResponseMessage": response_message,
-            "RequestMessage": request_message,
+            ".example.v1.ResponseMessage": response_message,
+            ".example.v1.RequestMessage": request_message,
         }
         method = make_method(
             name="PagedMethod",
@@ -156,8 +161,11 @@ class MethodTest(unittest.TestCase):
         self.assertEqual(method.method_signatures.value, ["sig1", "sig2"])
 
     def test_method_lro_annotationn(self):
-        input_msg = make_message(name="Input")
-        output_msg = make_message(name=".google.longrunning.Operation")
+        input_msg = make_message(name="Input", full_name=".example.v1.input")
+        output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
         method = make_method(
             name="Method",
             input_message=input_msg,
