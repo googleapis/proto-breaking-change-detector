@@ -27,6 +27,7 @@ class DectetorTest(unittest.TestCase):
     def test_detector_basic(self):
         # Mock original and updated FileDescriptorSet.
         L = desc.SourceCodeInfo.Location
+        # fmt: off
         locations = [
             L(path=(6, 0, 2, 0), span=(1, 2, 3, 4)),
             L(
