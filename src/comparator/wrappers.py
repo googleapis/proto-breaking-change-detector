@@ -900,10 +900,10 @@ class FileSet:
                 message_stack.append(self.messages_map[message_full_name])
             while message_stack:
                 message = message_stack.pop()
-                for field in message.fields.values():
+                for _, field in message.fields.items():
                     # If the field is a map type, the message type is auto-generated.
                     if field.is_map_type:
-                        for entry_type in field.map_entry_type.values():
+                        for _, entry_type in field.map_entry_type.items():
                             self._register_field(entry_type)
                     elif not field.is_primitive_type:
                         # If the field is not a map and primitive type, add the
