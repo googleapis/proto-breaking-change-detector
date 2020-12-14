@@ -30,15 +30,10 @@ class DectetorTest(unittest.TestCase):
         # fmt: off
         locations = [
             L(path=(6, 0, 2, 0), span=(1, 2, 3, 4)),
-            L(
-                path=(
-                    4,
-                    0,
-                ),
-                span=(5, 6, 7, 8),
-            ),
+            L(path=(4, 0,), span=(5, 6, 7, 8),),
             L(path=(4, 1), span=(11, 12, 13, 14)),
         ]
+        # fmt: on
         input_msg = make_message(name="input", full_name=".example.v1.input")
         output_msg = make_message(name="output", full_name=".example.v1.output")
         service_original = make_service(
