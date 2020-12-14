@@ -152,8 +152,8 @@ class Field:
         resource_database: ResourceDatabase = None,
         message_resource: resource_pb2.ResourceDescriptor = None,
         api_version: str = None,
-        map_entry = None,
-        oneof_name: str = None
+        map_entry=None,
+        oneof_name: str = None,
     ):
 
         self.field_pb = field_pb
@@ -284,7 +284,9 @@ class Field:
         """Return if the field is proto3_optional"""
         proto3_optional = self.field_pb.proto3_optional
         if not self.oneof and proto3_optional:
-            raise TypeError("When proto3_optional is true, this field must belong to a oneof.")
+            raise TypeError(
+                "When proto3_optional is true, this field must belong to a oneof."
+            )
         return proto3_optional
 
     @property
@@ -381,9 +383,11 @@ class Message:
             # The auto-generated nested message uses the transformed
             # name of the field (name `first_field` is converted to `FirstFieldEntry`)
             is_oneof = bool(self.oneofs and field.HasField("oneof_index"))
-            # `oneof_index` gives the index of a oneof in the containing type's oneof_decl 
+            # `oneof_index` gives the index of a oneof in the containing type's oneof_decl
             # list.  This field is a member of that oneof.
-            oneof_name = list(self.oneofs.keys())[field.oneof_index] if is_oneof else None
+            oneof_name = (
+                list(self.oneofs.keys())[field.oneof_index] if is_oneof else None
+            )
             field_map_entry_name = (
                 field.name.replace("_", " ").title().replace(" ", "") + "Entry"
             )

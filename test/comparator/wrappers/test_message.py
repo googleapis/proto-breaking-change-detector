@@ -123,7 +123,9 @@ class MessageTest(unittest.TestCase):
     def test_oneofs(self):
         # Oneof with only one field.
         oneof = make_oneof(name="not_interesting")
-        oneof_field = make_field(name="first_field", number=1, oneof_index=0, oneof_name="not_interesting")
+        oneof_field = make_field(
+            name="first_field", number=1, oneof_index=0, oneof_name="not_interesting"
+        )
         non_oneof_field = make_field(name="second_field", number=2)
         message = make_message(
             name="Message",
@@ -134,7 +136,9 @@ class MessageTest(unittest.TestCase):
             oneofs=(oneof,),
         )
         self.assertEqual(list(message.oneofs.keys()), ["not_interesting"])
-        self.assertEqual({x.name for x in message.fields.values() if x.oneof}, {"first_field"})
+        self.assertEqual(
+            {x.name for x in message.fields.values() if x.oneof}, {"first_field"}
+        )
 
     def test_resource_annotation(self):
         options = descriptor_pb2.MessageOptions()

@@ -256,13 +256,22 @@ class FieldComparatorTest(unittest.TestCase):
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings["An existing field `Foo` is moved into One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_ADDITION")
-    
+
     def test_proto3_optional_change(self):
-        field_optional = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field", proto3_optional=True)
-        field_not_optional = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
-        FieldComparator(field_optional, field_not_optional, self.finding_container).compare()
+        field_optional = make_field(
+            name="Foo", oneof_index=0, oneof_name="oneof_field", proto3_optional=True
+        )
+        field_not_optional = make_field(
+            name="Foo", oneof_index=0, oneof_name="oneof_field"
+        )
+        FieldComparator(
+            field_optional, field_not_optional, self.finding_container
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "Proto3 optional state of an existing field `Foo` is changed.")
+        self.assertEqual(
+            finding.message,
+            "Proto3 optional state of an existing field `Foo` is changed.",
+        )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 
     def test_resource_reference_addition_breaking(self):

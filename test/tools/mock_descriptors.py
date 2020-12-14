@@ -154,8 +154,10 @@ def make_oneof_pb2(name: str) -> desc.OneofDescriptorProto:
         name=name,
     )
 
+
 def make_oneof(name: str) -> wrappers.Oneof:
     return wrappers.Oneof(make_oneof_pb2(name))
+
 
 def make_message_pb2(
     name: str,

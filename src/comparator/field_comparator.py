@@ -194,7 +194,7 @@ class FieldComparator:
                 source_code_line=self.field_update.source_code_line,
                 message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed.",
                 change_type=ChangeType.MAJOR,
-            )  
+            )
 
         # 7. Check `google.api.resource_reference` annotation.
         self.rb_original = self.field_original.resource_database
