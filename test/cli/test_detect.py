@@ -18,6 +18,7 @@ from io import StringIO
 
 class CliDetectTest(unittest.TestCase):
     COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
+    COMMON_RESOURCE = os.path.join(os.getcwd(), "googleapis/google/cloud/common_resources.proto")
 
     def test_descriptor_set_enum(self):
         # Mock the stdout so that the unit test does not
@@ -197,8 +198,8 @@ class CliDetectTest(unittest.TestCase):
                 [
                     f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
                     f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
-                    "--original_proto_files=googleapis/google/pubsub/v1beta2/pubsub.proto",
-                    "--update_proto_files=googleapis/google/pubsub/v1/pubsub.proto",
+                    f"--original_proto_files=googleapis/google/pubsub/v1beta2/pubsub.proto,{self.COMMON_RESOURCE}",
+                    f"--update_proto_files=googleapis/google/pubsub/v1/pubsub.proto,{self.COMMON_RESOURCE}",
                     "--human_readable_message",
                 ],
             )
