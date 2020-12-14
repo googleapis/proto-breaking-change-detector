@@ -30,7 +30,7 @@ class DectetorTest(unittest.TestCase):
         # fmt: off
         locations = [
             L(path=(6, 0, 2, 0), span=(1, 2, 3, 4)),
-            L(path=(4, 0), span=(5, 6, 7, 8)),
+            L(path=(4, 0,), span=(5, 6, 7, 8),),
             L(path=(4, 1), span=(11, 12, 13, 14)),
         ]
         # fmt: on
