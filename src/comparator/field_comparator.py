@@ -164,7 +164,7 @@ class FieldComparator:
                         change_type=ChangeType.MAJOR,
                     )
 
-        # 6. Check the oneof_index of the field.
+        # 6. Check the oneof state of the field.
         if self.field_original.oneof != self.field_update.oneof:
             proto_file_name = self.field_update.proto_file_name
             source_code_line = self.field_update.source_code_line
