@@ -270,7 +270,7 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
             finding.message,
-            "Proto3 optional state of an existing field `Foo` is changed.",
+            "Proto3 optional state of an existing field `Foo` is changed to required.",
         )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 

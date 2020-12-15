@@ -138,7 +138,7 @@ class Field:
     message_resource: message-level resource definition.
     api_version: the version of the API definition files.
     map_entry: type of the field if it is a map.
-    oneof_name: set if the field is in oneof.
+    oneof_name: the oneof name that the field belongs to if it is in any oneof.
     """
 
     def __init__(
@@ -282,12 +282,7 @@ class Field:
     @property
     def proto3_optional(self) -> bool:
         """Return if the field is proto3_optional"""
-        proto3_optional = self.field_pb.proto3_optional
-        if not self.oneof and proto3_optional:
-            raise TypeError(
-                "When proto3_optional is true, this field must belong to a oneof."
-            )
-        return proto3_optional
+        return self.field_pb.proto3_optional
 
     @property
     def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:
