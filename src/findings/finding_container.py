@@ -64,7 +64,13 @@ class FindingContainer:
             # Customize sort key function to output the findings in the same
             # file based on the source code line number.
             # Sort message alphabetically if the line number is same.
-            findings.sort(key=lambda f: (f.location.proto_file_name, f.location.source_code_line, f.message))
+            findings.sort(
+                key=lambda f: (
+                    f.location.proto_file_name,
+                    f.location.source_code_line,
+                    f.message,
+                )
+            )
             for finding in findings:
                 output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message
