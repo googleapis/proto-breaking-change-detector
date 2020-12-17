@@ -282,7 +282,12 @@ class Field:
     @property
     def proto3_optional(self) -> bool:
         """Return if the field is proto3_optional"""
-        return self.field_pb.proto3_optional
+        proto3_optional = self.field_pb.proto3_optional
+        if not self.oneof and proto3_optional:
+            raise TypeError(
+                "When proto3_optional is true, this field must belong to a oneof."
+            )
+        return proto3_optional
 
     @property
     def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:

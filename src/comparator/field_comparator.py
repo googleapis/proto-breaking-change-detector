@@ -187,28 +187,26 @@ class FieldComparator:
                     change_type=ChangeType.MAJOR,
                 )
         # 7. Check the proto3_optional state of the field.
-        if (
-            self.field_original.proto3_optional
-            and not self.field_update.proto3_optional
+        elif (
+            self.field_original.oneof
+            and self.field_original.proto3_optional != self.field_update.proto3_optional
         ):
-            self.finding_container.addFinding(
-                category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
-                proto_file_name=self.field_update.proto_file_name,
-                source_code_line=self.field_update.source_code_line,
-                message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed to required.",
-                change_type=ChangeType.MAJOR,
-            )
-        if (
-            not self.field_original.proto3_optional
-            and self.field_update.proto3_optional
-        ):
-            self.finding_container.addFinding(
-                category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
-                proto_file_name=self.field_update.proto_file_name,
-                source_code_line=self.field_update.source_code_line,
-                message=f"An existing field `{self.field_original.name}` is changed to proto3 optional.",
-                change_type=ChangeType.MINOR,
-            )
+            if self.field_original.proto3_optional:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed to required.",
+                    change_type=ChangeType.MAJOR,
+                )
+            if self.field_update.proto3_optional:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    message=f"An existing field `{self.field_original.name}` is changed to proto3 optional.",
+                    change_type=ChangeType.MINOR,
+                )
 
         # 8. Check `google.api.resource_reference` annotation.
         self.rb_original = self.field_original.resource_database
