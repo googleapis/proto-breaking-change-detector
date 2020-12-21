@@ -49,15 +49,12 @@ class ServiceComparator:
                 change_type=ChangeType.MAJOR,
             )
             return
-        self.messages_map_original = self.service_original.messages_map
-        self.messages_map_update = self.service_update.messages_map
+        # 3. Check the default host.
         self._compare_host()
+        # 4. Check the oauth scopes list.
         self._compare_oauth_scopes()
-        # 3. Check the methods list
-        self._compareRpcMethods(
-            self.messages_map_original,
-            self.messages_map_update,
-        )
+        # 5. Check the methods list
+        self._compareRpcMethods()
 
     def _compare_host(self):
         if not self.service_original.host and not self.service_update.host:
@@ -111,11 +108,7 @@ class ServiceComparator:
                 change_type=ChangeType.MAJOR,
             )
 
-    def _compareRpcMethods(
-        self,
-        messages_map_original,
-        messages_map_update,
-    ):
+    def _compareRpcMethods(self):
         methods_original = self.service_original.methods
         methods_update = self.service_update.methods
         methods_original_keys = set(methods_original.keys())
@@ -274,10 +267,7 @@ class ServiceComparator:
         if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
             annotation_value = http_annotation_original["http_uri"]
             transformed_value = self._get_version_update_name(annotation_value)
-            if (
-                not transformed_value
-                or transformed_value != http_annotation_update["http_uri"]
-            ):
+            if transformed_value != http_annotation_update["http_uri"]:
                 self.finding_container.addFinding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
@@ -363,5 +353,5 @@ class ServiceComparator:
         original_version = self.service_original.api_version
         update_version = self.service_update.api_version
         if not original_version or not update_version:
-            return None
+            return name
         return name.replace(original_version, update_version)

@@ -33,23 +33,21 @@ class FileSetComparator:
 
     def compare(self):
         # 1.Compare the per-language packaging options.
-        self._compare_packaging_options(self.fs_original, self.fs_update)
+        self._compare_packaging_options()
         # 2. Check the services map.
-        self._compare_services(self.fs_original, self.fs_update)
+        self._compare_services()
         # 3. Check the messages map.
-        self._compare_messages(self.fs_original, self.fs_update)
+        self._compare_messages()
         # 4. Check the enums map.
-        self._compare_enums(self.fs_original, self.fs_update)
+        self._compare_enums()
         # 5. Check the file-level resource definitions.
-        self._compare_resources(self.fs_original, self.fs_update)
+        self._compare_resources()
 
-    def _compare_packaging_options(self, fs_original, fs_update):
-        packaging_options_original = fs_original.packaging_options_map
-        packaging_options_update = fs_update.packaging_options_map
+    def _compare_packaging_options(self):
+        packaging_options_original = self.fs_original.packaging_options_map
+        packaging_options_update = self.fs_update.packaging_options_map
         if not packaging_options_original and not packaging_options_update:
             return
-        api_version_original = fs_original.api_version
-        api_version_update = fs_update.api_version
         for option in packaging_options_original.keys():
             per_language_options_original = set(
                 packaging_options_original[option].keys()
@@ -76,11 +74,8 @@ class FileSetComparator:
                 transformed_option_value_original = {}
                 transformed_option_value_update = {}
                 for namespace in per_language_options_original:
-                    transformed_option_value_original[
-                        namespace.lower().replace(
-                            api_version_original, api_version_update
-                        )
-                    ] = namespace
+                    transformed_name = self._get_version_update_name(namespace.lower())
+                    transformed_option_value_original[transformed_name] = namespace
                 for namespace in per_language_options_update:
                     transformed_option_value_update[namespace.lower()] = namespace
 
@@ -113,43 +108,44 @@ class FileSetComparator:
                         change_type=ChangeType.MAJOR,
                     )
 
-    def _compare_services(self, fs_original, fs_update):
-        keys_original = set(fs_original.services_map.keys())
-        keys_update = set(fs_update.services_map.keys())
+    def _compare_services(self):
+        keys_original = set(self.fs_original.services_map.keys())
+        keys_update = set(self.fs_update.services_map.keys())
         for name in keys_original - keys_update:
-            ServiceComparator(fs_original.services_map.get(name), None).compare()
+            ServiceComparator(
+                fs_original.services_map[name], None, self.finding_container
+            ).compare()
         for name in keys_update - keys_original:
-            ServiceComparator(None, fs_update.services_map.get(name)).compare()
+            ServiceComparator(
+                None, fs_update.services_map[name], self.finding_container
+            ).compare()
         for name in keys_update & keys_original:
             ServiceComparator(
-                fs_original.services_map.get(name),
-                fs_update.services_map.get(name),
+                self.fs_original.services_map[name],
+                self.fs_update.services_map[name],
                 self.finding_container,
             ).compare()
 
-    def _compare_messages(self, fs_original, fs_update):
-        keys_original = set(fs_original.messages_map.keys())
-        keys_update = set(fs_update.messages_map.keys())
+    def _compare_messages(self):
+        keys_original = set(self.fs_original.messages_map.keys())
+        keys_update = set(self.fs_update.messages_map.keys())
         compared_update_keys = set()
         for name in keys_original:
-            if (
-                name in keys_update
-                or self._get_version_update_name(name) in keys_update
-            ):
-                update_name = (
-                    name if name in keys_update else self._get_version_update_name(name)
-                )
+            transformed_name = (
+                name if name in keys_update else self._get_version_update_name(name)
+            )
+            if transformed_name in keys_update:
                 # Common dependency or same message with version updates.
                 DescriptorComparator(
-                    fs_original.messages_map[name],
-                    fs_update.messages_map[update_name],
+                    self.fs_original.messages_map[name],
+                    self.fs_update.messages_map[transformed_name],
                     self.finding_container,
                 ).compare()
-                compared_update_keys.add(update_name)
+                compared_update_keys.add(transformed_name)
             else:
                 # Message only exits in the original version.
                 DescriptorComparator(
-                    fs_original.messages_map[name],
+                    self.fs_original.messages_map[name],
                     None,
                     self.finding_container,
                 ).compare()
@@ -157,33 +153,30 @@ class FileSetComparator:
             # Message only exits in the update version.
             DescriptorComparator(
                 None,
-                fs_update.messages_map.get(name),
+                self.fs_update.messages_map[name],
                 self.finding_container,
             ).compare()
 
-    def _compare_enums(self, fs_original, fs_update):
-        keys_original = set(fs_original.enums_map.keys())
-        keys_update = set(fs_update.enums_map.keys())
+    def _compare_enums(self):
+        keys_original = set(self.fs_original.enums_map.keys())
+        keys_update = set(self.fs_update.enums_map.keys())
         compared_update_keys = set()
         for name in keys_original:
-            if (
-                name in keys_update
-                or self._get_version_update_name(name) in keys_update
-            ):
-                update_name = (
-                    name if name in keys_update else self._get_version_update_name(name)
-                )
+            transformed_name = (
+                name if name in keys_update else self._get_version_update_name(name)
+            )
+            if transformed_name in keys_update:
                 # Common dependency or same enum with version updates.
                 EnumComparator(
-                    fs_original.enums_map.get(name),
-                    fs_update.enums_map.get(update_name),
+                    self.fs_original.enums_map[name],
+                    self.fs_update.enums_map[transformed_name],
                     self.finding_container,
                 ).compare()
-                compared_update_keys.add(update_name)
+                compared_update_keys.add(transformed_name)
             else:
                 # Enum only exits in the original version.
                 EnumComparator(
-                    fs_original.enums_map.get(name),
+                    self.fs_original.enums_map[name],
                     None,
                     self.finding_container,
                 ).compare()
@@ -191,13 +184,13 @@ class FileSetComparator:
             # Enum only exits in the update version.
             EnumComparator(
                 None,
-                fs_update.enums_map.get(name),
+                self.fs_update.enums_map[name],
                 self.finding_container,
             ).compare()
 
-    def _compare_resources(self, fs_original, fs_update):
-        resources_original = fs_original.resources_database
-        resources_update = fs_update.resources_database
+    def _compare_resources(self):
+        resources_original = self.fs_original.resources_database
+        resources_update = self.fs_update.resources_database
         resources_types_original = set(resources_original.types.keys())
         resources_types_update = set(resources_update.types.keys())
         # 1. Patterns of file-level resource definitions have changed.
@@ -258,5 +251,6 @@ class FileSetComparator:
         original_version = self.fs_original.api_version
         update_version = self.fs_update.api_version
         if not original_version or not update_version:
-            return None
+            # No replacement is needed, return the original name.
+            return name
         return name.replace(original_version, update_version)
