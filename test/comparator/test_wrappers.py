@@ -162,6 +162,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_request_message.api_version, "v1alpha")
         self.assertTrue(foo_request_message.nested_messages["NestedMessage"])
         self.assertEqual(foo_request_message.proto_file_name, "wrappers.proto")
+        self.assertEqual(list(foo_request_message.oneofs.keys()), ["response"])
         # Nested message `NestedMessage` is defined at Line52 in .proto file.
         self.assertEqual(
             foo_request_message.nested_messages["NestedMessage"].source_code_line, 52
@@ -171,11 +172,6 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(
             foo_request_message.nested_enums["NestedEnum"].source_code_line, 53
         )
-        self.assertEqual(foo_request_message.oneof_fields[0].name, "content")
-        self.assertEqual(foo_request_message.oneof_fields[1].name, "error")
-        # Oneof field `content` and `error` are defined at Line49,50 in .proto file.
-        self.assertEqual(foo_request_message.oneof_fields[0].source_code_line, 49)
-        self.assertEqual(foo_request_message.oneof_fields[1].source_code_line, 50)
         resource = foo_request_message.resource
         self.assertEqual(resource.value.pattern, ["foo/{foo}/bar/{bar}"])
         self.assertEqual(resource.value.type, "example.googleapis.com/Foo")
@@ -195,6 +191,14 @@ class WrappersTest(unittest.TestCase):
         self.assertFalse(map_message.nested_messages)
 
     def test_field_wrapper(self):
+        foo_request_message = self._FILE_SET.messages_map[".example.v1alpha.FooRequest"]
+        # Oneof field `content` and `error` are defined at Line49,50 in .proto file.
+        content_field_oneof = foo_request_message.fields[1]
+        error_field_oneof = foo_request_message.fields[2]
+        self.assertEqual(content_field_oneof.oneof_name, "response")
+        self.assertEqual(error_field_oneof.oneof_name, "response")
+        self.assertEqual(content_field_oneof.source_code_line, 49)
+        self.assertEqual(error_field_oneof.source_code_line, 50)
         foo_response_message = self._FILE_SET.messages_map[
             ".example.v1alpha.FooResponse"
         ]

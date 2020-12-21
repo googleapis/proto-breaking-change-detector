@@ -73,8 +73,15 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(field.required.value, False)
 
     def test_oneof(self):
-        field = make_field(oneof=True)
+        field = make_field(oneof_name="oneof_field", oneof_index=0)
         self.assertTrue(field.oneof)
+        self.assertEqual(field.oneof_name, "oneof_field")
+
+    def test_proto3_optional(self):
+        field = make_field(
+            oneof_name="oneof_field", oneof_index=0, proto3_optional=True
+        )
+        self.assertTrue(field.proto3_optional)
 
     def test_resource_reference(self):
         options = descriptor_pb2.FieldOptions()

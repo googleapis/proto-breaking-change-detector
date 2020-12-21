@@ -164,7 +164,7 @@ class FieldComparator:
                         change_type=ChangeType.MAJOR,
                     )
 
-        # 6. Check the oneof_index of the field.
+        # 6. Check the oneof state of the field.
         if self.field_original.oneof != self.field_update.oneof:
             proto_file_name = self.field_update.proto_file_name
             source_code_line = self.field_update.source_code_line
@@ -186,8 +186,29 @@ class FieldComparator:
                     message=msg,
                     change_type=ChangeType.MAJOR,
                 )
+        # 7. Check the proto3_optional state of the field.
+        elif (
+            self.field_original.oneof
+            and self.field_original.proto3_optional != self.field_update.proto3_optional
+        ):
+            if self.field_original.proto3_optional:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed to required.",
+                    change_type=ChangeType.MAJOR,
+                )
+            if self.field_update.proto3_optional:
+                self.finding_container.addFinding(
+                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    message=f"An existing field `{self.field_original.name}` is changed to proto3 optional.",
+                    change_type=ChangeType.MINOR,
+                )
 
-        # 6. Check `google.api.resource_reference` annotation.
+        # 8. Check `google.api.resource_reference` annotation.
         self.rb_original = self.field_original.resource_database
         self.rb_update = self.field_update.resource_database
         self.mr_update = self.field_update.message_resource
