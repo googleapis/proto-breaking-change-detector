@@ -236,6 +236,31 @@ class CliDetectTest(unittest.TestCase):
                 + "google/pubsub/v1beta2/pubsub.proto L369: An existing field `ack_id` is removed.\n",
             )
 
+    def test_tts_proto(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=googleapis/google/cloud/texttospeech/v1beta1/cloud_tts.proto",
+                    "--update_proto_files=googleapis/google/cloud/texttospeech/v1/cloud_tts.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "google/cloud/texttospeech/v1beta1/cloud_tts.proto L103: An existing EnumValue `MP3_64_KBPS` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L113: An existing EnumValue `MULAW` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L142: An existing Enum `TimepointType` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L160: An existing field `enable_time_pointing` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L275: An existing field `timepoints` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L278: An existing field `audio_config` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L283: An existing message `Timepoint` is removed.\n",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

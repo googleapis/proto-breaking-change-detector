@@ -130,9 +130,17 @@ class DescriptorComparator:
         enum_name_update = set(nested_enum_dict_update.keys())
 
         for name in enum_name_original - enum_name_update:
-            EnumComparator(nested_enum_dict_original[name], None).compare()
+            EnumComparator(
+                nested_enum_dict_original[name],
+                None,
+                self.finding_container,
+            ).compare()
         for name in enum_name_update - enum_name_original:
-            EnumComparator(None, nested_enum_dict_update[name]).compare()
+            EnumComparator(
+                None,
+                nested_enum_dict_update[name],
+                self.finding_container,
+            ).compare()
         for name in enum_name_original & enum_name_update:
             EnumComparator(
                 nested_enum_dict_original[name],
