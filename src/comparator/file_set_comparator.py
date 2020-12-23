@@ -189,8 +189,8 @@ class FileSetComparator:
             ).compare()
 
     def _compare_resources(self):
-        resources_original = self.fs_original.resources_database
-        resources_update = self.fs_update.resources_database
+        resources_original = self.fs_original.used_resources_database
+        resources_update = self.fs_update.used_resources_database
         resources_types_original = set(resources_original.types.keys())
         resources_types_update = set(resources_update.types.keys())
         # 1. Patterns of file-level resource definitions have changed.

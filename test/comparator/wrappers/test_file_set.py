@@ -136,7 +136,7 @@ class FileSetTest(unittest.TestCase):
             options=message_options,
         )
         file2 = make_file_pb2(
-            name="bar.proto", package=".example.v1", messages=[message]
+            name="bar.proto", package=".example.bar", messages=[message]
         )
         file_set = make_file_set(files=[file1, file2])
         # All resources should be registered in the database.
@@ -149,6 +149,15 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             list(resource_patterns.keys()),
             ["foo/{foo}", "user/{user}", "user/{user}/bar/", "tests/{test}/"],
+        )
+        # Check used resources database.
+        # File1 depends on file2, but they are not in the same package, only file1
+        # is API definition file. So only resources in file1 are in used_resource_database.
+        self.assertEqual(
+            list(file_set.used_resources_database.types.keys()), ["example.v1/Foo"]
+        )
+        self.assertEqual(
+            list(file_set.used_resources_database.patterns.keys()), ["foo/{foo}"]
         )
 
     def test_file_set_source_code_location(self):

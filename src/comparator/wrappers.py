@@ -830,8 +830,6 @@ class FileSet:
         # Create source code location map, key is the file name, value is the
         # source code information of every field.
         source_code_locations_map = self._get_source_code_locations_map()
-        # Register all resources in the database.
-        self.resources_database = self._get_resource_database(source_code_locations_map)
         # Get the root package from the API definition files.
         self.root_package = self._get_root_package()
         # Get API version from definition files.
@@ -846,15 +844,25 @@ class FileSet:
         self.definition_files = [
             f for f in file_set_pb.file if f.package == self.root_package
         ]
+        # Register all resources in the database.
+        self.resources_database = self._get_resource_database(
+            file_set_pb.file, source_code_locations_map
+        )
         # Create global messages/enums map to have all messages/enums registered from the file
         # set including the nested messages/enums, since they could also be referenced.
         # Key is the full name of the message/enum and value is the Message/Enum object.
         self._get_global_info_map(source_code_locations_map)
+
         # Get all **used** information for comparison.
         self.packaging_options_map = defaultdict(dict)
         self.services_map: Dict[str, Service] = {}
         self.enums_map: Dict[str, Enum] = {}
         self.messages_map: Dict[str, Message] = {}
+        # Register all resources in the API definition files in a separate database,
+        # so that we can avoid comparing redundant resources defined in dependencies.
+        self.used_resources_database = self._get_resource_database(
+            self.definition_files, source_code_locations_map
+        )
         path = ()
         for fd in self.definition_files:
             source_code_locations = source_code_locations_map[fd.name]
@@ -1004,12 +1012,13 @@ class FileSet:
 
     def _get_resource_database(
         self,
+        files: [descriptor_pb2.FileDescriptorProto],
         source_code_locations_map: Dict[
             str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
         ],
     ):
         resources_database = ResourceDatabase()
-        for fd in self.file_set_pb.file:
+        for fd in files:
             source_code_locations = source_code_locations_map[fd.name]
             # Register file-level resource definitions in database.
             for i, resource in enumerate(
