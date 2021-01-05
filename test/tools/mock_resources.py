@@ -63,6 +63,6 @@ def make_resource_descriptor(
     resource_type: str, resource_patterns: [str]
 ) -> resource_pb2.ResourceDescriptor:
     resource_descriptor = resource_pb2.ResourceDescriptor(
-        type=resource_type, pattern=[pattern for pattern in resource_patterns]
+        type=resource_type, pattern=list(resource_patterns)
     )
     return WithLocation(resource_descriptor, None, None)

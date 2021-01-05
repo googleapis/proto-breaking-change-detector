@@ -52,8 +52,8 @@ class LoaderTest(unittest.TestCase):
             ],
         )
         self.assertTrue(loader.get_descriptor_set())
-        self.assertTrue(
-            isinstance(loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet)
+        self.assertIsInstance(
+            loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
         )
 
     def test_loader_descriptor_set(self):
@@ -73,8 +73,8 @@ class LoaderTest(unittest.TestCase):
         )
         self.assertFalse(loader.proto_files)
         self.assertTrue(loader.get_descriptor_set())
-        self.assertTrue(
-            isinstance(loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet)
+        self.assertIsInstance(
+            loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
         )
 
 

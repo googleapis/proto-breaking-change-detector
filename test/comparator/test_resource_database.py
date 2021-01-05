@@ -92,11 +92,11 @@ class ResourceDatabaseTest(unittest.TestCase):
         parent_resources = self.resource_database.get_parent_resources_by_child_type(
             "child"
         )
-        self.assertTrue(parent_resource in parent_resources)
+        self.assertIn(parent_resource, parent_resources)
         # Reverse query would not have any result.
-        self.assertTrue(
-            child_resource
-            not in self.resource_database.get_parent_resources_by_child_type("parent")
+        self.assertNotIn(
+            child_resource,
+            self.resource_database.get_parent_resources_by_child_type("parent"),
         )
 
 
