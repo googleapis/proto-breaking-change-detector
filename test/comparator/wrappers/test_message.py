@@ -43,7 +43,7 @@ class MessageTest(unittest.TestCase):
         )
         message = make_message("Message", fields=fields)
         field_one = message.fields[1]
-        self.assertTrue(isinstance(field_one, wrappers.Field))
+        self.assertIsInstance(field_one, wrappers.Field)
         self.assertEqual(field_one.name, "field_one")
 
     def test_map_entry_option(self):
