@@ -35,6 +35,8 @@ class DescriptorComparator:
         self._compare(self.message_original, self.message_update)
 
     def _compare(self, message_original, message_update):
+        if not message_update and not message_original:
+            return
         # 1. If original message is None, then a new message is added.
         if message_original is None and message_update:
             self.finding_container.addFinding(
@@ -44,9 +46,8 @@ class DescriptorComparator:
                 message=f"A new message `{message_update.name}` is added.",
                 change_type=ChangeType.MINOR,
             )
-            return
         # 2. If updated message is None, then the original message is removed.
-        if message_update is None and message_original:
+        elif message_update is None and message_original:
             self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
@@ -54,37 +55,36 @@ class DescriptorComparator:
                 message=f"An existing message `{message_original.name}` is removed.",
                 change_type=ChangeType.MAJOR,
             )
-            return
+        else:
+            # 3. Check breaking changes in each fields. Note: Fields are
+            # identified by number, not by name. Descriptor.fields_by_number
+            # (dict int -> FieldDescriptor) indexed by number.
+            if message_original.fields or message_update.fields:
+                self._compare_nested_fields(
+                    message_original.fields,
+                    message_update.fields,
+                )
 
-        # 3. Check breaking changes in each fields. Note: Fields are
-        # identified by number, not by name. Descriptor.fields_by_number
-        # (dict int -> FieldDescriptor) indexed by number.
-        if message_original.fields or message_update.fields:
-            self._compare_nested_fields(
-                message_original.fields,
-                message_update.fields,
-            )
+            # 4. Check breaking changes in nested message.
+            # Descriptor.nested_types_by_name (dict str -> Descriptor)
+            # indexed by name. Recursively call _compare for nested
+            # message type comparison.
+            if message_original.nested_messages or message_update.nested_messages:
+                self._compare_nested_messages(
+                    message_original.nested_messages,
+                    message_update.nested_messages,
+                )
+            # 5. Check breaking changes in nested enum.
+            # Enums are identified by names.
+            if message_original.nested_enums or message_update.nested_enums:
+                self._compare_nested_enums(
+                    message_original.nested_enums,
+                    message_update.nested_enums,
+                )
 
-        # 4. Check breaking changes in nested message.
-        # Descriptor.nested_types_by_name (dict str -> Descriptor)
-        # indexed by name. Recursively call _compare for nested
-        # message type comparison.
-        if message_original.nested_messages or message_update.nested_messages:
-            self._compare_nested_messages(
-                message_original.nested_messages,
-                message_update.nested_messages,
-            )
-        # 5. Check breaking changes in nested enum.
-        # Enums are identified by names.
-        if message_original.nested_enums or message_update.nested_enums:
-            self._compare_nested_enums(
-                message_original.nested_enums,
-                message_update.nested_enums,
-            )
-
-        # 6. Check `google.api.resource` annotation.
-        # This check has been done in file_set comparator. Since we have
-        # registered all resources in the database.
+            # 6. Check `google.api.resource` annotation.
+            # This check has been done in file_set comparator. Since we have
+            # registered all resources in the database.
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
