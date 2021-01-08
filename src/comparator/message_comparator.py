@@ -36,7 +36,7 @@ class DescriptorComparator:
 
     def _compare(self, message_original, message_update):
         # 1. If original message is None, then a new message is added.
-        if message_original is None:
+        if message_original is None and message_update:
             self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_ADDITION,
                 proto_file_name=message_update.proto_file_name,
@@ -46,7 +46,7 @@ class DescriptorComparator:
             )
             return
         # 2. If updated message is None, then the original message is removed.
-        if message_update is None:
+        if message_update is None and message_original:
             self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
