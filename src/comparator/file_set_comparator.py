@@ -113,11 +113,11 @@ class FileSetComparator:
         keys_update = set(self.fs_update.services_map.keys())
         for name in keys_original - keys_update:
             ServiceComparator(
-                fs_original.services_map[name], None, self.finding_container
+                self.fs_original.services_map[name], None, self.finding_container
             ).compare()
         for name in keys_update - keys_original:
             ServiceComparator(
-                None, fs_update.services_map[name], self.finding_container
+                None, self.fs_update.services_map[name], self.finding_container
             ).compare()
         for name in keys_update & keys_original:
             ServiceComparator(

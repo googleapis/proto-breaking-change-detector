@@ -94,7 +94,7 @@ class Enum:
     enum_pb: descriptor_pb2.EnumDescriptorProto
     proto_file_name: str
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
-    path: Tuple[int]
+    path: Tuple[int, ...]
     full_name: str
 
     def __getattr__(self, name):
@@ -150,7 +150,7 @@ class Field:
         ],
         path: Tuple[int],
         resource_database: ResourceDatabase = None,
-        message_resource: resource_pb2.ResourceDescriptor = None,
+        message_resource: WithLocation = None,
         api_version: str = None,
         map_entry=None,
         oneof_name: str = None,
@@ -182,7 +182,7 @@ class Field:
         return self.field_pb.number
 
     @property
-    def repeated(self) -> bool:
+    def repeated(self) -> WithLocation:
         """Return True if this is a repeated field, False otherwise.
 
         Returns:
@@ -290,7 +290,7 @@ class Field:
         return proto3_optional
 
     @property
-    def resource_reference(self) -> Optional[resource_pb2.ResourceReference]:
+    def resource_reference(self) -> Optional[WithLocation]:
         """Return the resource_reference annotation of the field if any"""
         resource_ref = self.field_pb.options.Extensions[resource_pb2.resource_reference]
         if not resource_ref.type and not resource_ref.child_type:
@@ -349,7 +349,7 @@ class Message:
         source_code_locations: Dict[
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
-        path: Tuple[int],
+        path: Tuple[int, ...],
         resource_database: ResourceDatabase = None,
         api_version: str = None,
         full_name: str = None,
@@ -498,7 +498,7 @@ class Message:
         # fmt: on
 
     @property
-    def resource(self) -> Optional[resource_pb2.ResourceDescriptor]:
+    def resource(self) -> Optional[WithLocation]:
         """If this message describes a resource, return the resource."""
         resource = self.message_pb.options.Extensions[resource_pb2.resource]
         if not resource.type or not resource.pattern:
@@ -573,7 +573,7 @@ class Method:
         return self.method_pb.output_type.endswith(".google.longrunning.Operation")
 
     @property
-    def client_streaming(self) -> bool:
+    def client_streaming(self) -> WithLocation:
         """Return True if this is a client-streamign method."""
         # MethodDescriptorProto.client_streaming has field number 5
         return WithLocation(
@@ -583,7 +583,7 @@ class Method:
         )
 
     @property
-    def server_streaming(self) -> bool:
+    def server_streaming(self) -> WithLocation:
         """Return True if this is a server-streaming method."""
         # MethodDescriptorProto.client_streaming has field number 6
         return WithLocation(
@@ -658,7 +658,7 @@ class Method:
         )
 
     @property
-    def method_signatures(self) -> Optional[Sequence[str]]:
+    def method_signatures(self) -> WithLocation:
         """Return the signatures defined for this method."""
         signatures = self.method_pb.options.Extensions[client_pb2.method_signature]
         fields = [
@@ -767,7 +767,7 @@ class Service:
         # fmt: on
 
     @property
-    def host(self) -> Optional[str]:
+    def host(self) -> Optional[WithLocation]:
         """Return the hostname for this service, if specified.
 
         Returns:
@@ -786,7 +786,7 @@ class Service:
         )
 
     @property
-    def oauth_scopes(self) -> Optional[Sequence[str]]:
+    def oauth_scopes(self) -> Optional[Sequence[WithLocation]]:
         """Return a sequence of oauth scopes, if applicable.
 
         Returns:
@@ -834,11 +834,8 @@ class FileSet:
         self.root_package = self._get_root_package()
         # Get API version from definition files.
         version = r"(?P<version>v[0-9]+(p[0-9]+)?((alpha|beta)[0-9]*)?)"
-        self.api_version = (
-            re.search(version, self.root_package).group()
-            if re.search(version, self.root_package)
-            else None
-        )
+        search_version = re.search(version, self.root_package)
+        self.api_version = search_version.group() if search_version else None
         # Get API definition files. This helps us to compare only the definition files
         # and imported dependency information.
         self.definition_files = [
@@ -980,7 +977,7 @@ class FileSet:
                 )
 
     def _get_root_package(self) -> str:
-        dependency_map: Dict[str, Sequence[str]] = defaultdict(list)
+        dependency_map = defaultdict(list)
         for fd in self.file_set_pb.file:
             # Put the fileDescriptor and its dependencies to the dependency map.
             for dep in fd.dependency:
@@ -1010,13 +1007,7 @@ class FileSet:
             source_code_locations_map[fd.name] = source_code_locations
         return source_code_locations_map
 
-    def _get_resource_database(
-        self,
-        files: [descriptor_pb2.FileDescriptorProto],
-        source_code_locations_map: Dict[
-            str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
-        ],
-    ):
+    def _get_resource_database(self, files, source_code_locations_map):
         resources_database = ResourceDatabase()
         for fd in files:
             source_code_locations = source_code_locations_map[fd.name]

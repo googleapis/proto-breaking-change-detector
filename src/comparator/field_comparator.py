@@ -279,7 +279,7 @@ class FieldComparator:
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
                     message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}` to `{update_type}`.",
-                    actionabel=True,
+                    change_type=ChangeType.MAJOR,
                 )
             return
         # The `type` is changed to `child_type` or `child_type` is changed to `type`, but
