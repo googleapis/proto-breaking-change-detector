@@ -35,8 +35,6 @@ class DescriptorComparator:
         self._compare(self.message_original, self.message_update)
 
     def _compare(self, message_original, message_update):
-        if not message_update and not message_original:
-            return
         # 1. If original message is None, then a new message is added.
         if message_original is None and message_update:
             self.finding_container.addFinding(
@@ -46,8 +44,9 @@ class DescriptorComparator:
                 message=f"A new message `{message_update.name}` is added.",
                 change_type=ChangeType.MINOR,
             )
+            return
         # 2. If updated message is None, then the original message is removed.
-        elif message_update is None and message_original:
+        if message_update is None and message_original:
             self.finding_container.addFinding(
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
@@ -55,7 +54,8 @@ class DescriptorComparator:
                 message=f"An existing message `{message_original.name}` is removed.",
                 change_type=ChangeType.MAJOR,
             )
-        else:
+            return
+        if message_update and message_original:
             # 3. Check breaking changes in each fields. Note: Fields are
             # identified by number, not by name. Descriptor.fields_by_number
             # (dict int -> FieldDescriptor) indexed by number.
