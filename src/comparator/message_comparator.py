@@ -55,36 +55,36 @@ class DescriptorComparator:
                 change_type=ChangeType.MAJOR,
             )
             return
+        if message_update and message_original:
+            # 3. Check breaking changes in each fields. Note: Fields are
+            # identified by number, not by name. Descriptor.fields_by_number
+            # (dict int -> FieldDescriptor) indexed by number.
+            if message_original.fields or message_update.fields:
+                self._compare_nested_fields(
+                    message_original.fields,
+                    message_update.fields,
+                )
 
-        # 3. Check breaking changes in each fields. Note: Fields are
-        # identified by number, not by name. Descriptor.fields_by_number
-        # (dict int -> FieldDescriptor) indexed by number.
-        if message_original.fields or message_update.fields:
-            self._compare_nested_fields(
-                message_original.fields,
-                message_update.fields,
-            )
+            # 4. Check breaking changes in nested message.
+            # Descriptor.nested_types_by_name (dict str -> Descriptor)
+            # indexed by name. Recursively call _compare for nested
+            # message type comparison.
+            if message_original.nested_messages or message_update.nested_messages:
+                self._compare_nested_messages(
+                    message_original.nested_messages,
+                    message_update.nested_messages,
+                )
+            # 5. Check breaking changes in nested enum.
+            # Enums are identified by names.
+            if message_original.nested_enums or message_update.nested_enums:
+                self._compare_nested_enums(
+                    message_original.nested_enums,
+                    message_update.nested_enums,
+                )
 
-        # 4. Check breaking changes in nested message.
-        # Descriptor.nested_types_by_name (dict str -> Descriptor)
-        # indexed by name. Recursively call _compare for nested
-        # message type comparison.
-        if message_original.nested_messages or message_update.nested_messages:
-            self._compare_nested_messages(
-                message_original.nested_messages,
-                message_update.nested_messages,
-            )
-        # 5. Check breaking changes in nested enum.
-        # Enums are identified by names.
-        if message_original.nested_enums or message_update.nested_enums:
-            self._compare_nested_enums(
-                message_original.nested_enums,
-                message_update.nested_enums,
-            )
-
-        # 6. Check `google.api.resource` annotation.
-        # This check has been done in file_set comparator. Since we have
-        # registered all resources in the database.
+            # 6. Check `google.api.resource` annotation.
+            # This check has been done in file_set comparator. Since we have
+            # registered all resources in the database.
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())
