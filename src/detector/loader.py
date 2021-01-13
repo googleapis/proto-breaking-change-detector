@@ -35,7 +35,7 @@ class Loader:
         proto_defintion_dirs: Sequence[str],
         proto_files: Sequence[str],
         descriptor_set: str,
-        include_source_code: True,
+        include_source_code: bool = True,
     ):
         self.proto_defintion_dirs = proto_defintion_dirs
         self.descriptor_set = descriptor_set
