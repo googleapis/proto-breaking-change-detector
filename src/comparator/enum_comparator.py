@@ -12,53 +12,71 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from google.protobuf.descriptor_pb2 import EnumDescriptorProto
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory
+from src.findings.utils import FindingCategory, ChangeType
+from src.comparator.wrappers import Enum
 
 
 class EnumComparator:
     def __init__(
-        self, enum_original: EnumDescriptorProto, enum_update: EnumDescriptorProto
+        self,
+        enum_original: Enum,
+        enum_update: Enum,
+        finding_container: FindingContainer,
     ):
         self.enum_original = enum_original
         self.enum_update = enum_update
+        self.finding_container = finding_container
 
     def compare(self):
-        # 1. If original EnumDescriptor is None, then a new
-        # EnumDescriptor is added.
+        # 1. If the original EnumDescriptor is None,
+        # then a new EnumDescriptor is added.
         if self.enum_original is None:
-            msg = f"A new Enum {self.enum_update.name} is added."
-            FindingContainer.addFinding(FindingCategory.ENUM_ADDITION, "", msg, False)
+            self.finding_container.addFinding(
+                category=FindingCategory.ENUM_ADDITION,
+                proto_file_name=self.enum_update.proto_file_name,
+                source_code_line=self.enum_update.source_code_line,
+                message=f"A new Enum `{self.enum_update.name}` is added.",
+                change_type=ChangeType.MINOR,
+            )
 
-        # 2. If updated EnumDescriptor is None, then the original
-        # EnumDescriptor is removed.
+        # 2. If the updated EnumDescriptor is None,
+        # then the original EnumDescriptor is removed.
         elif self.enum_update is None:
-            msg = f"An Enum {self.enum_original.name} is removed"
-            FindingContainer.addFinding(FindingCategory.ENUM_REMOVAL, "", msg, True)
+            self.finding_container.addFinding(
+                category=FindingCategory.ENUM_REMOVAL,
+                proto_file_name=self.enum_original.proto_file_name,
+                source_code_line=self.enum_original.source_code_line,
+                message=f"An existing Enum `{self.enum_original.name}` is removed.",
+                change_type=ChangeType.MAJOR,
+            )
 
-        # 3. If both EnumDescriptors are existing, check if the name is changed.
-        elif self.enum_original.name != self.enum_update.name:
-            msg = f"Name of the Enum is changed, the original is {self.enum_original.name}, but the updated is {self.enum_update.name}"
-            FindingContainer.addFinding(FindingCategory.ENUM_NAME_CHANGE, "", msg, True)
-
-        # 4. If the EnumDescriptors have the same name, check the values
-        # of them stay the same. Enum values are identified by number,
-        # not by name.
+        # 3. If the EnumDescriptors have the same name, check the values
+        # of them stay the same. Enum values are identified by number.
         else:
-            enum_values_dict_original = {x.number: x for x in self.enum_original.value}
-            enum_values_dict_update = {x.number: x for x in self.enum_update.value}
+            enum_values_dict_original = self.enum_original.values
+            enum_values_dict_update = self.enum_update.values
             enum_values_keys_set_original = set(enum_values_dict_original.keys())
             enum_values_keys_set_update = set(enum_values_dict_update.keys())
-            # Compare Enum values that only exist in original version
+            # Compare Enum values that only exist in the original version.
             for number in enum_values_keys_set_original - enum_values_keys_set_update:
-                EnumValueComparator(enum_values_dict_original[number], None).compare()
-            # Compare Enum values that only exist in update version
+                EnumValueComparator(
+                    enum_values_dict_original[number],
+                    None,
+                    self.finding_container,
+                ).compare()
+            # Compare Enum values that only exist in the update version.
             for number in enum_values_keys_set_update - enum_values_keys_set_original:
-                EnumValueComparator(None, enum_values_dict_update[number]).compare()
-            # Compare Enum values that exist both in original and update versions
+                EnumValueComparator(
+                    None,
+                    enum_values_dict_update[number],
+                    self.finding_container,
+                ).compare()
+            # Compare Enum values that exist in both original and update versions.
             for number in enum_values_keys_set_original & enum_values_keys_set_update:
                 EnumValueComparator(
-                    enum_values_dict_original[number], enum_values_dict_update[number]
+                    enum_values_dict_original[number],
+                    enum_values_dict_update[number],
+                    self.finding_container,
                 ).compare()

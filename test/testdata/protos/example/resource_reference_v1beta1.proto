@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package example.v1beta1;
+
+import "google/api/resource.proto";
+
+option (google.api.resource_definition) = {
+  type: "example.googleapis.com/t1"
+  pattern: "foo/{foo}"
+};
+// File-level resource definition `t2` is removed, but is added
+// to message-level resource. Non-breaking change.
+
+message Foo {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/t2"
+    pattern: "foo/{foo}/bar/{bar}/t2"
+  };
+  // resource_reference annotation is removed, but it is added in message-level.
+  // Non-breaking change.
+  string name = 1;
+  // Type of the resource_reference is changed to child_type, and they can not be resoved
+  // to the identical resource. Breaking change.
+  string topic = 2 [
+    (google.api.resource_reference).child_type = "example.googleapis.com/t1"
+  ];
+}

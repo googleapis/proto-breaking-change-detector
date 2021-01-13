@@ -1,3 +1,11 @@
+# Packages
 **/__pycache__
 .vscode/
 **/*.pyc
+# Default output json file for testing.
+detected_breaking_changes.json
+# Virtual environment
+env/
+coverage.xml
+pip-wheel-metadata
+*.egg-info

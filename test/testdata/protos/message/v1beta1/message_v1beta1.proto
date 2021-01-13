@@ -1,27 +1,25 @@
 syntax = "proto3";
 
-package tutorial;
+package tutorial.v1beta1;
 
 message Person {
   string name = 1;
-  int32 id = 2;
-  string email = 3;
+  string id = 2;
+  string email_address = 3;
 
   enum PhoneType {
     MOBILE = 0;
     HOME = 1;
     WORK = 2;
+    SCHOOL = 3;
   }
 
   message PhoneNumber {
     string number = 1;
-    PhoneType type = 2;
   }
 
-  repeated PhoneNumber phones = 4;
-  oneof marriage{
-    bool single = 5;
-  }
+  PhoneNumber phones = 4;
+  bool single = 5;
 }
 
 message AddressBook {

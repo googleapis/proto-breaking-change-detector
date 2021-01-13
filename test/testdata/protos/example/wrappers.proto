@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package example.v1alpha;
+
+import "google/api/resource.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/client.proto";
+import "google/rpc/status.proto";
+import "google/longrunning/operations.proto";
+
+
+// File-level resource definition.
+option (google.api.resource_definition) = {
+  type: "example.googleapis.com/t1"
+  pattern: "foo/{foo}"
+  pattern: "foo/{foo}/bar/{bar}/t1"
+};
+
+service Example {
+  option(google.api.oauth_scopes) = "https://www.googleapis.com/auth/cloud-platform";
+
+  rpc Foo(FooRequest) returns (FooResponse) {
+    option (google.api.http) = {
+      post: "/v1/example:foo"
+      body: "*"
+    };
+    option (google.api.method_signature) = "content,error";
+  }
+
+  rpc Bar(FooRequest) returns (google.longrunning.Operation) {
+    option (google.api.http) = {
+      post: "/v1/example:bar"
+      body: "*"
+    };
+    option (google.longrunning.operation_info) = {
+      response_type: "FooResponse"
+      metadata_type: "FooMetadata"
+    };
+  }
+}
+
+message FooRequest {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/Foo"
+    pattern: "foo/{foo}/bar/{bar}"
+  };
+  oneof response {
+    string content = 1;
+    google.rpc.Status error = 2;
+  }
+  message NestedMessage {}
+  enum NestedEnum {
+    a = 0;
+  }
+}
+
+message FooResponse {
+  Enum1 enum_field = 1 [
+     (google.api.resource_reference).child_type = "example.googleapis.com/t1"
+  ];
+}
+
+message FooMetadata {
+  string name = 1 [
+     (google.api.field_behavior) = REQUIRED
+  ];
+}
+
+enum Enum1 {
+  a = 0;
+  b = 1;
+}
+
+message MapMessage {
+  map<string, FooMetadata> first_field = 1;
+}
+

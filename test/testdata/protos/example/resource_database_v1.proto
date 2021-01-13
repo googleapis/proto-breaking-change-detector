@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package example;
+package example.v1;
 
 import "google/api/resource.proto";
 
@@ -14,3 +14,25 @@ option (google.api.resource_definition) = {
   type: "example.googleapis.com/t2"
   pattern: "foo/{foo}/bar/{bar}/t2"
 };
+
+message Foo {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/Foo"
+    pattern: "foo/{foo}/bar/{bar}"
+  };
+  string name = 1;
+}
+
+message Bar {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/t3"
+    pattern: "foo/{foo}/bar/{bar}/t3"
+  };
+}
+
+message Test {
+  option (google.api.resource) = {
+    type: "example.googleapis.com/Test"
+    pattern: "foo/{foo}/test"
+  };
+}

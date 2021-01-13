@@ -13,48 +13,91 @@
 # limitations under the License.
 
 import unittest
+import os
 from google.api import resource_pb2
-from test.tools.invoker import UnittestInvoker
 from src.comparator.resource_database import ResourceDatabase
+from test.tools.mock_resources import make_resource_descriptor
 
 
 class ResourceDatabaseTest(unittest.TestCase):
-    _INVOKER = UnittestInvoker(
-        ["resource_database_v1.proto"], "resource_database_v1_descriptor_set.pb", True
-    )
-
     def setUp(self):
-        self.descriptor_set = self._INVOKER.run()
         self.resource_database = ResourceDatabase()
 
-    def test_resource_database(self):
-        for f in self.descriptor_set.file:
-            resources = f.options.Extensions[resource_pb2.resource_definition]
-            for resource in resources:
-                self.resource_database.register_resource(resource)
-                self.assertEqual(
-                    self.resource_database.get_resource_by_type(resource.type), resource
-                )
-                self.assertEqual(
-                    self.resource_database.get_resource_by_pattern(resource.pattern[0]),
-                    resource,
-                )
-            # Check a non-existing resource, should return None.
-            self.assertEqual(
-                self.resource_database.get_resource_by_pattern("a/{a}/b{b}"),
-                None,
-            )
-        # We should get the parent resource correctly by child_type.
-        # The resource with pattern `foo/{foo}/bar/{bar}/t2` has the parent pattern of `foo/{foo}`
-        # which is also defined in the proto by type `example.googleapis.com/t1`.
-        parent_resource = self.resource_database.get_parent_resources_by_child_type(
-            "example.googleapis.com/t2"
-        )
-        self.assertEqual(parent_resource[0].type, "example.googleapis.com/t1")
+    def test_register_empty_resources(self):
+        # Register resource is None, the database should be empty.
+        self.resource_database.register_resource(None)
+        self.assertFalse(self.resource_database.types)
+        self.assertFalse(self.resource_database.patterns)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER.cleanup()
+    def test_register_invalid_resource(self):
+        # Register resource with no type.
+        resource_without_type = make_resource_descriptor(
+            resource_type=None, resource_patterns=["a"]
+        )
+        # Raise TypeError: APIs must define a resource type
+        # and resource pattern for each resource in the API.
+        with self.assertRaises(TypeError):
+            self.resource_database.register_resource(resource_without_type)
+
+    def test_register_valid_resource(self):
+        resource = make_resource_descriptor(
+            resource_type="resource", resource_patterns=["a"]
+        )
+        self.resource_database.register_resource(resource)
+        self.assertEqual(list(self.resource_database.types.keys()), ["resource"])
+        self.assertEqual(self.resource_database.types["resource"], resource)
+        self.assertEqual(list(self.resource_database.patterns.keys()), ["a"])
+        self.assertEqual(self.resource_database.patterns["a"], resource)
+
+    def test_register_resource_with_multiple_patterns(self):
+        resource = make_resource_descriptor(
+            resource_type="resource", resource_patterns=["b", "c"]
+        )
+        self.resource_database.register_resource(resource)
+        self.assertEqual(list(self.resource_database.types.keys()), ["resource"])
+        self.assertEqual(self.resource_database.types["resource"], resource)
+        self.assertEqual(list(self.resource_database.patterns.keys()), ["b", "c"])
+        self.assertEqual(self.resource_database.patterns["b"], resource)
+        self.assertEqual(self.resource_database.patterns["c"], resource)
+
+    def test_get_resource_by_type(self):
+        resource = make_resource_descriptor(
+            resource_type="resource", resource_patterns=["a"]
+        )
+        self.resource_database.register_resource(resource)
+        self.assertEqual(
+            self.resource_database.get_resource_by_type("resource"), resource
+        )
+        self.assertEqual(self.resource_database.get_resource_by_type("resource1"), None)
+
+    def test_get_resource_by_pattern(self):
+        resource = make_resource_descriptor(
+            resource_type="resource", resource_patterns=["a", "b"]
+        )
+        self.resource_database.register_resource(resource)
+        # The resourc could be query by either type.
+        self.assertEqual(self.resource_database.get_resource_by_pattern("a"), resource)
+        self.assertEqual(self.resource_database.get_resource_by_pattern("b"), resource)
+
+    def test_get_parent_resource_by_type(self):
+        child_resource = make_resource_descriptor(
+            resource_type="child", resource_patterns=["a/{a}/b/{b}", "b/{b}"]
+        )
+        parent_resource = make_resource_descriptor(
+            resource_type="parent", resource_patterns=["a/{a}/b"]
+        )
+        self.resource_database.register_resource(child_resource)
+        self.resource_database.register_resource(parent_resource)
+        # `a/{a}/b` is the parent pattern of `a/{a}/b/{b}`
+        parent_resources = self.resource_database.get_parent_resources_by_child_type(
+            "child"
+        )
+        self.assertIn(parent_resource, parent_resources)
+        # Reverse query would not have any result.
+        self.assertNotIn(
+            child_resource,
+            self.resource_database.get_parent_resources_by_child_type("parent"),
+        )
 
 
 if __name__ == "__main__":

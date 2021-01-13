@@ -92,6 +92,10 @@ if [ $NUM_PYTHON_FILES_CHANGED -gt 0 ]
 then
   echo_status "Checking tests..."
   python3 -m unittest discover test/comparator
+  python3 -m unittest discover test/comparator/wrappers
+  python3 -m unittest discover test/findings
+  python3 -m unittest discover test/detector
+  python3 -m unittest discover test/cli
   TEST_STATUS=$?
   if [ $TEST_STATUS != 0 ]
   then
@@ -105,7 +109,8 @@ if [ $NUM_PYTHON_FILES_CHANGED -gt 0 ]
 then
   echo_status "Checking Apache License Header ..."
   header_check_preparation
-  addlicense -c "Google LLC" -l apache -check $(find $PWD -type f -name '*.py')
+  addlicense -c "Google LLC" -l apache -check $(find $PWD/src -type f -name '*.py')
+  addlicense -c "Google LLC" -l apache -check $(find $PWD/test -type f -name '*.py')
   CHECK_STATUS=$?
   if [ $CHECK_STATUS != 0 ]
   then

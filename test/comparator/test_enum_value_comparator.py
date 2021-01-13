@@ -13,61 +13,72 @@
 # limitations under the License.
 
 import unittest
-from test.tools.invoker import UnittestInvoker
+from test.tools.mock_descriptors import make_enum_value
+from google.protobuf import descriptor_pb2
 from src.comparator.enum_value_comparator import EnumValueComparator
 from src.findings.finding_container import FindingContainer
 
 
 class EnumValueComparatorTest(unittest.TestCase):
-    # This is for tesing the behavior of src.comparator.enum_valeu_comparator.EnumValueComparator
-    # class. We take the two enum values (`MOBILE` and `HOME` in `PhoneType`)
-    # in message_v1.proto as input to exercise different cases of enum values changes.
-    # UnittestInvoker helps us to execute the protoc command to compile the proto file,
-    # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in proto, and
-    # create a FileDescriptorSet (_PB_ORIGNAL) out of it.
-    _PROTO_ORIGINAL = "message_v1.proto"
-    _DESCRIPTOR_SET_ORIGINAL = "message_v1_descriptor_set.pb"
-    _INVOKER_ORIGNAL = UnittestInvoker([_PROTO_ORIGINAL], _DESCRIPTOR_SET_ORIGINAL)
-    _PB_ORIGNAL = _INVOKER_ORIGNAL.run()
-
     def setUp(self):
-        # Get `MOBILE` and `HOME` enumValueDescriptorProto from `message_v1_descriptor_set.pb`.
-        enum_type_values = self._PB_ORIGNAL.file[0].message_type[0].enum_type[0].value
-        self.enumValue_mobile = enum_type_values[0]
-        self.enumValue_home = enum_type_values[1]
-
-    def tearDown(self):
-        FindingContainer.reset()
+        L = descriptor_pb2.SourceCodeInfo.Location
+        locations = [L(path=(2, 1), span=(1, 2))]
+        self.enum_foo = make_enum_value(
+            name="FOO",
+            number=1,
+            proto_file_name="test.proto",
+            locations=locations,
+            path=(2, 1),
+        )
+        self.enum_bar = make_enum_value(
+            name="BAR",
+            number=1,
+            proto_file_name="test_update.proto",
+            locations=locations,
+            path=(2, 1),
+        )
+        self.finding_container = FindingContainer()
 
     def test_enum_value_removal(self):
-        EnumValueComparator(self.enumValue_mobile, None).compare()
-        finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "An EnumValue MOBILE is removed")
+        EnumValueComparator(
+            self.enum_foo,
+            None,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "An existing EnumValue `FOO` is removed.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "test.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_value_addition(self):
-        EnumValueComparator(None, self.enumValue_home).compare()
-        finding = FindingContainer.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new EnumValue HOME is added.")
+        EnumValueComparator(None, self.enum_foo, self.finding_container).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "A new EnumValue `FOO` is added.")
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "test.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_name_change(self):
-        EnumValueComparator(self.enumValue_mobile, self.enumValue_home).compare()
-        finding = FindingContainer.getAllFindings()[0]
+        EnumValueComparator(
+            self.enum_foo, self.enum_bar, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(
-            finding.message,
-            "Name of the EnumValue is changed, the original "
-            "is MOBILE, but the updated is HOME",
+            finding.message, "Name of the EnumValue is changed from `FOO` to `BAR`."
         )
         self.assertEqual(finding.category.name, "ENUM_VALUE_NAME_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "test_update.proto")
+        self.assertEqual(finding.location.source_code_line, 2)
 
     def test_no_api_change(self):
-        EnumValueComparator(self.enumValue_mobile, self.enumValue_mobile).compare()
-        self.assertEqual(len(FindingContainer.getAllFindings()), 0)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._INVOKER_ORIGNAL.cleanup()
+        EnumValueComparator(
+            self.enum_foo, self.enum_foo, self.finding_container
+        ).compare()
+        self.assertEqual(len(self.finding_container.getAllFindings()), 0)
 
 
 if __name__ == "__main__":
