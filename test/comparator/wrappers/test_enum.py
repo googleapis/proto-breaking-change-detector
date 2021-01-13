@@ -25,7 +25,7 @@ class EnumTest(unittest.TestCase):
         self.assertEqual(enum.path, ())
         self.assertEqual(
             enum.source_code_line,
-            "No source code line can be identified by path ().",
+            -1,
         )
         self.assertEqual(enum.full_name, ".example.foo.enum")
 

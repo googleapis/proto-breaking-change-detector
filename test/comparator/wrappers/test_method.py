@@ -23,7 +23,7 @@ class MethodTest(unittest.TestCase):
         self.assertEqual(method.path, ())
         self.assertEqual(
             method.source_code_line,
-            "No source code line can be identified by path ().",
+            -1,
         )
 
     def test_method_types(self):

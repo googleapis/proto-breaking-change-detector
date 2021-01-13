@@ -27,7 +27,7 @@ class MessageTest(unittest.TestCase):
         self.assertEqual(message.path, ())
         self.assertEqual(
             message.source_code_line,
-            "No source code line can be identified by path ().",
+            -1,
         )
         self.assertEqual(message.full_name, ".example.v1.my_message")
 

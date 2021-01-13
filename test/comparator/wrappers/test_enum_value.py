@@ -25,7 +25,7 @@ class EnumValueTest(unittest.TestCase):
         self.assertEqual(enum_value.proto_file_name, "foo")
         self.assertEqual(
             enum_value.source_code_line,
-            "No source code line can be identified by path ().",
+            -1,
         )
         self.assertEqual(enum_value.path, ())
 

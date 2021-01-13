@@ -30,7 +30,7 @@ class ServiceTest(unittest.TestCase):
         self.assertFalse(service.api_version)
         self.assertEqual(
             service.source_code_line,
-            "No source code line can be identified by path ().",
+            -1,
         )
 
     def test_service_api_version(self):
