@@ -35,10 +35,12 @@ class Loader:
         proto_defintion_dirs: Sequence[str],
         proto_files: Sequence[str],
         descriptor_set: str,
+        include_source_code: bool = True,
     ):
         self.proto_defintion_dirs = proto_defintion_dirs
         self.descriptor_set = descriptor_set
         self.proto_files = proto_files
+        self.include_source_code = include_source_code
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         desc_set = desc.FileDescriptorSet()
@@ -54,7 +56,8 @@ class Loader:
             protoc_command.append(f"--proto_path={directory}")
         protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
         protoc_command.append("-o/dev/stdout")
-        protoc_command.append("--include_source_info")
+        if self.include_source_code:
+            protoc_command.append("--include_source_info")
         # Include the imported dependencies.
         protoc_command.append("--include_imports")
         protoc_command.extend(pf for pf in self.proto_files)

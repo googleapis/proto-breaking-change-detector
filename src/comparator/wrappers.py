@@ -35,8 +35,8 @@ from typing import Dict, Sequence, Optional, Tuple, cast
 
 
 def _get_source_code_line(source_code_locations, path):
-    if path not in source_code_locations:
-        return f"No source code line can be identified by path {path}."
+    if not source_code_locations or path not in source_code_locations:
+        return -1
     # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
     return source_code_locations[path].span[0] + 1
 
@@ -303,7 +303,10 @@ class Field:
         )
         # In some proto definitions, the reference `type` and `child_type` share
         # the same field number 1055.
-        if resource_ref_path not in self.source_code_locations:
+        if (
+            not self.source_code_locations
+            or resource_ref_path not in self.source_code_locations
+        ):
             resource_ref_path = self.path + (8, 1055)
         return WithLocation(resource_ref, self.source_code_locations, resource_ref_path)
 
@@ -862,7 +865,11 @@ class FileSet:
         )
         path = ()
         for fd in self.definition_files:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self._get_packaging_options_map(
                 fd.options, fd.name, source_code_locations, path + (8,)
@@ -940,7 +947,11 @@ class FileSet:
         self.global_messages_map = {}
         self.global_enums_map = {}
         for fd in self.file_set_pb.file:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Register first level enums.
             # fmt: off
             for i, enum in enumerate(fd.enum_type):
@@ -994,6 +1005,8 @@ class FileSet:
     ) -> Dict[str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]]:
         source_code_locations_map = {}
         for fd in self.file_set_pb.file:
+            if not fd.source_code_info:
+                continue
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -1010,7 +1023,11 @@ class FileSet:
     def _get_resource_database(self, files, source_code_locations_map):
         resources_database = ResourceDatabase()
         for fd in files:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Register file-level resource definitions in database.
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]
