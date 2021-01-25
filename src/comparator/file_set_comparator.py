@@ -30,6 +30,10 @@ class FileSetComparator:
         self.fs_original = file_set_original
         self.fs_update = file_set_update
         self.finding_container = finding_container
+        self.original_definition_files = [
+            f.name for f in self.fs_original.definition_files
+        ]
+        self.update_definition_files = [f.name for f in self.fs_update.definition_files]
 
     def compare(self):
         # 1.Compare the per-language packaging options.
@@ -145,8 +149,7 @@ class FileSetComparator:
             else:
                 # Message only exits in the original version.
                 message = self.fs_original.messages_map[name]
-                definition_files = [f.name for f in self.fs_original.definition_files]
-                if message.proto_file_name not in definition_files:
+                if message.proto_file_name not in self.original_definition_files:
                     # The removed message is imported from dependency files.
                     # This should be caught at the fields level where this message is referenced.
                     continue
@@ -158,8 +161,7 @@ class FileSetComparator:
         for name in keys_update - compared_update_keys:
             # Message only exits in the update version.
             message = self.fs_update.messages_map[name]
-            definition_files = [f.name for f in self.fs_update.definition_files]
-            if message.proto_file_name not in definition_files:
+            if message.proto_file_name not in self.update_definition_files:
                 # The added message is imported from dependency files.
                 # This should be caught at the fields level where this message is referenced.
                 continue
@@ -188,8 +190,7 @@ class FileSetComparator:
             else:
                 # Enum only exits in the original version.
                 removed_enum = self.fs_original.enums_map[name]
-                definition_files = [f.name for f in self.fs_original.definition_files]
-                if removed_enum.proto_file_name not in definition_files:
+                if removed_enum.proto_file_name not in self.original_definition_files:
                     # The removed enum is imported from dependency files.
                     # This should be caught at the fields level where this enum is referenced.
                     continue
@@ -201,8 +202,7 @@ class FileSetComparator:
         for name in keys_update - compared_update_keys:
             # Enum only exits in the update version.
             added_enum = self.fs_update.enums_map[name]
-            definition_files = [f.name for f in self.fs_update.definition_files]
-            if added_enum.proto_file_name not in definition_files:
+            if added_enum.proto_file_name not in self.update_definition_files:
                 # The added enum is imported from dependency files.
                 # This should be caught at the fields level where this enum is referenced.
                 continue
