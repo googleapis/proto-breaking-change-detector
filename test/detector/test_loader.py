@@ -21,7 +21,7 @@ from google.protobuf import descriptor_pb2
 class LoaderTest(unittest.TestCase):
     _CURRENT_DIR = os.getcwd()
     COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
-    
+
     def test_loader_args(self):
         loader = Loader(
             proto_defintion_dirs=None,
@@ -35,7 +35,6 @@ class LoaderTest(unittest.TestCase):
         self.assertFalse(loader.local_protobuf)
         self.assertEqual(loader.protoc_binary, "//path/to/protoc/binary")
         self.assertEqual(loader.descriptor_set, "//path/to/descriptor/set")
-
 
     def test_loader_proto_dirs(self):
         loader = Loader(
