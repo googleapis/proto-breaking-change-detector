@@ -28,7 +28,7 @@ class Detector:
         self,
         descriptor_set_original: desc.FileDescriptorSet,
         descriptor_set_update: desc.FileDescriptorSet,
-        opts: Options,
+        opts: Options = None,
     ):
         self.descriptor_set_original = descriptor_set_original
         self.descriptor_set_update = descriptor_set_update
@@ -42,6 +42,9 @@ class Detector:
             FileSet(self.descriptor_set_update),
             self.finding_container,
         ).compare()
+
+        if not self.opts:
+            return self.finding_container.getActionableFindings()
         # Output json file of findings and human-readable messages if the
         # command line option is enabled.
         with open(self.opts.output_json_path, "w") as write_json_file:
