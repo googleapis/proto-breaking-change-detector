@@ -36,12 +36,12 @@ class ResourceReferenceTest(unittest.TestCase):
 
     def test_resources_change(self):
         _INVOKER_ORIGNAL = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
+            proto_definition_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[os.path.join(self.PROTO_DIR, "resource_database_v1.proto")],
             descriptor_set=None,
         )
         _INVOKER_UPDATE = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
+            proto_definition_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[
                 os.path.join(self.PROTO_DIR, "resource_database_v1beta1.proto")
             ],
@@ -99,12 +99,12 @@ class ResourceReferenceTest(unittest.TestCase):
 
     def test_resource_reference_change(self):
         _INVOKER_ORIGNAL = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
+            proto_definition_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[os.path.join(self.PROTO_DIR, "resource_reference_v1.proto")],
             descriptor_set=None,
         )
         _INVOKER_UPDATE = Loader(
-            proto_defintion_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
+            proto_definition_dirs=[self.PROTO_DIR, self.COMMON_PROTOS_DIR],
             proto_files=[
                 os.path.join(self.PROTO_DIR, "resource_reference_v1beta1.proto")
             ],

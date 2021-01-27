@@ -27,7 +27,7 @@ class WrappersTest(unittest.TestCase):
     COMMON_PROTOS_DIR = os.path.join(_CURRENT_DIR, "api-common-protos")
 
     _INVOKER = Loader(
-        proto_defintion_dirs=[
+        proto_definition_dirs=[
             os.path.join(_CURRENT_DIR, "test/testdata/protos/example/"),
             COMMON_PROTOS_DIR,
         ],
