@@ -55,7 +55,7 @@ class Loader:
                 desc_set.ParseFromString(f.read())
             return desc_set
         # Construct the protoc command with proper argument prefix.
-        protoc_command = [self.PROTOC_BINARY]
+        protoc_command = [self.protoc_binary]
         for directory in self.proto_definition_dirs:
             protoc_command.append(f"--proto_path={directory}")
         if self.local_protobuf:
