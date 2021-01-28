@@ -57,7 +57,7 @@ class FindingContainer:
         output_message = ""
         file_to_findings = defaultdict(list)
         for finding in self.getActionableFindings():
-            # Create a map to summarize the findings based on proto file name.s
+            # Create a map to summarize the findings based on proto file name.
             file_to_findings[finding.location.proto_file_name].append(finding)
         # Add each finding to the output message.
         for file_name, findings in file_to_findings.items():
@@ -72,5 +72,8 @@ class FindingContainer:
                 )
             )
             for finding in findings:
-                output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
+                if finding.location.source_code_line == -1:
+                    output_message += f"{file_name}: {finding.message}\n"
+                else:
+                    output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
         return output_message

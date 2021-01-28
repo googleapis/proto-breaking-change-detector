@@ -94,7 +94,9 @@ class DectetorTest(unittest.TestCase):
             file_set_original, file_set_update
         ).detect_breaking_changes()
         # Without options, the detector returns an array of actionable Findings.
-        self.assertIsInstance(breaking_changes[0], Finding)
+        self.assertEqual(
+            breaking_changes, "original.proto: An existing Enum `foo` is removed.\n"
+        )
 
 
 if __name__ == "__main__":
