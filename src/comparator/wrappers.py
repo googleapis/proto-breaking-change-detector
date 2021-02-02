@@ -443,11 +443,15 @@ class Message:
             nested_path = self.nested_path + [message.name]
             nested_messages_map[message.name] = Message(
                 message_pb=message,
-                proto_file_name= self.proto_file_name,
+                proto_file_name=self.proto_file_name,
                 source_code_locations=self.source_code_locations,
                 # DescriptorProto.nested_type has field number 3.
                 # So we append (3, nested_message_index) to the path.
-                path=self.path + (3, i,),
+                path=self.path
+                + (
+                    3,
+                    i,
+                ),
                 resource_database=self.resource_database,
                 api_version=self.api_version,
                 full_name=self.full_name + "." + message.name,

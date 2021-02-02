@@ -60,7 +60,7 @@ def make_enum(
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
     full_name: str = ".example.foo.enum",
-    nested_path: Sequence[str] = []
+    nested_path: Sequence[str] = [],
 ) -> wrappers.Enum:
     """Mock an Enum object."""
     source_code_locations = {tuple(location.path): location for location in locations}
