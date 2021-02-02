@@ -333,7 +333,7 @@ class ServiceComparator:
         signatures_update = method_update.method_signatures.value
         if len(signatures_original) > len(signatures_update):
             self.finding_container.addFinding(
-                category=FindingCategory.METHOD_SIGNATURE_CHANGE,
+                category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
                 message=f"An existing method_signature is removed from method `{method_original.name}`.",

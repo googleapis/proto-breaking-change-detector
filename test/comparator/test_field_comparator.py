@@ -247,7 +247,7 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_oneof, field_not_oneof, self.finding_container).compare()
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings["An existing field `Foo` is moved out of One-of."]
-        self.assertEqual(finding.category.name, "FIELD_ONEOF_REMOVAL")
+        self.assertEqual(finding.category.name, "FIELD_ONEOF_MOVE_OUT")
 
     def test_into_oneof(self):
         field_oneof = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
@@ -255,7 +255,7 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(field_not_oneof, field_oneof, self.finding_container).compare()
         findings = {f.message: f for f in self.finding_container.getAllFindings()}
         finding = findings["An existing field `Foo` is moved into One-of."]
-        self.assertEqual(finding.category.name, "FIELD_ONEOF_ADDITION")
+        self.assertEqual(finding.category.name, "FIELD_ONEOF_MOVE_IN")
 
     def test_proto3_optional_change(self):
         field_optional = make_field(

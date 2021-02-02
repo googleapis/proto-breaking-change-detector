@@ -58,7 +58,7 @@ class ResourceReferenceTest(unittest.TestCase):
             "An existing pattern value of the resource definition `example.googleapis.com/t2` is updated from `foo/{foo}/bar/{bar}/t2` to `foo/{foo}/bar/{bar}/t2_update`."
         ]
         self.assertEqual(
-            file_resource_pattern_change.category.name, "RESOURCE_DEFINITION_CHANGE"
+            file_resource_pattern_change.category.name, "RESOURCE_PATTERN_CHANGE"
         )
         self.assertEqual(
             file_resource_pattern_change.location.proto_file_name,
@@ -71,7 +71,7 @@ class ResourceReferenceTest(unittest.TestCase):
         ]
         self.assertEqual(
             message_resource_pattern_change.category.name,
-            "RESOURCE_DEFINITION_CHANGE",
+            "RESOURCE_PATTERN_CHANGE",
         )
         self.assertEqual(
             message_resource_pattern_change.location.proto_file_name,

@@ -224,7 +224,7 @@ class FileSetComparator:
             # An existing pattern is removed.
             if len(patterns_original) > len(patterns_update):
                 self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                    category=FindingCategory.RESOURCE_PATTERN_REMOVEL,
                     proto_file_name=resources_original.types[
                         resource_type
                     ].proto_file_name,
@@ -239,7 +239,7 @@ class FileSetComparator:
             for old_pattern, new_pattern in zip(patterns_original, patterns_update):
                 if old_pattern != new_pattern:
                     self.finding_container.addFinding(
-                        category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                        category=FindingCategory.RESOURCE_PATTERN_CHANGE,
                         proto_file_name=resources_update.types[
                             resource_type
                         ].proto_file_name,
