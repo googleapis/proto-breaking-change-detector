@@ -248,6 +248,7 @@ class FileSetComparator:
                         ].source_code_line,
                         message=f"An existing pattern value of the resource definition `{resource_type}` is updated from `{old_pattern}` to `{new_pattern}`.",
                         change_type=ChangeType.MAJOR,
+                        extra_info=[f'pattern: "{new_pattern}"'],
                     )
 
         # 2. File-level resource definitions addition.

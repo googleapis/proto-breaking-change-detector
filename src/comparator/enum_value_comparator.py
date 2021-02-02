@@ -55,4 +55,6 @@ class EnumValueComparator:
                 source_code_line=self.enum_value_update.source_code_line,
                 message=f"Name of the EnumValue is changed from `{self.enum_value_original.name}` to `{self.enum_value_update.name}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.enum_value_update.nested_path
+                + [f"{self.enum_value_update.name}"],
             )
