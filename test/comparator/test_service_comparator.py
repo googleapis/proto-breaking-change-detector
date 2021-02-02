@@ -319,7 +319,7 @@ class ServiceComparatorTest(unittest.TestCase):
         finding = findings_map[
             "An existing method_signature is removed from method `notInteresting`."
         ]
-        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_CHANGE")
+        self.assertEqual(finding.category.name, "METHOD_SIGNATURE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 

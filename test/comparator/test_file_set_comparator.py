@@ -140,7 +140,7 @@ class FileSetComparatorTest(unittest.TestCase):
             "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`.",
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_CHANGE")
         self.assertEqual(
             finding.location.proto_file_name,
             "foo.proto",
@@ -173,7 +173,7 @@ class FileSetComparatorTest(unittest.TestCase):
             "An existing pattern value of the resource definition `.example.v1.Bar` is removed.",
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "RESOURCE_DEFINITION_CHANGE")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVEL")
         self.assertEqual(
             finding.location.proto_file_name,
             "foo.proto",

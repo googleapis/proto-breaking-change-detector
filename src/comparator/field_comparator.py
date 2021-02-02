@@ -171,7 +171,7 @@ class FieldComparator:
             if self.field_original.oneof:
                 msg = f"An existing field `{self.field_original.name}` is moved out of One-of."
                 self.finding_container.addFinding(
-                    category=FindingCategory.FIELD_ONEOF_REMOVAL,
+                    category=FindingCategory.FIELD_ONEOF_MOVE_OUT,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
                     message=msg,
@@ -180,7 +180,7 @@ class FieldComparator:
             else:
                 msg = f"An existing field `{self.field_original.name}` is moved into One-of."
                 self.finding_container.addFinding(
-                    category=FindingCategory.FIELD_ONEOF_ADDITION,
+                    category=FindingCategory.FIELD_ONEOF_MOVE_IN,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
                     message=msg,
