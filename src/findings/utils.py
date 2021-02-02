@@ -75,6 +75,7 @@ class FindingCategory(enum.Enum):
     PACKAGING_OPTION_REMOVAL = 60
     PACKAGING_OPTION_ADDITION = 61
 
+
 class ChangeType(enum.Enum):
     MAJOR = 1
     MINOR = 2
