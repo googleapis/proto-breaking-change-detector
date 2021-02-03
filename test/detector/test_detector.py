@@ -95,7 +95,7 @@ class DectetorTest(unittest.TestCase):
         ).detect_breaking_changes()
         # Without options, the detector returns an array of actionable Findings.
         self.assertEqual(
-            breaking_changes, "original.proto: An existing Enum `foo` is removed.\n"
+            breaking_changes[0].message, "An existing Enum `foo` is removed."
         )
 
 
