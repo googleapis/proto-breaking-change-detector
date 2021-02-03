@@ -154,7 +154,10 @@ class ServiceComparator:
                     source_code_line=method_update.input.source_code_line,
                     message=f"Input type of an existing method `{name}` is changed from `{input_type_original}` to `{input_type_update}`.",
                     change_type=ChangeType.MAJOR,
-                    extra_info=["service " + self.service_update.name + " {", f"rpc {name}"],
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.4 The response type of an RPC method is changed.
             response_type_original = method_original.output.value
@@ -170,7 +173,10 @@ class ServiceComparator:
                     source_code_line=method_update.output.source_code_line,
                     message=f"Output type of an existing method `{name}` is changed from `{response_type_original}` to `{response_type_update}`.",
                     change_type=ChangeType.MAJOR,
-                    extra_info=["service " + self.service_update.name + " {", f"rpc {name}"],
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.5 The request streaming state of an RPC method is changed.
             if (
@@ -183,7 +189,10 @@ class ServiceComparator:
                     source_code_line=method_update.client_streaming.source_code_line,
                     message=f"The request streaming type of an existing method `{name}` is changed.",
                     change_type=ChangeType.MAJOR,
-                    extra_info=["service " + self.service_update.name + " {", f"rpc {name}"],
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.6 The response streaming state of an RPC method is changed.
             if (
@@ -196,7 +205,10 @@ class ServiceComparator:
                     source_code_line=method_update.server_streaming.source_code_line,
                     message=f"The response streaming type of an existing method `{name}` is changed.",
                     change_type=ChangeType.MAJOR,
-                    extra_info=["service " + self.service_update.name + " {", f"rpc {name}"],
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.7 The paginated response of an RPC method is changed.
             if method_original.paged_result_field or method_update.paged_result_field:
@@ -212,7 +224,10 @@ class ServiceComparator:
                         source_code_line=method_update.source_code_line,
                         message=f"The paginated response of an existing method `{name}` is changed.",
                         change_type=ChangeType.MAJOR,
-                        extra_info=["service " + self.service_update.name + " {", f"rpc {name}"],
+                        extra_info=[
+                            "service " + self.service_update.name + " {",
+                            f"rpc {name}",
+                        ],
                     )
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)

@@ -59,7 +59,7 @@ class Loader:
         for directory in self.proto_definition_dirs:
             protoc_command.append(f"--proto_path={directory}")
         if self.local_protobuf:
-            protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
+            protoc_command.append(f"--proto_path={self.local_protobuf}")
         protoc_command.append("-o/dev/stdout")
         if self.include_source_code:
             protoc_command.append("--include_source_info")
