@@ -67,6 +67,7 @@ class FieldComparator:
                 source_code_line=self.field_update.source_code_line,
                 message=f"Name of an existing field is changed from `{self.field_original.name}` to `{self.field_update.name}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.field_update.nested_path,
             )
             return
 
@@ -79,6 +80,7 @@ class FieldComparator:
                 source_code_line=self.field_update.repeated.source_code_line,
                 message=f"Repeated state of an existing field `{self.field_original.name}` is changed.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.field_update.nested_path,
             )
         # Field option change from optional to required is breaking.
         if not self.field_original.required.value and self.field_update.required.value:
@@ -88,6 +90,8 @@ class FieldComparator:
                 source_code_line=self.field_update.required.source_code_line,
                 message=f"Field behavior of an existing field `{self.field_original.name}` is changed.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.field_update.nested_path
+                + ["(google.api.field_behavior)"],
             )
         # 5. Check the type of the field.
         if self.field_original.proto_type.value != self.field_update.proto_type.value:
@@ -97,6 +101,7 @@ class FieldComparator:
                 source_code_line=self.field_update.proto_type.source_code_line,
                 message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.proto_type.value}` to `{self.field_update.proto_type.value}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.field_update.nested_path,
             )
         # If field has the same primitive type, then the type should be identical.
         # If field has the same non-primitive type like `TYPE_ENUM`.
@@ -119,6 +124,7 @@ class FieldComparator:
                     source_code_line=self.field_update.type_name.source_code_line,
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
         # If the fields have the same type_name, but they are map type,
         # the key type and value type should also be identical.
@@ -130,6 +136,7 @@ class FieldComparator:
                     source_code_line=self.field_update.type_name.source_code_line,
                     message=f"Type of an existing field `{self.field_original.name}` is changed from a map to `{self.field_update.type_name.value}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
             elif not self.field_original.is_map_type and self.field_update.is_map_type:
                 self.finding_container.addFinding(
@@ -138,6 +145,7 @@ class FieldComparator:
                     source_code_line=self.field_update.type_name.source_code_line,
                     message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to a map.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
             # Both fields are map types, compare the key and value type.
             elif self.field_original.is_map_type and self.field_update.is_map_type:
@@ -162,6 +170,7 @@ class FieldComparator:
                         source_code_line=self.field_update.type_name.source_code_line,
                         message=f"Type of an existing field `{self.field_original.name}` is changed from `map<{key_original}, {value_original}>` to `map<{key_update}, {value_update}>`.",
                         change_type=ChangeType.MAJOR,
+                        extra_info=self.field_update.nested_path,
                     )
 
         # 6. Check the oneof state of the field.
@@ -176,6 +185,7 @@ class FieldComparator:
                     source_code_line=source_code_line,
                     message=msg,
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
             else:
                 msg = f"An existing field `{self.field_original.name}` is moved into One-of."
@@ -185,6 +195,7 @@ class FieldComparator:
                     source_code_line=source_code_line,
                     message=msg,
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
         # 7. Check the proto3_optional state of the field.
         elif (
@@ -198,6 +209,7 @@ class FieldComparator:
                     source_code_line=self.field_update.source_code_line,
                     message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed to required.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path,
                 )
             if self.field_update.proto3_optional:
                 self.finding_container.addFinding(
@@ -231,6 +243,8 @@ class FieldComparator:
                     source_code_line=resource_ref_update.source_code_line,
                     message=f"A resource reference option is added to the field `{field_original.name}`, but it is not defined anywhere",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path
+                    + ["(google.api.resource_reference)"],
                 )
             # If the new resource reference is in the database, no breaking change.
             else:
@@ -278,6 +292,8 @@ class FieldComparator:
                     source_code_line=resource_ref_update.source_code_line,
                     message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}` to `{update_type}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=self.field_update.nested_path
+                    + ["(google.api.resource_reference)", f"{update_type}"],
                 )
             return
         # The `type` is changed to `child_type` or `child_type` is changed to `type`, but
@@ -370,4 +386,6 @@ class FieldComparator:
                 f"resource reference option in field `{self.field_original.name}` "
                 "cannot be resolved to the identical resource.",
                 change_type=ChangeType.MAJOR,
+                extra_info=self.field_update.nested_path
+                + ["(google.api.resource_reference)"],
             )
