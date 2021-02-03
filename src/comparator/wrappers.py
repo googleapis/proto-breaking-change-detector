@@ -440,7 +440,7 @@ class Message:
             # information extraction.
             if message.options.map_entry:
                 continue
-            nested_path = self.nested_path + [message.name]
+            nested_path = self.nested_path + ["message " + message.name + " {"]
             nested_messages_map[message.name] = Message(
                 message_pb=message,
                 proto_file_name=self.proto_file_name,
@@ -502,7 +502,7 @@ class Message:
         """Return the nested enums in the message. Enum is identified by name."""
         nested_enum_map = {}
         for i, enum in enumerate(self.message_pb.enum_type):
-            nested_path = self.nested_path + [enum.name]
+            nested_path = self.nested_path + ["enum " + enum.name + " {"]
             nested_enum_map[enum.name] = Enum(
                 enum_pb=enum,
                 proto_file_name=self.proto_file_name,
@@ -977,7 +977,7 @@ class FileSet:
                     source_code_locations=source_code_locations,
                     path=(5, i),
                     full_name=full_name,
-                    nested_path=[enum.name],
+                    nested_path=["enum " + enum.name + " {"],
                 )
             # Register first level messages.
             message_stack = [
@@ -990,7 +990,7 @@ class FileSet:
                     api_version=self.api_version,
                     # `.package.outer_message.nested_message`
                     full_name=self._get_full_name(fd.package, message.name),
-                    nested_path=[message.name],
+                    nested_path=["message " + message.name + " {"],
                 )
                 for i, message in enumerate(fd.message_type)
             ]
