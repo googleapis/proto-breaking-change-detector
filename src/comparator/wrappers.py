@@ -31,12 +31,12 @@ from google.longrunning import operations_pb2
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.comparator.resource_database import ResourceDatabase
-from typing import Dict, Sequence, Optional, Tuple, cast
+from typing import Dict, Sequence, Optional, Tuple, cast, List
 
 
 def _get_source_code_line(source_code_locations, path):
-    if path not in source_code_locations:
-        return f"No source code line can be identified by path {path}."
+    if not source_code_locations or path not in source_code_locations:
+        return -1
     # The line number in `span` is zero-based, +1 to get the actual line number in .proto file.
     return source_code_locations[path].span[0] + 1
 
@@ -70,6 +70,7 @@ class EnumValue:
     proto_file_name: str
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
     path: Tuple[int]
+    nested_path: List[str]
 
     def __getattr__(self, name):
         return getattr(self.enum_value_pb, name)
@@ -96,6 +97,7 @@ class Enum:
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
     path: Tuple[int, ...]
     full_name: str
+    nested_path: List[str]
 
     def __getattr__(self, name):
         return getattr(self.enum_pb, name)
@@ -107,17 +109,19 @@ class Enum:
         Returns:
             Dict[int, EnumValue]: EnumValue is identified by number.
         """
-        return {
-            enum_value.number: EnumValue(
-                enum_value,
-                self.proto_file_name,
-                self.source_code_locations,
+        enum_value_map = {}
+        for i, enum_value in enumerate(self.enum_pb.value):
+            nested_path = self.nested_path + [enum_value.name]
+            enum_value_map[enum_value.number] = EnumValue(
+                enum_value_pb=enum_value,
+                proto_file_name=self.proto_file_name,
+                source_code_locations=self.source_code_locations,
                 # EnumDescriptorProto.value has field number 2.
                 # So we append (2, value_index) to the path.
-                self.path + (2, i),
+                path=self.path + (2, i),
+                nested_path=nested_path,
             )
-            for i, enum_value in enumerate(self.enum_pb.value)
-        }
+        return enum_value_map
 
     @property
     def source_code_line(self):
@@ -154,6 +158,7 @@ class Field:
         api_version: str = None,
         map_entry=None,
         oneof_name: str = None,
+        nested_path: List[str] = [],
     ):
 
         self.field_pb = field_pb
@@ -167,6 +172,7 @@ class Field:
         self.api_version = api_version
         self.map_entry = map_entry
         self.oneof_name = oneof_name
+        self.nested_path = nested_path
 
     def __getattr__(self, name):
         return getattr(self.field_pb, name)
@@ -303,7 +309,10 @@ class Field:
         )
         # In some proto definitions, the reference `type` and `child_type` share
         # the same field number 1055.
-        if resource_ref_path not in self.source_code_locations:
+        if (
+            not self.source_code_locations
+            or resource_ref_path not in self.source_code_locations
+        ):
             resource_ref_path = self.path + (8, 1055)
         return WithLocation(resource_ref, self.source_code_locations, resource_ref_path)
 
@@ -353,6 +362,7 @@ class Message:
         resource_database: ResourceDatabase = None,
         api_version: str = None,
         full_name: str = None,
+        nested_path: List[str] = [],
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
@@ -361,6 +371,7 @@ class Message:
         self.resource_database = resource_database
         self.api_version = api_version
         self.full_name = full_name
+        self.nested_path = nested_path
 
     def __getattr__(self, name):
         return getattr(self.message_pb, name)
@@ -391,6 +402,7 @@ class Message:
             field_map_entry_name = (
                 field.name.replace("_", " ").title().replace(" ", "") + "Entry"
             )
+            nested_path = self.nested_path + [field.name]
             map_entry = (
                 self.map_entries[field_map_entry_name]
                 if field_map_entry_name in self.map_entries
@@ -406,6 +418,7 @@ class Message:
                 api_version=self.api_version,
                 map_entry=map_entry,
                 oneof_name=oneof_name,
+                nested_path=nested_path,
             )
         return fields_map
 
@@ -419,27 +432,32 @@ class Message:
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
         """Return the nested messsages in the message. Message is identified by name."""
-        # fmt: off
-        return {
-            message.name: Message(
-                message_pb=message,
-                proto_file_name= self.proto_file_name,
-                source_code_locations=self.source_code_locations,
-                # DescriptorProto.nested_type has field number 3.
-                # So we append (3, nested_message_index) to the path.
-                path=self.path + (3, i,),
-                resource_database=self.resource_database,
-                api_version=self.api_version,
-                full_name=self.full_name + "." + message.name,
-            )
+        nested_messages_map = {}
+        for i, message in enumerate(self.message_pb.nested_type):
             # Exclude the auto-generated map_entries message, since
             # the generated message does not have real source code location.
             # Including those messages in the comparator will fail the source code
             # information extraction.
-            for i, message in enumerate(self.message_pb.nested_type)
-            if not message.options.map_entry
-        }
-        # fmt: on
+            if message.options.map_entry:
+                continue
+            nested_path = self.nested_path + ["message " + message.name + " {"]
+            nested_messages_map[message.name] = Message(
+                message_pb=message,
+                proto_file_name=self.proto_file_name,
+                source_code_locations=self.source_code_locations,
+                # DescriptorProto.nested_type has field number 3.
+                # So we append (3, nested_message_index) to the path.
+                path=self.path
+                + (
+                    3,
+                    i,
+                ),
+                resource_database=self.resource_database,
+                api_version=self.api_version,
+                full_name=self.full_name + "." + message.name,
+                nested_path=nested_path,
+            )
+        return nested_messages_map
 
     @property
     def map_entries(self) -> Dict[str, Dict[str, Field]]:
@@ -482,9 +500,10 @@ class Message:
     @property
     def nested_enums(self) -> Dict[str, Enum]:
         """Return the nested enums in the message. Enum is identified by name."""
-        # fmt: off
-        return {
-            enum.name: Enum(
+        nested_enum_map = {}
+        for i, enum in enumerate(self.message_pb.enum_type):
+            nested_path = self.nested_path + ["enum " + enum.name + " {"]
+            nested_enum_map[enum.name] = Enum(
                 enum_pb=enum,
                 proto_file_name=self.proto_file_name,
                 source_code_locations=self.source_code_locations,
@@ -492,10 +511,9 @@ class Message:
                 # So we append (4, nested_enum_index) to the path.
                 path=self.path + (4, i),
                 full_name=self.full_name + "." + enum.name,
+                nested_path=nested_path,
             )
-            for i, enum in enumerate(self.message_pb.enum_type)
-        }
-        # fmt: on
+        return nested_enum_map
 
     @property
     def resource(self) -> Optional[WithLocation]:
@@ -862,7 +880,11 @@ class FileSet:
         )
         path = ()
         for fd in self.definition_files:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Create packaging options map and duplicate the per-language rules for namespaces.
             self._get_packaging_options_map(
                 fd.options, fd.name, source_code_locations, path + (8,)
@@ -940,7 +962,11 @@ class FileSet:
         self.global_messages_map = {}
         self.global_enums_map = {}
         for fd in self.file_set_pb.file:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Register first level enums.
             # fmt: off
             for i, enum in enumerate(fd.enum_type):
@@ -951,6 +977,7 @@ class FileSet:
                     source_code_locations=source_code_locations,
                     path=(5, i),
                     full_name=full_name,
+                    nested_path=["enum " + enum.name + " {"],
                 )
             # Register first level messages.
             message_stack = [
@@ -963,6 +990,7 @@ class FileSet:
                     api_version=self.api_version,
                     # `.package.outer_message.nested_message`
                     full_name=self._get_full_name(fd.package, message.name),
+                    nested_path=["message " + message.name + " {"],
                 )
                 for i, message in enumerate(fd.message_type)
             ]
@@ -994,6 +1022,8 @@ class FileSet:
     ) -> Dict[str, Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]]:
         source_code_locations_map = {}
         for fd in self.file_set_pb.file:
+            if not fd.source_code_info:
+                continue
             # Iterate over the source_code_info and place it into a dictionary.
             #
             # The comments in protocol buffers are sorted by a concept called
@@ -1010,7 +1040,11 @@ class FileSet:
     def _get_resource_database(self, files, source_code_locations_map):
         resources_database = ResourceDatabase()
         for fd in files:
-            source_code_locations = source_code_locations_map[fd.name]
+            source_code_locations = (
+                source_code_locations_map[fd.name]
+                if source_code_locations_map
+                else None
+            )
             # Register file-level resource definitions in database.
             for i, resource in enumerate(
                 fd.options.Extensions[resource_pb2.resource_definition]

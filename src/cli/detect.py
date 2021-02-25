@@ -82,17 +82,25 @@ def detect(
     # It takes options, returns fileDescriptorSet.
     if options.use_descriptor_set():
         file_set_original = Loader(
-            None, None, options.original_descriptor_set_file_path
+            proto_definition_dirs=None,
+            proto_files=None,
+            descriptor_set=options.original_descriptor_set_file_path,
         ).get_descriptor_set()
         file_set_update = Loader(
-            None, None, options.update_descriptor_set_file_path
+            proto_definition_dirs=None,
+            proto_files=None,
+            descriptor_set=options.update_descriptor_set_file_path,
         ).get_descriptor_set()
     elif options.use_proto_dirs():
         file_set_original = Loader(
-            options.original_api_definition_dirs, options.original_proto_files, None
+            proto_definition_dirs=options.original_api_definition_dirs,
+            proto_files=options.original_proto_files,
+            descriptor_set=None,
         ).get_descriptor_set()
         file_set_update = Loader(
-            options.update_api_definition_dirs, options.update_proto_files, None
+            proto_definition_dirs=options.update_api_definition_dirs,
+            proto_files=options.update_proto_files,
+            descriptor_set=None,
         ).get_descriptor_set()
     # 4. Create the detector with two FileDescriptorSet and options.
     # It creates output_json file and prints human-readable message if the option is enabled.

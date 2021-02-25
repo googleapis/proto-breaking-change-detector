@@ -88,6 +88,10 @@ class ServiceComparator:
                 source_code_line=host_update.source_code_line,
                 message=f"An existing default host is updated from `{host_original.value}` to `{host_update.value}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    "option (google.api.default_host)",
+                ],
             )
 
     def _compare_oauth_scopes(self):
@@ -150,6 +154,10 @@ class ServiceComparator:
                     source_code_line=method_update.input.source_code_line,
                     message=f"Input type of an existing method `{name}` is changed from `{input_type_original}` to `{input_type_update}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.4 The response type of an RPC method is changed.
             response_type_original = method_original.output.value
@@ -165,6 +173,10 @@ class ServiceComparator:
                     source_code_line=method_update.output.source_code_line,
                     message=f"Output type of an existing method `{name}` is changed from `{response_type_original}` to `{response_type_update}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.5 The request streaming state of an RPC method is changed.
             if (
@@ -177,6 +189,10 @@ class ServiceComparator:
                     source_code_line=method_update.client_streaming.source_code_line,
                     message=f"The request streaming type of an existing method `{name}` is changed.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.6 The response streaming state of an RPC method is changed.
             if (
@@ -189,6 +205,10 @@ class ServiceComparator:
                     source_code_line=method_update.server_streaming.source_code_line,
                     message=f"The response streaming type of an existing method `{name}` is changed.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
                 )
             # 3.7 The paginated response of an RPC method is changed.
             if method_original.paged_result_field or method_update.paged_result_field:
@@ -204,6 +224,10 @@ class ServiceComparator:
                         source_code_line=method_update.source_code_line,
                         message=f"The paginated response of an existing method `{name}` is changed.",
                         change_type=ChangeType.MAJOR,
+                        extra_info=[
+                            "service " + self.service_update.name + " {",
+                            f"rpc {name}",
+                        ],
                     )
             # 3.8 The method_signature annotation is changed.
             self._compare_method_signatures(method_original, method_update)
@@ -253,6 +277,12 @@ class ServiceComparator:
                 source_code_line=method_update.http_annotation.source_code_line,
                 message=f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    f"{method_update.name}",
+                    "option (google.api.http)",
+                    http_annotation_update["http_method"],
+                ],
             )
         # Compare http body, they should be identical.
         if http_annotation_original["http_body"] != http_annotation_update["http_body"]:
@@ -262,6 +292,12 @@ class ServiceComparator:
                 source_code_line=method_update.http_annotation.source_code_line,
                 message=f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    f"{method_update.name}",
+                    "option (google.api.http)",
+                    http_annotation_update["http_body"],
+                ],
             )
         # Compare http URI, minor version updates are allowed if not identical.
         if http_annotation_original["http_uri"] != http_annotation_update["http_uri"]:
@@ -274,6 +310,12 @@ class ServiceComparator:
                     source_code_line=method_update.http_annotation.source_code_line,
                     message=f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"{method_update.name}",
+                        "option (google.api.http)",
+                        http_annotation_update["http_uri"],
+                    ],
                 )
 
     def _compare_lro_annotations(self, method_original, method_update):
@@ -313,6 +355,12 @@ class ServiceComparator:
                 source_code_line=lro_update.source_code_line,
                 message=f"The response_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['response_type']}` to `{lro_update.value['response_type']}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    f"{method_update.name}",
+                    "option (google.longrunning.operation_info)",
+                    f"response_type: \"{lro_update.value['response_type']}\"",
+                ],
             )
         # The metadata_type value of LRO operation_info is changed.
         if (
@@ -326,6 +374,12 @@ class ServiceComparator:
                 source_code_line=lro_update.source_code_line,
                 message=f"The metadata_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['metadata_type']}` to `{lro_update.value['metadata_type']}`.",
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    f"{method_update.name}",
+                    "option (google.longrunning.operation_info)",
+                    f"metadata_type: \"{lro_update.value['metadata_type']}\"",
+                ],
             )
 
     def _compare_method_signatures(self, method_original, method_update):
@@ -333,7 +387,7 @@ class ServiceComparator:
         signatures_update = method_update.method_signatures.value
         if len(signatures_original) > len(signatures_update):
             self.finding_container.addFinding(
-                category=FindingCategory.METHOD_SIGNATURE_CHANGE,
+                category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
                 message=f"An existing method_signature is removed from method `{method_original.name}`.",
@@ -347,6 +401,11 @@ class ServiceComparator:
                     source_code_line=method_update.method_signatures.source_code_line,
                     message=f"An existing method_signature for method `{method_update.name}` is changed from `{old_sig}` to `{new_sig}`.",
                     change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {method_update.name}",
+                        "option (google.api.method_signature)",
+                    ],
                 )
 
     def _get_version_update_name(self, name):

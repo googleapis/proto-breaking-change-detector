@@ -33,12 +33,13 @@ def make_enum_value(
     proto_file_name: str = "foo",
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
+    nested_path: Sequence[str] = [],
 ) -> wrappers.EnumValue:
     """Mock an EnumValue object."""
     source_code_locations = {tuple(location.path): location for location in locations}
     enum_value_pb = make_enum_value_pb2(name, number)
     enum_value = wrappers.EnumValue(
-        enum_value_pb, proto_file_name, source_code_locations, path
+        enum_value_pb, proto_file_name, source_code_locations, path, nested_path
     )
     return enum_value
 
@@ -59,12 +60,13 @@ def make_enum(
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
     path: Tuple[int] = (),
     full_name: str = ".example.foo.enum",
+    nested_path: Sequence[str] = [],
 ) -> wrappers.Enum:
     """Mock an Enum object."""
     source_code_locations = {tuple(location.path): location for location in locations}
     enum_pb = make_enum_pb2(name, values)
     return wrappers.Enum(
-        enum_pb, proto_file_name, source_code_locations, path, full_name
+        enum_pb, proto_file_name, source_code_locations, path, full_name, nested_path
     )
 
 
@@ -112,6 +114,7 @@ def make_field(
     oneof_index: int = None,
     oneof_name: str = None,
     proto3_optional: bool = False,
+    nested_path: Sequence[str] = [],
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
@@ -146,6 +149,7 @@ def make_field(
         api_version=api_version,
         map_entry=map_entry,
         oneof_name=oneof_name,
+        nested_path=nested_path,
     )
 
 
@@ -191,6 +195,7 @@ def make_message(
     api_version: str = None,
     map_entry: bool = False,
     full_name: str = ".example.v1.my_message",
+    nested_path: Sequence[str] = [],
     **kwargs,
 ) -> wrappers.Message:
     message_pb = make_message_pb2(
@@ -213,6 +218,7 @@ def make_message(
         resource_database=resource_database,
         api_version=api_version,
         full_name=full_name,
+        nested_path=nested_path,
         **kwargs,
     )
 

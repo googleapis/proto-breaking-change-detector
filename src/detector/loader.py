@@ -32,13 +32,19 @@ class Loader:
 
     def __init__(
         self,
-        proto_defintion_dirs: Sequence[str],
+        proto_definition_dirs: Sequence[str],
         proto_files: Sequence[str],
         descriptor_set: str,
+        include_source_code: bool = True,
+        protoc_binary: str = None,
+        local_protobuf: bool = True,
     ):
-        self.proto_defintion_dirs = proto_defintion_dirs
+        self.proto_definition_dirs = proto_definition_dirs
         self.descriptor_set = descriptor_set
         self.proto_files = proto_files
+        self.include_source_code = include_source_code
+        self.protoc_binary = protoc_binary or self.PROTOC_BINARY
+        self.local_protobuf = local_protobuf
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         desc_set = desc.FileDescriptorSet()
@@ -49,12 +55,14 @@ class Loader:
                 desc_set.ParseFromString(f.read())
             return desc_set
         # Construct the protoc command with proper argument prefix.
-        protoc_command = [self.PROTOC_BINARY]
-        for directory in self.proto_defintion_dirs:
+        protoc_command = [self.protoc_binary]
+        for directory in self.proto_definition_dirs:
             protoc_command.append(f"--proto_path={directory}")
-        protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
+        if self.local_protobuf:
+            protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
         protoc_command.append("-o/dev/stdout")
-        protoc_command.append("--include_source_info")
+        if self.include_source_code:
+            protoc_command.append("--include_source_info")
         # Include the imported dependencies.
         protoc_command.append("--include_imports")
         protoc_command.extend(pf for pf in self.proto_files)

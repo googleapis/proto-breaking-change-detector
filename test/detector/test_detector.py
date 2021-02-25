@@ -19,8 +19,10 @@ from test.tools.mock_descriptors import (
     make_service,
     make_method,
     make_message,
+    make_enum,
 )
 from src.detector.options import Options
+from src.findings.utils import Finding
 
 
 class DectetorTest(unittest.TestCase):
@@ -77,6 +79,24 @@ class DectetorTest(unittest.TestCase):
                 + "my_proto.proto L6: An existing message `input` is removed.\n"
                 + "my_proto.proto L12: An existing message `output` is removed.\n",
             )
+
+    def test_detector_without_opts(self):
+        # Mock original and updated FileDescriptorSet.
+        enum_foo = make_enum(name="foo")
+        enum_bar = make_enum(name="bar")
+        file_set_original = desc.FileDescriptorSet(
+            file=[make_file_pb2(name="original.proto", enums=[enum_foo])]
+        )
+        file_set_update = desc.FileDescriptorSet(
+            file=[make_file_pb2(name="update.proto", enums=[enum_bar])]
+        )
+        breaking_changes = Detector(
+            file_set_original, file_set_update
+        ).detect_breaking_changes()
+        # Without options, the detector returns an array of actionable Findings.
+        self.assertEqual(
+            breaking_changes[0].message, "An existing Enum `foo` is removed."
+        )
 
 
 if __name__ == "__main__":

@@ -30,6 +30,10 @@ class FileSetComparator:
         self.fs_original = file_set_original
         self.fs_update = file_set_update
         self.finding_container = finding_container
+        self.original_definition_files = [
+            f.name for f in self.fs_original.definition_files
+        ]
+        self.update_definition_files = [f.name for f in self.fs_update.definition_files]
 
     def compare(self):
         # 1.Compare the per-language packaging options.
@@ -144,6 +148,11 @@ class FileSetComparator:
                 compared_update_keys.add(transformed_name)
             else:
                 # Message only exits in the original version.
+                message = self.fs_original.messages_map[name]
+                if message.proto_file_name not in self.original_definition_files:
+                    # The removed message is imported from dependency files.
+                    # This should be caught at the fields level where this message is referenced.
+                    continue
                 DescriptorComparator(
                     self.fs_original.messages_map[name],
                     None,
@@ -151,6 +160,11 @@ class FileSetComparator:
                 ).compare()
         for name in keys_update - compared_update_keys:
             # Message only exits in the update version.
+            message = self.fs_update.messages_map[name]
+            if message.proto_file_name not in self.update_definition_files:
+                # The added message is imported from dependency files.
+                # This should be caught at the fields level where this message is referenced.
+                continue
             DescriptorComparator(
                 None,
                 self.fs_update.messages_map[name],
@@ -175,6 +189,11 @@ class FileSetComparator:
                 compared_update_keys.add(transformed_name)
             else:
                 # Enum only exits in the original version.
+                removed_enum = self.fs_original.enums_map[name]
+                if removed_enum.proto_file_name not in self.original_definition_files:
+                    # The removed enum is imported from dependency files.
+                    # This should be caught at the fields level where this enum is referenced.
+                    continue
                 EnumComparator(
                     self.fs_original.enums_map[name],
                     None,
@@ -182,6 +201,11 @@ class FileSetComparator:
                 ).compare()
         for name in keys_update - compared_update_keys:
             # Enum only exits in the update version.
+            added_enum = self.fs_update.enums_map[name]
+            if added_enum.proto_file_name not in self.update_definition_files:
+                # The added enum is imported from dependency files.
+                # This should be caught at the fields level where this enum is referenced.
+                continue
             EnumComparator(
                 None,
                 self.fs_update.enums_map[name],
@@ -200,7 +224,7 @@ class FileSetComparator:
             # An existing pattern is removed.
             if len(patterns_original) > len(patterns_update):
                 self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                    category=FindingCategory.RESOURCE_PATTERN_REMOVEL,
                     proto_file_name=resources_original.types[
                         resource_type
                     ].proto_file_name,
@@ -215,7 +239,7 @@ class FileSetComparator:
             for old_pattern, new_pattern in zip(patterns_original, patterns_update):
                 if old_pattern != new_pattern:
                     self.finding_container.addFinding(
-                        category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+                        category=FindingCategory.RESOURCE_PATTERN_CHANGE,
                         proto_file_name=resources_update.types[
                             resource_type
                         ].proto_file_name,
@@ -224,6 +248,7 @@ class FileSetComparator:
                         ].source_code_line,
                         message=f"An existing pattern value of the resource definition `{resource_type}` is updated from `{old_pattern}` to `{new_pattern}`.",
                         change_type=ChangeType.MAJOR,
+                        extra_info=[f'pattern: "{new_pattern}"'],
                     )
 
         # 2. File-level resource definitions addition.
