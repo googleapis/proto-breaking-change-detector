@@ -1015,7 +1015,7 @@ class FileSet:
             for dep in deps:
                 if dep.name not in dependency_map:
                     return dep.package
-        return self.file_set_pb.file[0].package
+        return self.file_set_pb.file[0].package if self.file_set_pb.file else ""
 
     def _get_source_code_locations_map(
         self,

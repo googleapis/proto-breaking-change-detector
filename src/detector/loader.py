@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
-from subprocess import PIPE
+import logging
+import shutil
 import os
+import subprocess
+from subprocess import CalledProcessError, PIPE
 from typing import Sequence
+
 from google.protobuf import descriptor_pb2 as desc
 
 
@@ -47,6 +50,7 @@ class Loader:
         self.local_protobuf = local_protobuf
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
+        local_dir = os.getcwd()
         desc_set = desc.FileDescriptorSet()
         # If users pass in descriptor set file directly, we
         # can skip running the protoc command.
@@ -57,7 +61,10 @@ class Loader:
         # Construct the protoc command with proper argument prefix.
         protoc_command = [self.protoc_binary]
         for directory in self.proto_definition_dirs:
-            protoc_command.append(f"--proto_path={directory}")
+            if self.local_protobuf:
+                protoc_command.append(f"--proto_path={directory}")
+            else:
+                protoc_command.append(f"--proto_path={local_dir}/{directory}")
         if self.local_protobuf:
             protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
         protoc_command.append("-o/dev/stdout")
@@ -65,15 +72,28 @@ class Loader:
             protoc_command.append("--include_source_info")
         # Include the imported dependencies.
         protoc_command.append("--include_imports")
-        protoc_command.extend(pf for pf in self.proto_files)
+        if self.local_protobuf:
+            protoc_command.extend(pf for pf in self.proto_files)
+        else:
+            protoc_command.extend((local_dir + "/" + pf) for pf in self.proto_files)
 
         # Run protoc command to get pb file that contains serialized data of
         # the proto files.
-        process = subprocess.run(protoc_command, stdout=PIPE)
-        if process.returncode != 0:
-            raise _ProtocInvokerException(
-                f"Protoc command to load the descriptor set fails: {protoc_command}"
+        try:
+            union_command = " ".join(protoc_command)
+            logging.info(f"Run protoc command: {union_command}")
+            process = subprocess.run(
+                union_command, shell=True, stdout=PIPE, stderr=PIPE
             )
+            logging.info(f"Check the process output is not empty:")
+            logging.info(bool(process.stdout))
+            if process.returncode != 0:
+                raise _ProtocInvokerException(
+                    f"Protoc command to load the descriptor set fails. {union_command}"
+                )
+        except (CalledProcessError, FileNotFoundError) as e:
+            logging.info(f"Call process error: {e}")
+
         # Create FileDescriptorSet from the serialized data.
         desc_set.ParseFromString(process.stdout)
         return desc_set
