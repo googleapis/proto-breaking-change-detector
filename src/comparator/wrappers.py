@@ -31,7 +31,7 @@ from google.longrunning import operations_pb2
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.comparator.resource_database import ResourceDatabase
-from typing import Dict, Sequence, Optional, Tuple, cast
+from typing import Dict, Sequence, Optional, Tuple, cast, List
 
 
 def _get_source_code_line(source_code_locations, path):
@@ -70,7 +70,7 @@ class EnumValue:
     proto_file_name: str
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
     path: Tuple[int]
-    nested_path: [str]
+    nested_path: List[str]
 
     def __getattr__(self, name):
         return getattr(self.enum_value_pb, name)
@@ -97,7 +97,7 @@ class Enum:
     source_code_locations: Dict[Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location]
     path: Tuple[int, ...]
     full_name: str
-    nested_path: Sequence[str]
+    nested_path: List[str]
 
     def __getattr__(self, name):
         return getattr(self.enum_pb, name)
@@ -158,7 +158,7 @@ class Field:
         api_version: str = None,
         map_entry=None,
         oneof_name: str = None,
-        nested_path: Sequence[str] = [],
+        nested_path: List[str] = [],
     ):
 
         self.field_pb = field_pb
@@ -362,7 +362,7 @@ class Message:
         resource_database: ResourceDatabase = None,
         api_version: str = None,
         full_name: str = None,
-        nested_path: Sequence[str] = [],
+        nested_path: List[str] = [],
     ):
         self.message_pb = message_pb
         self.proto_file_name = proto_file_name
