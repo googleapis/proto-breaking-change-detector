@@ -335,7 +335,7 @@ class FieldComparator:
         if not rb_update:
             return False
         resources = (
-            rb_update.get_parent_resource_by_child_type(resource_ref.value.child_type)
+            rb_update.get_parent_resources_by_child_type(resource_ref.value.child_type)
             if self.field_update.child_type
             else rb_update.get_resource_by_type(resource_ref.value.type)
         )
