@@ -294,7 +294,7 @@ class FieldComparatorTest(unittest.TestCase):
             "A resource reference option is added to the field `Test`, but it is not defined anywhere",
         )
 
-    def test_resource_reference_addition_non_breaking(self):
+    def test_resource_reference_addition_non_breaking1(self):
         # The added resource reference is in the database. Non-breaking change.
         # The original field is without resource reference.
         field_without_reference = make_field(name="Test")
@@ -308,6 +308,37 @@ class FieldComparatorTest(unittest.TestCase):
         field_options.Extensions[
             resource_pb2.resource_reference
         ].type = "example.v1/Foo"
+        field_with_reference = make_field(
+            name="Test", options=field_options, resource_database=resource_database
+        )
+        FieldComparator(
+            field_without_reference, field_with_reference, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message, "A resource reference option is added to the field `Test`."
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+
+    def test_resource_reference_addition_non_breaking2(self):
+        # The added resource reference is in the database. Non-breaking change.
+        # The original field is without resource reference.
+        field_without_reference = make_field(name="Test")
+        # Create a database with resource `example.v1/Foo` registered.
+        resource = make_resource_descriptor(
+            resource_type="example.v1/Foo", resource_patterns=["foo/{foo}"]
+        )
+        resource_child = make_resource_descriptor(
+            resource_type="example.v1/Bar",
+            resource_patterns=["foo/{foo}/bar/{bar}"],
+        )
+        resource_database = make_resource_database(resources=[resource, resource_child])
+        # The update field has resource reference of child_type `example.v1/Bar`.
+        field_options = desc.FieldOptions()
+        field_options.Extensions[
+            resource_pb2.resource_reference
+        ].child_type = "example.v1/Bar"
         field_with_reference = make_field(
             name="Test", options=field_options, resource_database=resource_database
         )
