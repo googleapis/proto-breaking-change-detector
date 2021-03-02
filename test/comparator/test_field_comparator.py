@@ -294,7 +294,7 @@ class FieldComparatorTest(unittest.TestCase):
             "A resource reference option is added to the field `Test`, but it is not defined anywhere",
         )
 
-    def test_resource_reference_addition_non_breaking1(self):
+    def test_resource_reference_type_addition_non_breaking(self):
         # The added resource reference is in the database. Non-breaking change.
         # The original field is without resource reference.
         field_without_reference = make_field(name="Test")
@@ -321,7 +321,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
-    def test_resource_reference_addition_non_breaking2(self):
+    def test_resource_reference_child_type_addition_non_breaking(self):
         # The added resource reference is in the database. Non-breaking change.
         # The original field is without resource reference.
         field_without_reference = make_field(name="Test")
