@@ -53,4 +53,4 @@ jobs:
     - name: Check test coverage
       run: |
         # Skip the __init__.py and fail under 100%
-        python -m coverage report --omit=src/__init__.py,test/__init__.py  -m --fail-under=100
+        python -m coverage report  -m --fail-under=100
