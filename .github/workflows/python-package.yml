@@ -27,6 +27,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install black
+        pip install coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         git submodule init
         git submodule update
@@ -49,3 +50,7 @@ jobs:
     - name: Run unit tests for CLI
       run: |
         python -m unittest discover test/cli
+    - name: Check test coverage
+      run: |
+        # Skip the __init__.py and fail under 100%
+        python -m coverage report --omit=src/__init__.py,test/__init__.py  -m --fail-under=100
