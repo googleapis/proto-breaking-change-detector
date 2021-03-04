@@ -52,5 +52,11 @@ jobs:
         python -m unittest discover test/cli
     - name: Check test coverage
       run: |
+        # Collect test run data.
+        coverage run -m unittest discover test/comparator
+        coverage run -m unittest discover test/comparator/wrappers
+        coverage run -m unittest discover test/findings
+        coverage run -m unittest discover test/detector
+        coverage run -m unittest discover test/cli
         # TODO(xiaozhenliu) improve test coverage to 100
         coverage report -m --fail-under=90
