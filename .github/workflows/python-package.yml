@@ -52,6 +52,5 @@ jobs:
         python -m unittest discover test/cli
     - name: Check test coverage
       run: |
-        # Skip the __init__.py and fail under 90
         # TODO(xiaozhenliu) improve test coverage to 100
-        python -m coverage report  -m --fail-under=90
+        python -m coverage report -m --fail-under=90
