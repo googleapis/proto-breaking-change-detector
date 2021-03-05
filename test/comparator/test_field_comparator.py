@@ -274,7 +274,7 @@ class FieldComparatorTest(unittest.TestCase):
             "Proto3 optional state of an existing field `Foo` is changed to required.",
         )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
-    
+
     def test_proto3_required_to_optional(self):
         # Change required field to be proto3 optional. Non-breaking change.
         field_optional = make_field(
@@ -563,7 +563,10 @@ class FieldComparatorTest(unittest.TestCase):
             field_with_reference_foo, field_with_reference_bar, self.finding_container
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "The type of resource reference option of the field `Test` is changed from `example.v1/Foo` to `example.v1/Bar`.")
+        self.assertEqual(
+            finding.message,
+            "The type of resource reference option of the field `Test` is changed from `example.v1/Foo` to `example.v1/Bar`.",
+        )
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_resource_reference_change_type_conversion_non_breaking(self):
