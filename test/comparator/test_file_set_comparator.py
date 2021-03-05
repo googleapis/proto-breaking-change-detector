@@ -36,6 +36,28 @@ class FileSetComparatorTest(unittest.TestCase):
     def setUp(self):
         self.finding_container = FindingContainer()
 
+    def test_service_removal(self):
+        file_set = make_file_set(files=[make_file_pb2(services=[make_service()],)])
+        FileSetComparator(
+            file_set,
+            make_file_set(),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "An existing service `Placeholder` is removed.")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_service_addition(self):
+        file_set = make_file_set(files=[make_file_pb2(services=[make_service()],)])
+        FileSetComparator(
+            make_file_set(),
+            file_set,
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "A new service `Placeholder` is added.")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        
     def test_service_change(self):
         input_message = make_message(name="request", full_name=".example.v1.request")
         output_message = make_message(name="response", full_name=".example.v1.response")
@@ -69,7 +91,7 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
 
-    def test_message_change(self):
+    def test_message_change_breaking(self):
         message_original = make_message(
             fields=(make_field(name="field_one", number=1),)
         )
@@ -87,6 +109,41 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
+
+    def test_message_in_dependency_change_breaking(self):
+        # Message "dep_message" is imported from dep.proto and referenced as a field type.
+        field_type_original = make_message(
+            name="dep_message",
+            proto_file_name="dep.proto",
+        )
+        message_original = make_message(
+            fields=[make_field(type_name=".test.import.dep_message")],
+        )
+        # Message "test_message" is defined in my_proto.proto referenced as a field type.
+        field_type_update = make_message(
+            name="test_message",
+        )
+        message_update = make_message(
+            fields=[make_field(type_name="test_message")]
+        )
+        FileSetComparator(
+            make_file_set(files=[
+                make_file_pb2(name="orignal.proto", messages=[message_original], dependency="test/import/dep.proto", package="example.v1"),
+                make_file_pb2(name="dep.proto", messages=[field_type_original], package="test.import")
+            ]),
+            make_file_set(files=[make_file_pb2(name="update.proto", messages=[field_type_update, message_update], package="example.v1beta1")]),
+            self.finding_container,
+        ).compare()
+        # The breaking change should be in field level, instead of message removal,
+        # since the message is imported from dependency file.
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of an existing field `my_field` is changed from `.test.import.dep_message` to `test_message`.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "update.proto")
 
     def test_enum_change(self):
         enum_original = make_enum(
@@ -114,6 +171,41 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
+
+    def test_enum_in_dependency_change_breaking(self):
+        # Enum "dep_message" is imported from dep.proto and referenced as a field type.
+        field_type_original = make_enum(
+            name="dep_enum",
+            proto_file_name="dep.proto",
+        )
+        message_original = make_message(
+            fields=[make_field(type_name=".test.import.dep_enum")],
+        )
+        # Message "test_enum" is defined in update.proto referenced as a field type.
+        field_type_update = make_enum(
+            name="test_enum",
+        )
+        message_update = make_message(
+            fields=[make_field(type_name="test_enum")]
+        )
+        FileSetComparator(
+            make_file_set(files=[
+                make_file_pb2(name="orignal.proto", messages=[message_original], dependency="test/import/dep.proto", package="example.v1"),
+                make_file_pb2(name="dep.proto", enums=[field_type_original], package="test.import")
+            ]),
+            make_file_set(files=[make_file_pb2(name="update.proto", messages=[message_update], enums=[field_type_update], package="example.v1beta1")]),
+            self.finding_container,
+        ).compare()
+        # The breaking change should be in field level, instead of message removal,
+        # since the message is imported from dependency file.
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "Type of an existing field `my_field` is changed from `.test.import.dep_enum` to `test_enum`.",
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.location.proto_file_name, "update.proto")
 
     def test_resources_existing_pattern_change(self):
         options_original = make_file_options_resource_definition(

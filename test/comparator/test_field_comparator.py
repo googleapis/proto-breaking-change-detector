@@ -257,7 +257,8 @@ class FieldComparatorTest(unittest.TestCase):
         finding = findings["An existing field `Foo` is moved into One-of."]
         self.assertEqual(finding.category.name, "FIELD_ONEOF_MOVE_IN")
 
-    def test_proto3_optional_change(self):
+    def test_proto3_optional_to_required(self):
+        # Change an proto3 optional field to required. Breaking change.
         field_optional = make_field(
             name="Foo", oneof_index=0, oneof_name="oneof_field", proto3_optional=True
         )
@@ -271,6 +272,24 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(
             finding.message,
             "Proto3 optional state of an existing field `Foo` is changed to required.",
+        )
+        self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
+    
+    def test_proto3_required_to_optional(self):
+        # Change required field to be proto3 optional. Non-breaking change.
+        field_optional = make_field(
+            name="Foo", oneof_index=0, oneof_name="oneof_field", proto3_optional=True
+        )
+        field_not_optional = make_field(
+            name="Foo", oneof_index=0, oneof_name="oneof_field"
+        )
+        FieldComparator(
+            field_not_optional, field_optional, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(
+            finding.message,
+            "An existing field `Foo` is changed to proto3 optional.",
         )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 
@@ -360,7 +379,7 @@ class FieldComparatorTest(unittest.TestCase):
         )
         field_with_reference = make_field(name="Test", options=field_options)
         # The update field has no resource reference, and no resource reference is
-        # defined in the messasge.
+        # defined in the message.
         field_without_reference = make_field(name="Test")
         FieldComparator(
             field_with_reference, field_without_reference, self.finding_container
@@ -503,7 +522,7 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MINOR")
 
-    def test_resource_reference_change_same_type(self):
+    def test_resource_reference_change_same_type_non_breaking(self):
         # The field has the identical resource reference.
         field_options = make_field_annotation_resource_reference(
             resource_type="example.v1/Foo", is_child_type=False
@@ -516,7 +535,7 @@ class FieldComparatorTest(unittest.TestCase):
         # No breaking change should be detected.
         self.assertFalse(finding)
 
-    def test_resource_reference_change_same_child_type(self):
+    def test_resource_reference_change_same_child_type_non_breaking(self):
         # The field has the identical resource reference.
         field_options = make_field_annotation_resource_reference(
             resource_type="example.v1/Foo", is_child_type=True
@@ -528,6 +547,24 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()
         # No breaking change should be detected.
         self.assertFalse(finding)
+
+    def test_resource_reference_change_same_type_breaking(self):
+        # Both fields have resource reference identified by type.
+        # But the type value is different. Breaking change.
+        field_options_foo = make_field_annotation_resource_reference(
+            resource_type="example.v1/Foo", is_child_type=False
+        )
+        field_options_bar = make_field_annotation_resource_reference(
+            resource_type="example.v1/Bar", is_child_type=False
+        )
+        field_with_reference_foo = make_field(name="Test", options=field_options_foo)
+        field_with_reference_bar = make_field(name="Test", options=field_options_bar)
+        FieldComparator(
+            field_with_reference_foo, field_with_reference_bar, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.message, "The type of resource reference option of the field `Test` is changed from `example.v1/Foo` to `example.v1/Bar`.")
+        self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_resource_reference_change_type_conversion_non_breaking(self):
         child_resource = make_resource_descriptor(
