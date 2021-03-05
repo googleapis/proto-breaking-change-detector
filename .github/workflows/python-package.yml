@@ -55,6 +55,6 @@ jobs:
         # TODO(xiaozhenliu) improve test coverage to 100
         coverage run -m unittest discover test/comparator && coverage report -m --include=src/comparator/** --fail-under=99
         coverage run -m unittest discover test/comparator/wrappers && coverage report -m --include=src/comparator/wrappers.py --fail-under=96
-        coverage run -m unittest discover test/findings && coverage report -m --include=src/findings/** --fail-under=100
+        coverage run -m unittest discover test/findings && coverage report -m --include=src/findings/** --fail-under=99
         coverage run -m unittest discover test/cli && coverage report -m --include=src/cli/** --fail-under=96
         coverage run -m unittest discover test/detector && coverage report -m --include=src/detector/** --fail-under=95
