@@ -955,6 +955,7 @@ class FileSet:
                 return
         if register_type in self.global_messages_map:
             self.messages_map[register_type] = self.global_messages_map[register_type]
+
         elif register_type in self.global_enums_map:
             self.enums_map[register_type] = self.global_enums_map[register_type]
 
@@ -994,6 +995,7 @@ class FileSet:
                 )
                 for i, message in enumerate(fd.message_type)
             ]
+            names = [m.name for m in message_stack]
             # fmt: on
             # Iterate for nested messages and enums.
             while message_stack:

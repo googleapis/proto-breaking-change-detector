@@ -41,7 +41,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
-    def test_nested_field_change(self):
+    def test_nested_field_type_change(self):
         field_int = make_field(proto_type="TYPE_INT32")
         field_string = make_field(proto_type="TYPE_STRING")
         message1 = make_message(fields=[field_int])
@@ -52,6 +52,61 @@ class DescriptorComparatorTest(unittest.TestCase):
             "Type of an existing field `my_field` is changed from `int32` to `string`."
         ]
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_nested_field_addition(self):
+        field_int = make_field(proto_type="TYPE_INT32")
+        message_update = make_message(fields=[field_int])
+        DescriptorComparator(
+            make_message(), message_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "FIELD_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_nested_message_removal(self):
+        DescriptorComparator(
+            make_message(nested_messages=[make_message(name="nested_message")]),
+            make_message(),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_nested_message_addition(self):
+        DescriptorComparator(
+            make_message(),
+            make_message(nested_messages=[make_message(name="nested_message")]),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_nested_enum_addition(self):
+        DescriptorComparator(
+            make_message(),
+            make_message(nested_enums=[make_enum(name="nested_message")]),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "ENUM_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
+    def test_nested_enum_removal(self):
+        DescriptorComparator(
+            make_message(nested_enums=[make_enum(name="nested_message")]),
+            make_message(),
+            self.finding_container,
+        ).compare()
+        finding = self.finding_container.getAllFindings()[0]
+        self.assertEqual(finding.category.name, "ENUM_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 

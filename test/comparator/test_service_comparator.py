@@ -323,6 +323,56 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
+    def test_lro_annotation_addition(self):
+        lro_output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
+        method_lro = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+            lro_response_type="response_type",
+            lro_metadata_type="FooMetadata",
+        )
+        method_not_lro = make_method(
+            name="Method",
+        )
+        ServiceComparator(
+            make_service(methods=(method_not_lro,)),
+            make_service(methods=(method_lro,)),
+            self.finding_container,
+        ).compare()
+        finding = {f.message: f for f in self.finding_container.getAllFindings()}
+        self.assertTrue(
+            finding["A LRO operation_info annotation is added to method `Method`."]
+        )
+
+    def test_lro_annotation_removal(self):
+        lro_output_msg = make_message(
+            name=".google.longrunning.Operation",
+            full_name=".google.longrunning.Operation",
+        )
+        method_lro = make_method(
+            name="Method",
+            output_message=lro_output_msg,
+            lro_response_type="response_type",
+            lro_metadata_type="FooMetadata",
+        )
+        method_not_lro = make_method(
+            name="Method",
+        )
+        ServiceComparator(
+            make_service(methods=(method_lro,)),
+            make_service(methods=(method_not_lro,)),
+            self.finding_container,
+        ).compare()
+        finding = {f.message: f for f in self.finding_container.getAllFindings()}
+        self.assertTrue(
+            finding[
+                "An existing LRO operation_info annotation is removed from method `Method`."
+            ]
+        )
+
     def test_lro_annotation_error(self):
         lro_output_msg = make_message(
             name=".google.longrunning.Operation",

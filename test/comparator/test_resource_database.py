@@ -88,16 +88,26 @@ class ResourceDatabaseTest(unittest.TestCase):
         )
         self.resource_database.register_resource(child_resource)
         self.resource_database.register_resource(parent_resource)
+        # Check None child type, should return [].
+        parent_resources = self.resource_database.get_parent_resources_by_child_type(
+            None
+        )
+        self.assertFalse(parent_resources)
         # `a/{a}/b` is the parent pattern of `a/{a}/b/{b}`
         parent_resources = self.resource_database.get_parent_resources_by_child_type(
             "child"
         )
         self.assertIn(parent_resource, parent_resources)
         # Reverse query would not have any result.
-        self.assertNotIn(
-            child_resource,
-            self.resource_database.get_parent_resources_by_child_type("parent"),
+        parent_resources = self.resource_database.get_parent_resources_by_child_type(
+            "parent"
         )
+        self.assertFalse(parent_resources)
+        # Search parent resource for an non-existing resource, should return [].
+        parent_resources = self.resource_database.get_parent_resources_by_child_type(
+            "non-existing"
+        )
+        self.assertFalse(parent_resources)
 
 
 if __name__ == "__main__":

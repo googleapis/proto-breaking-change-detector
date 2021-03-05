@@ -197,6 +197,7 @@ class WrappersTest(unittest.TestCase):
         error_field_oneof = foo_request_message.fields[2]
         self.assertEqual(content_field_oneof.oneof_name, "response")
         self.assertEqual(error_field_oneof.oneof_name, "response")
+        self.assertFalse(content_field_oneof.map_entry_type)
         self.assertEqual(content_field_oneof.source_code_line, 49)
         self.assertEqual(error_field_oneof.source_code_line, 50)
         foo_response_message = self._FILE_SET.messages_map[
