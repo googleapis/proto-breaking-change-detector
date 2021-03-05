@@ -60,7 +60,7 @@ class FindingContainerTest(unittest.TestCase):
         self.finding_container.addFinding(
             category=FindingCategory.METHOD_SIGNATURE_CHANGE,
             proto_file_name="my_other_proto.proto",
-            source_code_line=16,
+            source_code_line=-1,
             message="An existing method_signature is changed from 'sig1' to 'sig2'.",
             change_type=ChangeType.MAJOR,
         )
@@ -68,7 +68,7 @@ class FindingContainerTest(unittest.TestCase):
             self.finding_container.toHumanReadableMessage(),
             "my_proto.proto L5: An existing file-level resource definition has changed.\n"
             + "my_proto.proto L12: An rpc method bar is removed.\n"
-            + "my_other_proto.proto L16: An existing method_signature is changed from 'sig1' to 'sig2'.\n",
+            + "my_other_proto.proto: An existing method_signature is changed from 'sig1' to 'sig2'.\n",
         )
 
 
