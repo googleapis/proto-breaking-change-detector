@@ -108,4 +108,4 @@ def detect(
 
 
 if __name__ == "__main__":
-    detect()
+    detect()  # pragma: no cover
