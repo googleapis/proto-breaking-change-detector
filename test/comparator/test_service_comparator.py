@@ -343,7 +343,9 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         finding = {f.message: f for f in self.finding_container.getAllFindings()}
-        self.assertTrue(finding["A LRO operation_info annotation is added to method `Method`."])
+        self.assertTrue(
+            finding["A LRO operation_info annotation is added to method `Method`."]
+        )
 
     def test_lro_annotation_removal(self):
         lro_output_msg = make_message(
@@ -365,7 +367,11 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         finding = {f.message: f for f in self.finding_container.getAllFindings()}
-        self.assertTrue(finding["An existing LRO operation_info annotation is removed from method `Method`."])
+        self.assertTrue(
+            finding[
+                "An existing LRO operation_info annotation is removed from method `Method`."
+            ]
+        )
 
     def test_lro_annotation_error(self):
         lro_output_msg = make_message(

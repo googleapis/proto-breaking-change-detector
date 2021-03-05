@@ -37,18 +37,32 @@ class FileSetComparatorTest(unittest.TestCase):
         self.finding_container = FindingContainer()
 
     def test_service_removal(self):
-        file_set = make_file_set(files=[make_file_pb2(services=[make_service()],)])
+        file_set = make_file_set(
+            files=[
+                make_file_pb2(
+                    services=[make_service()],
+                )
+            ]
+        )
         FileSetComparator(
             file_set,
             make_file_set(),
             self.finding_container,
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "An existing service `Placeholder` is removed.")
+        self.assertEqual(
+            finding.message, "An existing service `Placeholder` is removed."
+        )
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_service_addition(self):
-        file_set = make_file_set(files=[make_file_pb2(services=[make_service()],)])
+        file_set = make_file_set(
+            files=[
+                make_file_pb2(
+                    services=[make_service()],
+                )
+            ]
+        )
         FileSetComparator(
             make_file_set(),
             file_set,
@@ -57,7 +71,7 @@ class FileSetComparatorTest(unittest.TestCase):
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.message, "A new service `Placeholder` is added.")
         self.assertEqual(finding.change_type.name, "MINOR")
-        
+
     def test_service_change(self):
         input_message = make_message(name="request", full_name=".example.v1.request")
         output_message = make_message(name="response", full_name=".example.v1.response")
@@ -123,15 +137,32 @@ class FileSetComparatorTest(unittest.TestCase):
         field_type_update = make_message(
             name="test_message",
         )
-        message_update = make_message(
-            fields=[make_field(type_name="test_message")]
-        )
+        message_update = make_message(fields=[make_field(type_name="test_message")])
         FileSetComparator(
-            make_file_set(files=[
-                make_file_pb2(name="orignal.proto", messages=[message_original], dependency="test/import/dep.proto", package="example.v1"),
-                make_file_pb2(name="dep.proto", messages=[field_type_original], package="test.import")
-            ]),
-            make_file_set(files=[make_file_pb2(name="update.proto", messages=[field_type_update, message_update], package="example.v1beta1")]),
+            make_file_set(
+                files=[
+                    make_file_pb2(
+                        name="orignal.proto",
+                        messages=[message_original],
+                        dependency="test/import/dep.proto",
+                        package="example.v1",
+                    ),
+                    make_file_pb2(
+                        name="dep.proto",
+                        messages=[field_type_original],
+                        package="test.import",
+                    ),
+                ]
+            ),
+            make_file_set(
+                files=[
+                    make_file_pb2(
+                        name="update.proto",
+                        messages=[field_type_update, message_update],
+                        package="example.v1beta1",
+                    )
+                ]
+            ),
             self.finding_container,
         ).compare()
         # The breaking change should be in field level, instead of message removal,
@@ -185,15 +216,33 @@ class FileSetComparatorTest(unittest.TestCase):
         field_type_update = make_enum(
             name="test_enum",
         )
-        message_update = make_message(
-            fields=[make_field(type_name="test_enum")]
-        )
+        message_update = make_message(fields=[make_field(type_name="test_enum")])
         FileSetComparator(
-            make_file_set(files=[
-                make_file_pb2(name="orignal.proto", messages=[message_original], dependency="test/import/dep.proto", package="example.v1"),
-                make_file_pb2(name="dep.proto", enums=[field_type_original], package="test.import")
-            ]),
-            make_file_set(files=[make_file_pb2(name="update.proto", messages=[message_update], enums=[field_type_update], package="example.v1beta1")]),
+            make_file_set(
+                files=[
+                    make_file_pb2(
+                        name="orignal.proto",
+                        messages=[message_original],
+                        dependency="test/import/dep.proto",
+                        package="example.v1",
+                    ),
+                    make_file_pb2(
+                        name="dep.proto",
+                        enums=[field_type_original],
+                        package="test.import",
+                    ),
+                ]
+            ),
+            make_file_set(
+                files=[
+                    make_file_pb2(
+                        name="update.proto",
+                        messages=[message_update],
+                        enums=[field_type_update],
+                        package="example.v1beta1",
+                    )
+                ]
+            ),
             self.finding_container,
         ).compare()
         # The breaking change should be in field level, instead of message removal,
