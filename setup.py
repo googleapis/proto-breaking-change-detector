@@ -21,8 +21,8 @@ setup(
     install_requires=[
         "Click",
         "protobuf >= 3.12.0",
-        "google-api-core >= 1.14.0",
-        "googleapis-common-protos >= 1.5.0",
+        "google-api-core >= 1.17.0",
+        "googleapis-common-protos >= 1.6.0",
     ],
     entry_points="""
         [console_scripts]
