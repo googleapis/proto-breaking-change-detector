@@ -89,7 +89,7 @@ class Loader:
             logging.info(bool(process.stdout))
             if process.returncode != 0:
                 raise _ProtocInvokerException(
-                    f"Protoc command to load the descriptor set fails. {union_command}"
+                    f"Protoc command to load the descriptor set fails. {union_command}, error: {process.stderr}"
                 )
         except (CalledProcessError, FileNotFoundError) as e:
             logging.info(f"Call process error: {e}")

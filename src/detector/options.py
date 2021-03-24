@@ -63,22 +63,22 @@ class Options:
     def use_proto_dirs(self) -> bool:
         # User pass in the directorirs of proto definition files as input.
         if (
-            not self.original_api_definition_dirs
-            or not self.update_api_definition_dirs
-            or not self.original_proto_files
-            or not self.update_proto_files
+            self.original_api_definition_dirs
+            and self.update_api_definition_dirs
+            and self.original_proto_files
+            and self.update_proto_files
         ):
-            return False
-        return True
+            return True
+        return False
 
     def use_descriptor_set(self) -> bool:
         # User pass in the path of descriptor set files as input.
         if (
-            not self.original_descriptor_set_file_path
-            or not self.update_descriptor_set_file_path
+            self.original_descriptor_set_file_path
+            and self.update_descriptor_set_file_path
         ):
-            return False
-        return True
+            return True
+        return False
 
     def _valid_arguments(self) -> bool:
         # Either directories of the proto definition files or path of

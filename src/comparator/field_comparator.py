@@ -242,7 +242,7 @@ class FieldComparator:
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
                     message=f"A resource reference option is added to the field `{field_original.name}`, but it is not defined anywhere",
-                    change_type=ChangeType.MAJOR,
+                    change_type=ChangeType.MINOR,
                     extra_info=self.field_update.nested_path
                     + ["(google.api.resource_reference)"],
                 )

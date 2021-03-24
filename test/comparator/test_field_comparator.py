@@ -306,7 +306,7 @@ class FieldComparatorTest(unittest.TestCase):
         FieldComparator(
             field_without_reference, field_with_reference, self.finding_container
         ).compare()
-        finding = self.finding_container.getActionableFindings()[0]
+        finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
         self.assertEqual(
             finding.message,
