@@ -5,7 +5,7 @@ package tutorial.v1beta1;
 message Person {
   string name = 1;
   string id = 2;
-  string email_address = 3;
+  optional string email_address = 3;
 
   enum PhoneType {
     MOBILE = 0;
