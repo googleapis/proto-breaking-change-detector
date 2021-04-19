@@ -414,7 +414,7 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "PACKAGING_OPTION_REMOVAL")
         self.assertEqual(
             finding.message,
-            "An exisiting packaging option `Foo` for `java_outer_classname` is removed.",
+            "An existing packaging option `Foo` for `java_outer_classname` is removed.",
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -448,13 +448,13 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
         java_classname_option_change = findings_map[
-            "An exisiting packaging option `ServiceProto` for `java_outer_classname` is removed."
+            "An existing packaging option `ServiceProto` for `java_outer_classname` is removed."
         ]
         self.assertEqual(
             java_classname_option_change.category.name, "PACKAGING_OPTION_REMOVAL"
         )
         php_namespace_option_removal = findings_map[
-            "An exisiting packaging option `Google\\Cloud\\Service\\V1` for `php_namespace` is removed."
+            "An existing packaging option `Google\\Cloud\\Service\\V1` for `php_namespace` is removed."
         ]
         self.assertEqual(
             php_namespace_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"

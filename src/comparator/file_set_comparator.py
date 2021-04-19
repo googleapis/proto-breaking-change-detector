@@ -68,7 +68,7 @@ class FileSetComparator:
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=classname_option.proto_file_name,
                         source_code_line=classname_option.source_code_line,
-                        message=f"An exisiting packaging option `{classname}` for `{option}` is removed.",
+                        message=f"An existing packaging option `{classname}` for `{option}` is removed.",
                         change_type=ChangeType.MAJOR,
                     )
             # Compare the option of language namespace. Minor version updates in consideration.
@@ -94,7 +94,7 @@ class FileSetComparator:
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
-                        message=f"An exisiting packaging option `{original_option_value}` for `{option}` is removed.",
+                        message=f"An existing packaging option `{original_option_value}` for `{option}` is removed.",
                         change_type=ChangeType.MAJOR,
                     )
                 for namespace in set(transformed_option_value_update.keys()) - set(
