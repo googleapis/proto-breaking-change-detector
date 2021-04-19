@@ -30,7 +30,7 @@ class Loader:
     # This also works as the **temporary** solution of loading FileDescriptorSet
     # from API definition files that ussers pass in from the command line.
     _CURRENT_DIR = os.getcwd()
-    PROTOC_BINARY = os.path.join(_CURRENT_DIR, "test/tools/protoc")
+    PROTOC_BINARY = "python -m grpc.tools.protoc"
     PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
 
     def __init__(
