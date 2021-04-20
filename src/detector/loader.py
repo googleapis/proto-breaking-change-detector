@@ -47,7 +47,7 @@ class Loader:
         self.descriptor_set = descriptor_set
         self.proto_files = proto_files
         self.include_source_code = include_source_code
-        self.protoc_binary = protoc_binary
+        self.protoc_binary = protoc_binary or "grpc_tools.protoc"
         self.local_protobuf = local_protobuf
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
@@ -60,9 +60,7 @@ class Loader:
                 desc_set.ParseFromString(f.read())
             return desc_set
         # Construct the protoc command with proper argument prefix.
-        protoc_command = (
-            [self.protoc_binary] if self.protoc_binary else ["grpc_tools.protoc"]
-        )
+        protoc_command = [self.protoc_binary]
         for directory in self.proto_definition_dirs:
             if self.local_protobuf:
                 protoc_command.append(f"--proto_path={directory}")
@@ -81,7 +79,7 @@ class Loader:
 
         # Run protoc command to get pb file that contains serialized data of
         # the proto files.
-        if not self.protoc_binary:
+        if self.protoc_binary == "grpc_tools.protoc":
             fd, path = tempfile.mkstemp()
             protoc_command.append("--descriptor_set_out=" + path)
             # Use grpcio-tools.protoc to compile proto files
