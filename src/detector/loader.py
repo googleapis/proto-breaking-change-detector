@@ -18,8 +18,10 @@ import os
 import subprocess
 from subprocess import CalledProcessError, PIPE
 from typing import Sequence
+import tempfile
 
 from google.protobuf import descriptor_pb2 as desc
+from grpc_tools import protoc
 
 
 class Loader:
@@ -30,7 +32,6 @@ class Loader:
     # This also works as the **temporary** solution of loading FileDescriptorSet
     # from API definition files that ussers pass in from the command line.
     _CURRENT_DIR = os.getcwd()
-    PROTOC_BINARY = "python -m grpc.tools.protoc"
     PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
 
     def __init__(
@@ -46,7 +47,7 @@ class Loader:
         self.descriptor_set = descriptor_set
         self.proto_files = proto_files
         self.include_source_code = include_source_code
-        self.protoc_binary = protoc_binary or self.PROTOC_BINARY
+        self.protoc_binary = protoc_binary
         self.local_protobuf = local_protobuf
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
@@ -59,7 +60,9 @@ class Loader:
                 desc_set.ParseFromString(f.read())
             return desc_set
         # Construct the protoc command with proper argument prefix.
-        protoc_command = [self.protoc_binary]
+        protoc_command = (
+            [self.protoc_binary] if self.protoc_binary else ["grpc_tools.protoc"]
+        )
         for directory in self.proto_definition_dirs:
             if self.local_protobuf:
                 protoc_command.append(f"--proto_path={directory}")
@@ -67,7 +70,6 @@ class Loader:
                 protoc_command.append(f"--proto_path={local_dir}/{directory}")
         if self.local_protobuf:
             protoc_command.append(f"--proto_path={self.PROTOBUF_PROTOS_DIR}")
-        protoc_command.append("-o/dev/stdout")
         if self.include_source_code:
             protoc_command.append("--include_source_info")
         # Include the imported dependencies.
@@ -79,7 +81,21 @@ class Loader:
 
         # Run protoc command to get pb file that contains serialized data of
         # the proto files.
+        if not self.protoc_binary:
+            fd, path = tempfile.mkstemp()
+            protoc_command.append("--descriptor_set_out=" + path)
+            # Use grpcio-tools.protoc to compile proto files
+            if protoc.main(protoc_command) != 0:
+                raise _ProtocInvokerException(
+                    f"Protoc command to load the descriptor set fails. {protoc_command}"
+                )
+            else:
+                # Create FileDescriptorSet from the serialized data.
+                with open(fd, "rb") as f:
+                    desc_set.ParseFromString(f.read())
+                return desc_set
         try:
+            protoc_command.append("-o/dev/stdout")
             union_command = " ".join(protoc_command)
             logging.info(f"Run protoc command: {union_command}")
             process = subprocess.run(
