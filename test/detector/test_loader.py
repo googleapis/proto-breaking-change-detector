@@ -14,7 +14,7 @@
 
 import unittest
 import os
-from src.detector.loader import Loader
+from src.detector.loader import Loader, _ProtocInvokerException
 from google.protobuf import descriptor_pb2
 
 
@@ -105,6 +105,20 @@ class LoaderTest(unittest.TestCase):
         self.assertIsInstance(
             loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
         )
+
+    def test_loader_invalid_proto_compiler(self):
+        loader = Loader(
+            proto_definition_dirs=["dira", "dirb", "dirc"],
+            proto_files=["a", "b", "c"],
+            descriptor_set=None,
+            protoc_binary="//invalid/proto/compiler",
+        )
+        self.assertTrue(loader)
+        self.assertEqual(loader.protoc_binary, "//invalid/proto/compiler")
+        with self.assertRaisesRegex(
+            _ProtocInvokerException, "Protoc command to load the descriptor set fails."
+        ):
+            loader.get_descriptor_set()
 
 
 if __name__ == "__main__":
