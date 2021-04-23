@@ -33,6 +33,7 @@ class Loader:
     # from API definition files that ussers pass in from the command line.
     _CURRENT_DIR = os.getcwd()
     PROTOBUF_PROTOS_DIR = os.path.join(_CURRENT_DIR, "protobuf/src")
+    GRPC_TOOLS_PROTOC = "grpc_tools.protoc"
 
     def __init__(
         self,
@@ -47,7 +48,7 @@ class Loader:
         self.descriptor_set = descriptor_set
         self.proto_files = proto_files
         self.include_source_code = include_source_code
-        self.protoc_binary = protoc_binary or "grpc_tools.protoc"
+        self.protoc_binary = protoc_binary or self.GRPC_TOOLS_PROTOC
         self.local_protobuf = local_protobuf
 
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
@@ -79,7 +80,7 @@ class Loader:
 
         # Run protoc command to get pb file that contains serialized data of
         # the proto files.
-        if self.protoc_binary == "grpc_tools.protoc":
+        if self.protoc_binary == self.GRPC_TOOLS_PROTOC:
             fd, path = tempfile.mkstemp()
             protoc_command.append("--descriptor_set_out=" + path)
             # Use grpcio-tools.protoc to compile proto files
