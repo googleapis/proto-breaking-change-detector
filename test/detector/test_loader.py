@@ -14,7 +14,7 @@
 
 import unittest
 import os
-from src.detector.loader import Loader
+from src.detector.loader import Loader, _ProtocInvokerException
 from google.protobuf import descriptor_pb2
 
 
@@ -22,10 +22,23 @@ class LoaderTest(unittest.TestCase):
     _CURRENT_DIR = os.getcwd()
     COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
 
-    def test_loader_args(self):
+    def test_loader_args_default(self):
         loader = Loader(
             proto_definition_dirs=None,
             proto_files=None,
+            descriptor_set="//path/to/descriptor/set",
+        )
+        self.assertTrue(loader.include_source_code)
+        self.assertTrue(loader.local_protobuf)
+        self.assertEqual(loader.protoc_binary, "grpc_tools.protoc")
+        self.assertEqual(loader.descriptor_set, "//path/to/descriptor/set")
+        self.assertFalse(loader.proto_definition_dirs)
+        self.assertFalse(loader.proto_files)
+
+    def test_loader_args_overwrite(self):
+        loader = Loader(
+            proto_definition_dirs=["dira", "dirb", "dirc"],
+            proto_files=["a", "b", "c"],
             descriptor_set="//path/to/descriptor/set",
             include_source_code=False,
             protoc_binary="//path/to/protoc/binary",
@@ -34,6 +47,8 @@ class LoaderTest(unittest.TestCase):
         self.assertFalse(loader.include_source_code)
         self.assertFalse(loader.local_protobuf)
         self.assertEqual(loader.protoc_binary, "//path/to/protoc/binary")
+        self.assertEqual(loader.proto_definition_dirs, ["dira", "dirb", "dirc"])
+        self.assertEqual(loader.proto_files, ["a", "b", "c"])
         self.assertEqual(loader.descriptor_set, "//path/to/descriptor/set")
 
     def test_loader_proto_dirs(self):
@@ -90,6 +105,20 @@ class LoaderTest(unittest.TestCase):
         self.assertIsInstance(
             loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
         )
+
+    def test_loader_invalid_proto_compiler(self):
+        loader = Loader(
+            proto_definition_dirs=["dira", "dirb", "dirc"],
+            proto_files=["a", "b", "c"],
+            descriptor_set=None,
+            protoc_binary="//invalid/proto/compiler",
+        )
+        self.assertTrue(loader)
+        self.assertEqual(loader.protoc_binary, "//invalid/proto/compiler")
+        with self.assertRaisesRegex(
+            _ProtocInvokerException, "Protoc command to load the descriptor set fails."
+        ):
+            loader.get_descriptor_set()
 
 
 if __name__ == "__main__":
