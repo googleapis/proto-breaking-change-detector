@@ -34,7 +34,7 @@ jobs:
     - name: Lint with Black
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        python -m black src test setup.py --check
+        python -m black . --check
     - name: Run unit tests for comparators
       run: |
         python -m unittest discover test/comparator
