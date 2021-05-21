@@ -658,11 +658,7 @@ class Method:
             return None
         op = self.method_pb.options.Extensions[operations_pb2.operation_info]
         if not op.response_type or not op.metadata_type:
-            raise TypeError(
-                f"rpc {self.name} returns a google.longrunning."
-                "Operation, but is missing a response type or "
-                "metadata type.",
-            )
+            return None
         lro_annotation = {
             "response_type": op.response_type,
             "metadata_type": op.metadata_type,

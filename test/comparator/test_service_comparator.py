@@ -373,7 +373,7 @@ class ServiceComparatorTest(unittest.TestCase):
             ]
         )
 
-    def test_lro_annotation_error(self):
+    def test_lro_annotation_invalid(self):
         lro_output_msg = make_message(
             name=".google.longrunning.Operation",
             full_name=".google.longrunning.Operation",
@@ -388,14 +388,21 @@ class ServiceComparatorTest(unittest.TestCase):
             name="Method",
             output_message=lro_output_msg,
         )
-        # TypeError throws since the method returns a google.longrunning.Operation
-        # but is missing a response type or metadata type.
-        with self.assertRaises(TypeError):
-            ServiceComparator(
-                make_service(methods=(method_lro,)),
-                make_service(methods=(method_not_lro,)),
-                self.finding_container,
-            ).compare()
+        # `method_not_lro` returns `google.longrunning.Operation`
+        # but is missing a response type or metadata type, the definition
+        # is invalid. We still compare the two methods and take it as
+        # lro annotation removal.
+        ServiceComparator(
+            make_service(methods=(method_lro,)),
+            make_service(methods=(method_not_lro,)),
+            self.finding_container,
+        ).compare()
+        finding = {f.message: f for f in self.finding_container.getAllFindings()}
+        self.assertTrue(
+            finding[
+                "An existing LRO operation_info annotation is removed from method `Method`."
+            ]
+        )
 
     def test_lro_annotation_response_change(self):
         lro_output_msg = make_message(
