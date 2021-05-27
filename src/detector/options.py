@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+from typing import Optional
 
 
 class Options:
@@ -42,7 +43,7 @@ class Options:
         original_descriptor_set_file_path: str,
         update_descriptor_set_file_path: str,
         human_readable_message: bool = False,
-        output_json_path: str = None,
+        output_json_path: Optional[str] = None,
     ):
         self.original_api_definition_dirs = self._get_arg_arr(
             original_api_definition_dirs

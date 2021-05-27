@@ -153,11 +153,11 @@ class Field:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
-        resource_database: ResourceDatabase = None,
-        message_resource: WithLocation = None,
-        api_version: str = None,
+        resource_database: Optional[ResourceDatabase] = None,
+        message_resource: Optional[WithLocation] = None,
+        api_version: Optional[str] = None,
         map_entry=None,
-        oneof_name: str = None,
+        oneof_name: Optional[str] = None,
         nested_path: List[str] = [],
     ):
 
@@ -359,9 +359,9 @@ class Message:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int, ...],
-        resource_database: ResourceDatabase = None,
-        api_version: str = None,
-        full_name: str = None,
+        resource_database: Optional[ResourceDatabase] = None,
+        api_version: Optional[str] = None,
+        full_name: Optional[str] = None,
         nested_path: List[str] = [],
     ):
         self.message_pb = message_pb
@@ -748,7 +748,7 @@ class Service:
             Tuple[int, ...], descriptor_pb2.SourceCodeInfo.Location
         ],
         path: Tuple[int],
-        api_version: str = None,
+        api_version: Optional[str] = None,
     ):
         self.service_pb = service_pb
         self.messages_map = messages_map

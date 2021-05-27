@@ -14,6 +14,7 @@
 
 import json
 import sys
+from typing import Optional
 from google.protobuf import descriptor_pb2 as desc
 from src.detector.options import Options
 from src.comparator.file_set_comparator import FileSetComparator
@@ -28,7 +29,7 @@ class Detector:
         self,
         descriptor_set_original: desc.FileDescriptorSet,
         descriptor_set_update: desc.FileDescriptorSet,
-        opts: Options = None,
+        opts: Optional[Options] = None,
     ):
         self.descriptor_set_original = descriptor_set_original
         self.descriptor_set_update = descriptor_set_update

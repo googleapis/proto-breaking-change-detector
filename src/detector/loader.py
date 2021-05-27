@@ -17,7 +17,7 @@ import shutil
 import os
 import subprocess
 from subprocess import CalledProcessError, PIPE
-from typing import Sequence
+from typing import Optional, Sequence
 import tempfile
 
 from google.protobuf import descriptor_pb2 as desc
@@ -41,7 +41,7 @@ class Loader:
         proto_files: Sequence[str],
         descriptor_set: str,
         include_source_code: bool = True,
-        protoc_binary: str = None,
+        protoc_binary: Optional[str] = None,
         local_protobuf: bool = True,
     ):
         self.proto_definition_dirs = proto_definition_dirs
