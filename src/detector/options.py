@@ -107,8 +107,6 @@ class Options:
         # Raise error if the specified path is not valid.
         if not path:
             return os.path.join(os.getcwd(), "detected_breaking_changes.json")
-        elif not os.path.isfile(path):
-            raise TypeError(f"The output_json_path {path} is not existing.")
         return path
 
     def _check_valid_dirs(self, dirs) -> bool:

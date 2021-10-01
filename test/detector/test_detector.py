@@ -72,13 +72,16 @@ class DectetorTest(unittest.TestCase):
                     human_readable_message=True,
                 )
         with mock.patch("sys.stdout", new=StringIO()) as fakeOutput:
-            Detector(file_set_original, file_set_update, opts).detect_breaking_changes()
+            result = Detector(
+                file_set_original, file_set_update, opts
+            ).detect_breaking_changes()
             self.assertEqual(
                 fakeOutput.getvalue(),
                 "my_proto.proto L2: An existing rpc method `DoThing` is removed.\n"
                 + "my_proto.proto L6: An existing message `input` is removed.\n"
                 + "my_proto.proto L12: An existing message `output` is removed.\n",
             )
+            self.assertEqual(len(result), 3)
 
     def test_detector_without_opts(self):
         # Mock original and updated FileDescriptorSet.
