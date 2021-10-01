@@ -111,5 +111,4 @@ def detect(
 
 
 if __name__ == "__main__":
-    exit_code = detect()  # pragma: no cover
-    exit(exit_code)
+    exit(detect())  # pragma: no cover
