@@ -10,6 +10,8 @@
 # limitations under the License.
 import unittest
 import os
+import tempfile
+import json
 from click.testing import CliRunner
 from src.cli.detect import detect
 from unittest.mock import patch
@@ -62,6 +64,29 @@ class CliDetectTest(unittest.TestCase):
                 result.output,
                 "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
             )
+
+    def test_single_directory_enum_json(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        tmpfile = tempfile.NamedTemporaryFile(delete=False)
+        tmpfile.close()
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--update_proto_files=test/testdata/protos/enum/v1beta1/enum_v1beta1.proto",
+                    "--output_json_path=" + tmpfile.name,
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            with open(tmpfile.name, "r") as json_file:
+                json_obj = json.load(json_file)
+                self.assertEqual(len(json_obj), 2)
+            os.unlink(tmpfile.name)
 
     def test_single_directory_message(self):
         with patch("sys.stdout", new=StringIO()):
