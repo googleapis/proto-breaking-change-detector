@@ -104,8 +104,10 @@ def detect(
         ).get_descriptor_set()
     # 4. Create the detector with two FileDescriptorSet and options.
     # It creates output_json file and prints human-readable message if the option is enabled.
-    Detector(file_set_original, file_set_update, options).detect_breaking_changes()
+    result = Detector(file_set_original, file_set_update, options).detect_breaking_changes()
+    return len(result)
 
 
 if __name__ == "__main__":
-    detect()  # pragma: no cover
+    exit_code = detect()  # pragma: no cover
+    exit(exit_code)
