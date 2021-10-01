@@ -25,7 +25,7 @@ class ResourceDatabase:
         self.patterns = {}
 
     def register_resource(self, resource_with_location):
-        """ Register a resource in the database. """
+        """Register a resource in the database."""
         if not resource_with_location or not resource_with_location.value:
             return
         resource_message = resource_with_location.value
@@ -39,7 +39,7 @@ class ResourceDatabase:
         )
 
     def get_resource_by_type(self, resource_type):
-        """ Query the resource by type. Return None if the resource is not existing. """
+        """Query the resource by type. Return None if the resource is not existing."""
         return self.types.get(resource_type, None)
 
     def get_parent_resources_by_child_type(self, child_type):
@@ -72,5 +72,5 @@ class ResourceDatabase:
         return result
 
     def get_resource_by_pattern(self, pattern):
-        """ Query the resource by pattern. Return None if the resource is not existing. """
+        """Query the resource by pattern. Return None if the resource is not existing."""
         return self.patterns.get(pattern, None)

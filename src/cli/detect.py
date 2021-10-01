@@ -63,7 +63,7 @@ def detect(
     output_json_path: str,
     human_readable_message: bool,
 ):
-    """Detect the breaking changes of the original and updated versions of API definition files. """
+    """Detect the breaking changes of the original and updated versions of API definition files."""
     # 1. Read the stdin options and create the Options object for all the command args.
     # The detector accepts two types of the input:
     # a) proto API defintion files.
@@ -104,8 +104,11 @@ def detect(
         ).get_descriptor_set()
     # 4. Create the detector with two FileDescriptorSet and options.
     # It creates output_json file and prints human-readable message if the option is enabled.
-    Detector(file_set_original, file_set_update, options).detect_breaking_changes()
+    result = Detector(
+        file_set_original, file_set_update, options
+    ).detect_breaking_changes()
+    return len(result)
 
 
 if __name__ == "__main__":
-    detect()  # pragma: no cover
+    exit(detect())  # pragma: no cover

@@ -424,7 +424,7 @@ class Message:
 
     @property
     def oneofs(self) -> Dict[str, Oneof]:
-        """Return a dictionary of wrapped oneofs for the given message. """
+        """Return a dictionary of wrapped oneofs for the given message."""
         return {
             oneof_pb.name: Oneof(oneof_pb) for oneof_pb in self.message_pb.oneof_decl
         }

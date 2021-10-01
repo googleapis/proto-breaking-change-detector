@@ -44,12 +44,13 @@ class Detector:
             self.finding_container,
         ).compare()
 
-        if not self.opts:
-            return self.finding_container.getActionableFindings()
-        # Output json file of findings and human-readable messages if the
-        # command line option is enabled.
-        with open(self.opts.output_json_path, "w") as write_json_file:
-            json.dump(self.finding_container.toDictArr(), write_json_file)
+        if self.opts and self.opts.output_json_path:
+            # Output json file of findings and human-readable messages if the
+            # command line option is enabled.
+            with open(self.opts.output_json_path, "w") as write_json_file:
+                json.dump(self.finding_container.toDictArr(), write_json_file)
 
-        if self.opts.human_readable_message:
+        if self.opts and self.opts.human_readable_message:
             sys.stdout.write(self.finding_container.toHumanReadableMessage())
+
+        return self.finding_container.getActionableFindings()
