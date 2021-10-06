@@ -144,18 +144,22 @@ class FieldComparator:
         # the key type and value type should also be identical.
         elif self.field_original.type_name:
             if self.field_original.is_map_type and not self.field_update.is_map_type:
+                key_original = self.field_original.map_entry_type["key"]
+                value_original = self.field_original.map_entry_type["value"]
                 self.finding_container.addFinding(
                     category=FindingCategory.FIELD_TYPE_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.type_name.source_code_line,
                     subject=self.field_original.name,
                     context=self.context,
-                    oldtype="map<>",
+                    oldtype=f"map<{key_original}, {value_original}>",
                     type=self.field_update.type_name.value,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
             elif not self.field_original.is_map_type and self.field_update.is_map_type:
+                key_update = self.field_update.map_entry_type["key"]
+                value_update = self.field_update.map_entry_type["value"]
                 self.finding_container.addFinding(
                     category=FindingCategory.FIELD_TYPE_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
@@ -163,7 +167,7 @@ class FieldComparator:
                     subject=self.field_original.name,
                     context=self.context,
                     oldtype=self.field_original.type_name.value,
-                    type="map<>",
+                    type=f"map<{key_update}, {value_update}>",
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
