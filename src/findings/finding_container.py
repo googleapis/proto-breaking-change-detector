@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.findings.utils import FindingCategory, ChangeType, Finding
+from re import sub
+from src.findings.finding import Finding
+from src.findings.finding_category import FindingCategory, ChangeType
 from collections import defaultdict
 
 
@@ -25,30 +27,62 @@ class FindingContainer:
         category: FindingCategory,
         proto_file_name: str,
         source_code_line: int,
-        message: str,
         change_type: ChangeType,
         extra_info=None,
+        subject="",
+        oldsubject="",
+        context="",
+        type="",
+        oldtype="",
     ):
         self.finding_results.append(
             Finding(
                 category,
                 proto_file_name,
                 source_code_line,
-                message,
                 change_type,
                 extra_info,
+                subject=subject,
+                oldsubject=oldsubject,
+                context=context,
+                type=type,
+                oldtype=oldtype,
             )
         )
 
     def getAllFindings(self):
-        return self.finding_results
+        findings = [f for f in self.finding_results]
+        findings.sort(
+            key=lambda f: (
+                f.location.proto_file_name,
+                f.location.source_code_line,
+                f.subject,
+                f.oldsubject,
+                f.context,
+                f.type,
+                f.oldtype,
+            )
+        )
+        return findings
 
     def getActionableFindings(self):
-        return [
+        findings = [
             finding
             for finding in self.finding_results
             if finding.change_type == ChangeType.MAJOR
         ]
+        findings.sort(
+            key=lambda f: (
+                f.location.proto_file_name,
+                f.location.source_code_line,
+                f.subject,
+                f.oldsubject,
+                f.context,
+                f.type,
+                f.oldtype,
+            )
+        )
+        return findings
 
     def toDictArr(self):
         return [finding.toDict() for finding in self.finding_results]
@@ -68,12 +102,19 @@ class FindingContainer:
                 key=lambda f: (
                     f.location.proto_file_name,
                     f.location.source_code_line,
-                    f.message,
+                    f.subject,
+                    f.oldsubject,
+                    f.context,
+                    f.type,
+                    f.oldtype,
                 )
             )
             for finding in findings:
+                message = finding.getMessage()
                 if finding.location.source_code_line == -1:
-                    output_message += f"{file_name}: {finding.message}\n"
+                    output_message += f"{file_name}: {message}\n"
                 else:
-                    output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
+                    output_message += (
+                        f"{file_name} L{finding.location.source_code_line}: {message}\n"
+                    )
         return output_message

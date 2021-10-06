@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 from src.comparator.wrappers import Field
 
 
@@ -28,10 +28,12 @@ class FieldComparator:
         field_original: Field,
         field_update: Field,
         finding_container: FindingContainer,
+        context: str,
     ):
         self.field_original = field_original
         self.field_update = field_update
         self.finding_container = finding_container
+        self.context = context
 
     def compare(self):
         # 1. If original FieldDescriptor is None, then a
@@ -41,7 +43,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_ADDITION,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
-                message=f"A new field `{self.field_update.name}` is added.",
+                subject=self.field_update.name,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -53,7 +56,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REMOVAL,
                 proto_file_name=self.field_original.proto_file_name,
                 source_code_line=self.field_original.source_code_line,
-                message=f"An existing field `{self.field_original.name}` is removed.",
+                subject=self.field_original.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
             )
             return
@@ -65,7 +69,9 @@ class FieldComparator:
                 category=FindingCategory.FIELD_NAME_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.source_code_line,
-                message=f"Name of an existing field is changed from `{self.field_original.name}` to `{self.field_update.name}`.",
+                oldsubject=self.field_original.name,
+                subject=self.field_update.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.field_update.nested_path,
             )
@@ -78,7 +84,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_REPEATED_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.repeated.source_code_line,
-                message=f"Repeated state of an existing field `{self.field_original.name}` is changed.",
+                subject=self.field_update.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.field_update.nested_path,
             )
@@ -88,7 +95,8 @@ class FieldComparator:
                 category=FindingCategory.FIELD_BEHAVIOR_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.required.source_code_line,
-                message=f"Field behavior of an existing field `{self.field_original.name}` is changed.",
+                subject=self.field_update.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.field_update.nested_path
                 + ["(google.api.field_behavior)"],
@@ -99,7 +107,10 @@ class FieldComparator:
                 category=FindingCategory.FIELD_TYPE_CHANGE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=self.field_update.proto_type.source_code_line,
-                message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.proto_type.value}` to `{self.field_update.proto_type.value}`.",
+                subject=self.field_update.name,
+                context=self.context,
+                oldtype=self.field_original.proto_type.value,
+                type=self.field_update.proto_type.value,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.field_update.nested_path,
             )
@@ -122,7 +133,10 @@ class FieldComparator:
                     category=FindingCategory.FIELD_TYPE_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.type_name.source_code_line,
-                    message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to `{self.field_update.type_name.value}`.",
+                    subject=self.field_original.name,
+                    context=self.context,
+                    oldtype=self.field_original.type_name.value,
+                    type=self.field_update.type_name.value,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
@@ -134,7 +148,10 @@ class FieldComparator:
                     category=FindingCategory.FIELD_TYPE_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.type_name.source_code_line,
-                    message=f"Type of an existing field `{self.field_original.name}` is changed from a map to `{self.field_update.type_name.value}`.",
+                    subject=self.field_original.name,
+                    context=self.context,
+                    oldtype="map<>",
+                    type=self.field_update.type_name.value,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
@@ -143,7 +160,10 @@ class FieldComparator:
                     category=FindingCategory.FIELD_TYPE_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.type_name.source_code_line,
-                    message=f"Type of an existing field `{self.field_original.name}` is changed from `{self.field_original.type_name.value}` to a map.",
+                    subject=self.field_original.name,
+                    context=self.context,
+                    oldtype=self.field_original.type_name.value,
+                    type="map<>",
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
@@ -168,7 +188,10 @@ class FieldComparator:
                         category=FindingCategory.FIELD_TYPE_CHANGE,
                         proto_file_name=self.field_update.proto_file_name,
                         source_code_line=self.field_update.type_name.source_code_line,
-                        message=f"Type of an existing field `{self.field_original.name}` is changed from `map<{key_original}, {value_original}>` to `map<{key_update}, {value_update}>`.",
+                        subject=self.field_original.name,
+                        context=self.context,
+                        oldtype=f"map<{key_original}, {value_original}>",
+                        type=f"map<{key_update}, {value_update}>",
                         change_type=ChangeType.MAJOR,
                         extra_info=self.field_update.nested_path,
                     )
@@ -178,22 +201,22 @@ class FieldComparator:
             proto_file_name = self.field_update.proto_file_name
             source_code_line = self.field_update.source_code_line
             if self.field_original.oneof:
-                msg = f"An existing field `{self.field_original.name}` is moved out of One-of."
                 self.finding_container.addFinding(
                     category=FindingCategory.FIELD_ONEOF_MOVE_OUT,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
-                    message=msg,
+                    subject=self.field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
             else:
-                msg = f"An existing field `{self.field_original.name}` is moved into One-of."
                 self.finding_container.addFinding(
                     category=FindingCategory.FIELD_ONEOF_MOVE_IN,
                     proto_file_name=proto_file_name,
                     source_code_line=source_code_line,
-                    message=msg,
+                    subject=self.field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
@@ -207,7 +230,8 @@ class FieldComparator:
                     category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.source_code_line,
-                    message=f"Proto3 optional state of an existing field `{self.field_original.name}` is changed to required.",
+                    subject=self.field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path,
                 )
@@ -216,7 +240,8 @@ class FieldComparator:
                     category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.source_code_line,
-                    message=f"An existing field `{self.field_original.name}` is changed to proto3 optional.",
+                    subject=self.field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MINOR,
                 )
 
@@ -241,7 +266,8 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
-                    message=f"A resource reference option is added to the field `{field_original.name}`, but it is not defined anywhere",
+                    subject=field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MINOR,
                     extra_info=self.field_update.nested_path
                     + ["(google.api.resource_reference)"],
@@ -252,7 +278,8 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
-                    message=f"A resource reference option is added to the field `{field_original.name}`.",
+                    subject=field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MINOR,
                 )
             return
@@ -263,15 +290,17 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
-                    message=f"A resource reference option of the field `{field_original.name}` is removed.",
+                    subject=field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                 )
             else:
                 self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_REFERENCE_REMOVAL,
+                    category=FindingCategory.RESOURCE_REFERENCE_MOVED,
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
-                    message=f"A resource reference option of the field `{field_original.name}` is removed, but added back to the message options.",
+                    subject=field_original.name,
+                    context=self.context,
                     change_type=ChangeType.MINOR,
                 )
             return
@@ -290,7 +319,10 @@ class FieldComparator:
                     category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
                     proto_file_name=field_update.proto_file_name,
                     source_code_line=resource_ref_update.source_code_line,
-                    message=f"The type of resource reference option of the field `{field_original.name}` is changed from `{original_type}` to `{update_type}`.",
+                    subject=field_original.name,
+                    context=self.context,
+                    oldtype=original_type,
+                    type=update_type,
                     change_type=ChangeType.MAJOR,
                     extra_info=self.field_update.nested_path
                     + ["(google.api.resource_reference)", f"{update_type}"],
@@ -379,12 +411,13 @@ class FieldComparator:
         if not any(parent.value.type == parent_type for parent in parent_resources):
             # Resulting referenced resource patterns cannot be resolved identical.
             self.finding_container.addFinding(
-                category=FindingCategory.RESOURCE_REFERENCE_CHANGE,
+                category=FindingCategory.RESOURCE_REFERENCE_CHANGE_CHILD_TYPE,
                 proto_file_name=self.field_update.proto_file_name,
                 source_code_line=source_code_line,
-                message=f"The child_type `{child_type}` and type `{parent_type}` of "
-                f"resource reference option in field `{self.field_original.name}` "
-                "cannot be resolved to the identical resource.",
+                subject=self.field_original.name,
+                context=self.context,
+                oldtype=child_type,
+                type=parent_type,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.field_update.nested_path
                 + ["(google.api.resource_reference)"],

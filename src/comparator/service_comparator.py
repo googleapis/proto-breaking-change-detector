@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 from src.comparator.wrappers import Service
 
 
@@ -23,10 +23,12 @@ class ServiceComparator:
         service_original: Service,
         service_update: Service,
         finding_container: FindingContainer,
+        context: str,
     ):
         self.service_original = service_original
         self.service_update = service_update
         self.finding_container = finding_container
+        self.context = context
 
     def compare(self):
         # 1. If original service is None, then a new service is added.
@@ -35,7 +37,7 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_ADDITION,
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
-                message=f"A new service `{self.service_update.name}` is added.",
+                subject=self.service_update.name,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -45,7 +47,7 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
-                message=f"An existing service `{self.service_original.name}` is removed.",
+                subject=self.service_original.name,
                 change_type=ChangeType.MAJOR,
             )
             return
@@ -65,7 +67,8 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_HOST_ADDITION,
                 proto_file_name=host.proto_file_name,
                 source_code_line=host.source_code_line,
-                message=f"A new default host `{host.value}` is added.",
+                subject=host.value,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -75,7 +78,8 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_HOST_REMOVAL,
                 proto_file_name=host.proto_file_name,
                 source_code_line=host.source_code_line,
-                message=f"An existing default host `{host.value}` is removed.",
+                subject=host.value,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
             )
             return
@@ -86,7 +90,9 @@ class ServiceComparator:
                 category=FindingCategory.SERVICE_HOST_CHANGE,
                 proto_file_name=host_update.proto_file_name,
                 source_code_line=host_update.source_code_line,
-                message=f"An existing default host is updated from `{host_original.value}` to `{host_update.value}`.",
+                subject=host_update.value,
+                oldsubject=host_original.value,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=[
                     "service " + self.service_update.name + " {",
@@ -101,6 +107,17 @@ class ServiceComparator:
         oauth_scopes_update = {
             scope.value: scope for scope in self.service_update.oauth_scopes
         }
+        for scope in set(oauth_scopes_update.keys()) - set(
+            oauth_scopes_original.keys()
+        ):
+            self.finding_container.addFinding(
+                category=FindingCategory.OAUTH_SCOPE_ADDITION,
+                proto_file_name=self.service_original.proto_file_name,
+                source_code_line=oauth_scopes_update[scope].source_code_line,
+                subject=scope,
+                context=self.context,
+                change_type=ChangeType.MINOR,
+            )
         for scope in set(oauth_scopes_original.keys()) - set(
             oauth_scopes_update.keys()
         ):
@@ -108,7 +125,8 @@ class ServiceComparator:
                 category=FindingCategory.OAUTH_SCOPE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=oauth_scopes_original[scope].source_code_line,
-                message=f"An existing oauth_scope `{scope}` is removed.",
+                subject=scope,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
             )
 
@@ -124,7 +142,8 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_REMOVAL,
                 proto_file_name=removed_method.proto_file_name,
                 source_code_line=removed_method.source_code_line,
-                message=f"An existing rpc method `{name}` is removed.",
+                subject=name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
             )
         # 3.2 An RPC method is added.
@@ -134,7 +153,8 @@ class ServiceComparator:
                 category=FindingCategory.METHOD_ADDTION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
-                message=f"A new rpc method `{name}` is added.",
+                subject=name,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
         for name in methods_update_keys & methods_original_keys:
@@ -152,7 +172,10 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.input.source_code_line,
-                    message=f"Input type of an existing method `{name}` is changed from `{input_type_original}` to `{input_type_update}`.",
+                    subject=name,
+                    context=self.context,
+                    oldtype=input_type_original,
+                    type=input_type_update,
                     change_type=ChangeType.MAJOR,
                     extra_info=[
                         "service " + self.service_update.name + " {",
@@ -171,7 +194,10 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.output.source_code_line,
-                    message=f"Output type of an existing method `{name}` is changed from `{response_type_original}` to `{response_type_update}`.",
+                    subject=name,
+                    context=self.context,
+                    oldtype=response_type_original,
+                    type=response_type_update,
                     change_type=ChangeType.MAJOR,
                     extra_info=[
                         "service " + self.service_update.name + " {",
@@ -187,7 +213,8 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.client_streaming.source_code_line,
-                    message=f"The request streaming type of an existing method `{name}` is changed.",
+                    subject=name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                     extra_info=[
                         "service " + self.service_update.name + " {",
@@ -203,7 +230,8 @@ class ServiceComparator:
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.server_streaming.source_code_line,
-                    message=f"The response streaming type of an existing method `{name}` is changed.",
+                    subject=name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                     extra_info=[
                         "service " + self.service_update.name + " {",
@@ -222,7 +250,8 @@ class ServiceComparator:
                         category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
                         proto_file_name=method_update.proto_file_name,
                         source_code_line=method_update.source_code_line,
-                        message=f"The paginated response of an existing method `{name}` is changed.",
+                        subject=name,
+                        context=self.context,
                         change_type=ChangeType.MAJOR,
                         extra_info=[
                             "service " + self.service_update.name + " {",
@@ -254,7 +283,8 @@ class ServiceComparator:
                     category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
                     proto_file_name=method_original.proto_file_name,
                     source_code_line=method_original.http_annotation.source_code_line,
-                    message=f"The google.api.http annotation for existing method `{method_original.name}` is removed.",
+                    subject=method_original.name,
+                    context=self.context,
                     change_type=ChangeType.MAJOR,
                 )
             if not http_annotation_original and http_annotation_update:
@@ -262,7 +292,8 @@ class ServiceComparator:
                     category=FindingCategory.HTTP_ANNOTATION_ADDITION,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
-                    message=f"A google.api.http annotation is added to method `{method_update.name}`.",
+                    subject=method_update.name,
+                    context=self.context,
                     change_type=ChangeType.MINOR,
                 )
             return
@@ -275,7 +306,9 @@ class ServiceComparator:
                 category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
-                message=f"An existing http method of google.api.http annotation is changed for method `{method_update.name}`.",
+                subject=method_update.name,
+                context=self.context,
+                type="http_method",
                 change_type=ChangeType.MAJOR,
                 extra_info=[
                     "service " + self.service_update.name + " {",
@@ -290,7 +323,9 @@ class ServiceComparator:
                 category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
-                message=f"An existing http method body of google.api.http annotation is changed for method `{method_update.name}`.",
+                subject=method_update.name,
+                context=self.context,
+                type="http_body",
                 change_type=ChangeType.MAJOR,
                 extra_info=[
                     "service " + self.service_update.name + " {",
@@ -308,7 +343,9 @@ class ServiceComparator:
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
-                    message=f"An existing http method URI of google.api.http annotation is changed for method `{method_update.name}`.",
+                    subject=method_update.name,
+                    context=self.context,
+                    type="http_uri",
                     change_type=ChangeType.MAJOR,
                     extra_info=[
                         "service " + self.service_update.name + " {",
@@ -329,7 +366,8 @@ class ServiceComparator:
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.lro_annotation.source_code_line,
-                message=f"A LRO operation_info annotation is added to method `{method_update.name}`.",
+                subject=method_update.name,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -339,7 +377,8 @@ class ServiceComparator:
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.lro_annotation.source_code_line,
-                message=f"An existing LRO operation_info annotation is removed from method `{method_update.name}`.",
+                subject=method_update.name,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -353,7 +392,10 @@ class ServiceComparator:
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
-                message=f"The response_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['response_type']}` to `{lro_update.value['response_type']}`.",
+                subject=method_update.name,
+                context=self.context,
+                oldtype=lro_original.value["response_type"],
+                type=lro_update.value["response_type"],
                 change_type=ChangeType.MAJOR,
                 extra_info=[
                     "service " + self.service_update.name + " {",
@@ -372,7 +414,10 @@ class ServiceComparator:
                 category=FindingCategory.LRO_METADATA_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
-                message=f"The metadata_type of an existing LRO operation_info annotation for method `{method_update.name}` is changed from `{lro_original.value['metadata_type']}` to `{lro_update.value['metadata_type']}`.",
+                subject=method_update.name,
+                context=self.context,
+                oldtype=lro_original.value["metadata_type"],
+                type=lro_update.value["metadata_type"],
                 change_type=ChangeType.MAJOR,
                 extra_info=[
                     "service " + self.service_update.name + " {",
@@ -385,28 +430,31 @@ class ServiceComparator:
     def _compare_method_signatures(self, method_original, method_update):
         signatures_original = method_original.method_signatures.value
         signatures_update = method_update.method_signatures.value
-        if len(signatures_original) > len(signatures_update):
+        for sig in set(signatures_update) - set(signatures_original):
+            self.finding_container.addFinding(
+                category=FindingCategory.METHOD_SIGNATURE_ADDITION,
+                proto_file_name=method_original.proto_file_name,
+                source_code_line=method_original.method_signatures.source_code_line,
+                type=sig,
+                subject=method_original.name,
+                context=self.context,
+                change_type=ChangeType.MINOR,
+            )
+        for sig in set(signatures_original) - set(signatures_update):
             self.finding_container.addFinding(
                 category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
-                message=f"An existing method_signature is removed from method `{method_original.name}`.",
+                type=sig,
+                subject=method_original.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
+                extra_info=[
+                    "service " + self.service_update.name + " {",
+                    f"rpc {method_update.name}",
+                    "option (google.api.method_signature)",
+                ],
             )
-        for old_sig, new_sig in zip(signatures_original, signatures_update):
-            if old_sig != new_sig:
-                self.finding_container.addFinding(
-                    category=FindingCategory.METHOD_SIGNATURE_CHANGE,
-                    proto_file_name=method_update.proto_file_name,
-                    source_code_line=method_update.method_signatures.source_code_line,
-                    message=f"An existing method_signature for method `{method_update.name}` is changed from `{old_sig}` to `{new_sig}`.",
-                    change_type=ChangeType.MAJOR,
-                    extra_info=[
-                        "service " + self.service_update.name + " {",
-                        f"rpc {method_update.name}",
-                        "option (google.api.method_signature)",
-                    ],
-                )
 
     def _get_version_update_name(self, name):
         original_version = self.service_original.api_version
