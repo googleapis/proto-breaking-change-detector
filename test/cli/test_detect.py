@@ -41,7 +41,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
+                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
             )
 
     def test_single_directory_enum(self):
@@ -62,7 +62,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing Enum `BookType` is removed.\n",
+                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
             )
 
     def test_single_directory_enum_json(self):
@@ -104,11 +104,11 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1beta1.proto L7: Type of an existing field `id` is changed from `int32` to `string`.\n"
-                + "message_v1beta1.proto L8: Name of an existing field is changed from `email` to `email_address`.\n"
-                + "message_v1beta1.proto L21: Repeated state of an existing field `phones` is changed.\n"
-                + "message_v1beta1.proto L22: An existing field `single` is moved out of One-of.\n"
-                + "message_v1.proto L18: An existing field `type` is removed.\n",
+                "message_v1.proto L18: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L7: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L8: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L21: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L22: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
             )
 
     def test_single_directory_service(self):
@@ -127,16 +127,16 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L11: An existing rpc method `shouldRemove` is removed.\n"
-                + "service_v1.proto L21: An existing field `page_size` is removed.\n"
-                + "service_v1.proto L22: An existing field `page_token` is removed.\n"
-                + "service_v1.proto L26: An existing field `content` is removed.\n"
-                + "service_v1.proto L27: An existing field `next_page_token` is removed.\n"
-                + "service_v1beta1.proto L7: Input type of an existing method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate`.\n"
-                + "service_v1beta1.proto L7: Output type of an existing method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate`.\n"
-                + "service_v1beta1.proto L9: The request streaming type of an existing method `Bar` is changed.\n"
-                + "service_v1beta1.proto L9: The response streaming type of an existing method `Bar` is changed.\n"
-                + "service_v1beta1.proto L11: The paginated response of an existing method `paginatedMethod` is changed.\n",
+                "service_v1.proto L11: An existing method `shouldRemove` is removed from service `Example`.\n"
+                + "service_v1.proto L21: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L22: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L26: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1.proto L27: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1beta1.proto L7: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L7: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L9: Client streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L9: Server streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L11: Pagination feature is changed for method `paginatedMethod` in service `Example`.\n",
             )
 
     def test_single_directory_service_annotation(self):
@@ -155,12 +155,10 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_annotation_v1beta1.proto L14: An existing http method of google.api.http annotation is changed for method `Foo`.\n"
-                + "service_annotation_v1beta1.proto L18: An existing method_signature for method `Foo` is changed from `content` to `error`.\n"
-                + "service_annotation_v1beta1.proto L18: An existing method_signature for method `Foo` is changed from `error` to `content`.\n"
-                + "service_annotation_v1beta1.proto L22: An existing http method body of google.api.http annotation is changed for method `Bar`.\n"
-                + "service_annotation_v1beta1.proto L26: The metadata_type of an existing LRO operation_info annotation for method `Bar` is changed from `FooMetadata` to `FooMetadataUpdate`.\n"
-                + "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n",
+                "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n"
+                + "service_annotation_v1beta1.proto L14: An existing google.api.http annotation `http_method` is changed for method `Foo` in service `Example`.\n"
+                + "service_annotation_v1beta1.proto L22: An existing google.api.http annotation `http_body` is changed for method `Bar` in service `Example`.\n"
+                + "service_annotation_v1beta1.proto L26: Long running operation metadata type is changed from `FooMetadata` to `FooMetadataUpdate` for method `Bar` in service `Example`.\n",
             )
 
     def test_oslogin_proto_alpha(self):
@@ -180,23 +178,27 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "google/cloud/oslogin/v1/oslogin.proto L34: An existing packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L51: An existing method_signature is removed from method `DeletePosixAccount`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L59: An existing method_signature is removed from method `DeleteSshPublicKey`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L68: An existing method_signature is removed from method `GetLoginProfile`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L76: An existing method_signature is removed from method `GetSshPublicKey`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature is removed from method `ImportSshPublicKey`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature is removed from method `UpdateSshPublicKey`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L123: A resource reference option of the field `name` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L136: A resource reference option of the field `name` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L147: A resource reference option of the field `name` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L153: An existing field `project_id` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L156: An existing field `system_id` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L166: A resource reference option of the field `name` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L177: A resource reference option of the field `parent` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L202: A resource reference option of the field `name` is removed.\n",
+                + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L51: An existing method_signature `name` is removed from method `DeletePosixAccount` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L59: An existing method_signature `name` is removed from method `DeleteSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L68: An existing method_signature `name` is removed from method `GetLoginProfile` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L76: An existing method_signature `name` is removed from method `GetSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `project_id` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `ssh_public_key` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `ssh_public_key` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `update_mask` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L123: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeletePosixAccountRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L136: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeleteSshPublicKeyRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L147: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L153: An existing field `project_id` is removed from message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L156: An existing field `system_id` is removed from message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L166: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.GetSshPublicKeyRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L177: An existing resource_reference option of the field `parent` is removed in message `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L202: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.UpdateSshPublicKeyRequest`.\n",
             )
 
     def test_oslogin_proto_beta(self):
@@ -215,7 +217,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/oslogin/v1beta/oslogin.proto L179: Field behavior of an existing field `ssh_public_key` is changed.\n",
+                "google/cloud/oslogin/v1beta/oslogin.proto L179: Changed field behavior for an existing field `ssh_public_key` in message `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest`.\n",
             )
 
     def test_pubsub_proto(self):
@@ -238,27 +240,27 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/pubsub/v1/pubsub.proto L160: Field behavior of an existing field `name` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L221: Field behavior of an existing field `topic` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L245: Field behavior of an existing field `topic` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L250: Field behavior of an existing field `messages` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L266: Field behavior of an existing field `project` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L296: Field behavior of an existing field `topic` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L356: Field behavior of an existing field `topic` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L617: Field behavior of an existing field `name` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L623: Field behavior of an existing field `topic` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L880: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L903: Field behavior of an existing field `project` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L934: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L946: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L958: Field behavior of an existing field `push_config` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L966: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L985: Field behavior of an existing field `max_messages` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L1002: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L1019: Field behavior of an existing field `ack_deadline_seconds` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L1027: Field behavior of an existing field `subscription` is changed.\n"
-                + "google/pubsub/v1/pubsub.proto L1036: Field behavior of an existing field `ack_ids` is changed.\n"
-                + "google/pubsub/v1beta2/pubsub.proto L369: An existing field `ack_id` is removed.\n",
+                "google/pubsub/v1/pubsub.proto L160: Changed field behavior for an existing field `name` in message `.google.pubsub.v1beta2.Topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L221: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.GetTopicRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L245: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.PublishRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L250: Changed field behavior for an existing field `messages` in message `.google.pubsub.v1beta2.PublishRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L266: Changed field behavior for an existing field `project` in message `.google.pubsub.v1beta2.ListTopicsRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L296: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.ListTopicSubscriptionsRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L356: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.DeleteTopicRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L617: Changed field behavior for an existing field `name` in message `.google.pubsub.v1beta2.Subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L623: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.Subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L880: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.GetSubscriptionRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L903: Changed field behavior for an existing field `project` in message `.google.pubsub.v1beta2.ListSubscriptionsRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L934: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.DeleteSubscriptionRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L946: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.ModifyPushConfigRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L958: Changed field behavior for an existing field `push_config` in message `.google.pubsub.v1beta2.ModifyPushConfigRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L966: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.PullRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L985: Changed field behavior for an existing field `max_messages` in message `.google.pubsub.v1beta2.PullRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L1002: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L1019: Changed field behavior for an existing field `ack_deadline_seconds` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L1027: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L1036: Changed field behavior for an existing field `ack_ids` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
+                + "google/pubsub/v1beta2/pubsub.proto L369: An existing field `ack_id` is removed from message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n",
             )
 
     def test_tts_proto(self):
@@ -277,12 +279,12 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/texttospeech/v1beta1/cloud_tts.proto L103: An existing EnumValue `MP3_64_KBPS` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L113: An existing EnumValue `MULAW` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L142: An existing Enum `TimepointType` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L160: An existing field `enable_time_pointing` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L275: An existing field `timepoints` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L278: An existing field `audio_config` is removed.\n"
+                "google/cloud/texttospeech/v1beta1/cloud_tts.proto L103: An existing value `MP3_64_KBPS` is removed from enum `AudioEncoding`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L113: An existing value `MULAW` is removed from enum `AudioEncoding`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L142: An existing enum `TimepointType` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L160: An existing field `enable_time_pointing` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L275: An existing field `timepoints` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L278: An existing field `audio_config` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
                 + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L283: An existing message `Timepoint` is removed.\n",
             )
 
