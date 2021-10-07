@@ -61,7 +61,7 @@ class EnumValue:
 
     enum_value_pb: the descriptor of EnumValue.
     proto_file_name: the proto file where the EnumValue exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the EnumValue, by querying the above dictionary using the path,
           we can get the location information.
     """
@@ -87,7 +87,7 @@ class Enum:
 
     enum_pb: the descriptor of Enum.
     proto_file_name: the proto file where the Enum exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the Enum, by querying the above dictionary using the path,
           we can get the location information.
     """
@@ -134,7 +134,7 @@ class Field:
 
     field_pb: the descriptor of Field.
     proto_file_name: the proto file where the Field exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the Field, by querying the above dictionary using the path,
           we can get the location information.
     resource_database: global resource database that contains all file-level resource definitions
@@ -343,7 +343,7 @@ class Message:
 
     message_pb: the descriptor of Message.
     proto_file_name: the proto file where the Message exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the Message, by querying the above dictionary using the path,
           we can get the location information.
     resource_database: global resource database that contains all file-level resource definitions
@@ -431,7 +431,7 @@ class Message:
 
     @property
     def nested_messages(self) -> Dict[str, "Message"]:
-        """Return the nested messsages in the message. Message is identified by name."""
+        """Return the nested messages in the message. Message is identified by name."""
         nested_messages_map = {}
         for i, message in enumerate(self.message_pb.nested_type):
             # Exclude the auto-generated map_entries message, since
@@ -462,7 +462,7 @@ class Message:
     @property
     def map_entries(self) -> Dict[str, Dict[str, Field]]:
         # If the nested message is auto-generated map entry for the maps field,
-        # the message name is fieldName + 'Entry', and it has two nested fields (key, value).
+        # the message name is field_name + 'Entry', and it has two nested fields (key, value).
         #
         # For maps fields:
         # map<KeyType, ValueType> map_field = 1;
@@ -543,7 +543,7 @@ class Method:
     messages_map: the map that contains all messages defined in the API definition files and
                   the dependencies. The key is message name, and value is the Message class.
     proto_file_name: the proto file where the Method exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the Method, by querying the above dictionary using the path,
           we can get the location information.
     """
@@ -621,7 +621,7 @@ class Method:
             return None
         if not self.messages_map or self.output.value not in self.messages_map:
             return None
-        # API should provide a `string next_page_token` field in response messsage.
+        # API should provide a `string next_page_token` field in response message.
         # API should provide `int page_size` and `string page_token` fields in request message.
         # If the request field lacks any of the expected pagination fields,
         # then the method is not paginated.
@@ -733,7 +733,7 @@ class Service:
     messages_map: the map that contains all messages defined in the API definition files and
                   the dependencies. The key is message name, and value is the Message class.
     proto_file_name: the proto file where the Service exists.
-    source_code_locations: the dictionary that contains all the sourceCodeInfo in the fileDescriptorSet.
+    source_code_locations: the dictionary that contains all the source_code_info in the file_descriptor_set.
     path: the path to the MethServiceod, by querying the above dictionary using the path,
           we can get the location information.
     api_version: the version of the API definition files.
@@ -828,7 +828,7 @@ class Service:
 
 
 class FileSet:
-    """Description of a fileSet.
+    """Description of a file_set.
 
     file_set_pb: The FileDescriptorSet object that is obtained by proto compiler.
     """
@@ -1005,7 +1005,7 @@ class FileSet:
     def _get_root_package(self) -> str:
         dependency_map = defaultdict(list)
         for fd in self.file_set_pb.file:
-            # Put the fileDescriptor and its dependencies to the dependency map.
+            # Put the file descriptor and its dependencies to the dependency map.
             for dep in fd.dependency:
                 dependency_map[dep].append(fd)
         # Find the root API definition file.

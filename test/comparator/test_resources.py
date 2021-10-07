@@ -55,17 +55,17 @@ class ResourceReferenceTest(unittest.TestCase):
 
         addition_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "RESOURCE_PATTERN_ADDITION"
         )
         removal_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "RESOURCE_PATTERN_REMOVAL"
         )
         resource_definition_removal_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "RESOURCE_DEFINITION_REMOVAL"
         )
         self.assertEqual(
@@ -111,7 +111,7 @@ class ResourceReferenceTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "RESOURCE_REFERENCE_CHANGE_CHILD_TYPE"
         )
         self.assertEqual(
@@ -123,7 +123,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # but it is added in message-level. Non-breaking change.
         # 2. File-level resource definition `t2` is removed, but is added
         # to message-level resource. Non-breaking change.
-        breaking_changes = self.finding_container.getActionableFindings()
+        breaking_changes = self.finding_container.get_actionable_findings()
         self.assertEqual(len(breaking_changes), 1)
 
 

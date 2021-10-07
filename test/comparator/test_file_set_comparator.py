@@ -49,7 +49,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_service_addition(self):
@@ -65,7 +65,7 @@ class FileSetComparatorTest(unittest.TestCase):
             file_set,
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
@@ -94,7 +94,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(services=[service_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -109,7 +109,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(messages=[message_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -157,7 +157,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "update.proto")
@@ -183,7 +183,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(enums=[enum_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -232,7 +232,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "update.proto")
@@ -258,7 +258,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.change_type.name == "MAJOR"
         )
         self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVAL")
@@ -288,7 +288,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVAL")
         self.assertEqual(
@@ -311,7 +311,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(
             finding.category.name,
@@ -346,7 +346,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         file_resource_removal = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "RESOURCE_DEFINITION_REMOVAL"
         )
         self.assertEqual(
@@ -379,7 +379,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "PACKAGING_OPTION_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -413,13 +413,13 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         java_classname_option_removal = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "PACKAGING_OPTION_REMOVAL"
             and f.subject == "java_outer_classname"
         )
         php_namespace_option_removal = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "PACKAGING_OPTION_REMOVAL"
             and f.subject == "php_namespace"
         )
@@ -456,7 +456,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[file_update]),
             self.finding_container,
         ).compare()
-        self.assertTrue(len(self.finding_container.getAllFindings()) == 0)
+        self.assertTrue(len(self.finding_container.get_all_findings()) == 0)
 
 
 if __name__ == "__main__":

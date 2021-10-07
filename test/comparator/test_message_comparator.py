@@ -29,7 +29,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(
             self.message_foo, None, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -38,7 +38,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(
             None, self.message_foo, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -53,7 +53,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "FIELD_TYPE_CHANGE"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -65,7 +65,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(
             make_message(), message_update, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -77,7 +77,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "MESSAGE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -89,7 +89,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -101,7 +101,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -113,7 +113,7 @@ class DescriptorComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -131,7 +131,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "FIELD_REMOVAL"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -160,7 +160,7 @@ class DescriptorComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "ENUM_VALUE_ADDITION"
         )
         self.assertEqual(finding.change_type.name, "MINOR")

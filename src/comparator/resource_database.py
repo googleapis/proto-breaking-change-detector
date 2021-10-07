@@ -18,7 +18,7 @@ from typing import Sequence
 class ResourceDatabase:
     # Create resource database for file-level and messasge-level resouce definitions.
     # It has two dictionaries: types map and patterns map. Register a resource will put
-    # [typeStr, resource_messsage] in types dict, and [pattern0, resource_message]
+    # [type_str, resource_message] in types dict, and [pattern0, resource_message]
     # [pattern1, ressource_message] (if it has multiple patterns) in patterns dict."""
     def __init__(self):
         self.types = {}

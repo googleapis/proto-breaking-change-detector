@@ -64,7 +64,7 @@ class FileSetComparator:
                     per_language_options_original - per_language_options_update
                 ):
                     classname_option = packaging_options_original[option][classname]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=classname_option.proto_file_name,
                         source_code_line=classname_option.source_code_line,
@@ -91,7 +91,7 @@ class FileSetComparator:
                     namespace_option = packaging_options_original[option][
                         original_option_value
                     ]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
@@ -106,7 +106,7 @@ class FileSetComparator:
                     namespace_option = packaging_options_update[option][
                         original_option_value
                     ]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_ADDITION,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
@@ -239,7 +239,7 @@ class FileSetComparator:
             patterns_update = resources_update.types[resource_type].value.pattern
             # A new pattern is added.
             for pattern in set(patterns_update) - set(patterns_original):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.RESOURCE_PATTERN_ADDITION,
                     proto_file_name=resources_original.types[
                         resource_type
@@ -253,7 +253,7 @@ class FileSetComparator:
                 )
             # An existing pattern is removed.
             for pattern in set(patterns_original) - set(patterns_update):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.RESOURCE_PATTERN_REMOVAL,
                     proto_file_name=resources_original.types[
                         resource_type
@@ -268,7 +268,7 @@ class FileSetComparator:
 
         # 2. File-level resource definitions addition.
         for resource_type in resources_types_update - resources_types_original:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
@@ -277,7 +277,7 @@ class FileSetComparator:
             )
         # 3. File-level resource definitions removal.
         for resource_type in resources_types_original - resources_types_update:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                 proto_file_name=resources_original.types[resource_type].proto_file_name,
                 source_code_line=resources_original.types[
