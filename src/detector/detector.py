@@ -48,9 +48,11 @@ class Detector:
             # Output json file of findings and human-readable messages if the
             # command line option is enabled.
             with open(self.opts.output_json_path, "w") as write_json_file:
-                json.dump(self.finding_container.toDictArr(), write_json_file, indent=2)
+                json.dump(
+                    self.finding_container.to_dict_arr(), write_json_file, indent=2
+                )
 
         if self.opts and self.opts.human_readable_message:
-            sys.stdout.write(self.finding_container.toHumanReadableMessage())
+            sys.stdout.write(self.finding_container.to_human_readable_message())
 
-        return self.finding_container.getActionableFindings()
+        return self.finding_container.get_actionable_findings()

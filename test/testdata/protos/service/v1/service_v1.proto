@@ -8,9 +8,9 @@ service Example {
 
   rpc Bar(FooRequest) returns (FooResponse) {}
 
-  rpc shouldRemove(FooRequest) returns (FooResponse) {}
+  rpc ShouldRemove(FooRequest) returns (FooResponse) {}
 
-  rpc paginatedMethod(BarRequest) returns (BarResponse) {}
+  rpc PaginatedMethod(BarRequest) returns (BarResponse) {}
 }
 
 message FooRequest {}

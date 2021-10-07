@@ -33,7 +33,7 @@ class EnumValueComparator:
     def compare(self):
         # 1. If the original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_ADDITION,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
@@ -43,7 +43,7 @@ class EnumValueComparator:
             )
         # 2. If the updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_REMOVAL,
                 proto_file_name=self.enum_value_original.proto_file_name,
                 source_code_line=self.enum_value_original.source_code_line,
@@ -53,7 +53,7 @@ class EnumValueComparator:
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is identical.
         elif self.enum_value_original.name != self.enum_value_update.name:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
