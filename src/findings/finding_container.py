@@ -19,7 +19,7 @@ from src.findings.finding_category import FindingCategory, ChangeType
 from collections import defaultdict
 
 
-def sortedFilteredFindings(findings: list, filter: Callable) -> list:
+def sorted_filtered_findings(findings: list, filter: Callable) -> list:
     filtered = [f for f in findings if filter(f)]
     filtered.sort(
         key=lambda f: (
@@ -39,7 +39,7 @@ class FindingContainer:
     def __init__(self):
         self.finding_results = []
 
-    def addFinding(
+    def add_finding(
         self,
         category: FindingCategory,
         proto_file_name: str,
@@ -67,21 +67,21 @@ class FindingContainer:
             )
         )
 
-    def getAllFindings(self):
-        return sortedFilteredFindings(self.finding_results, lambda f: True)
+    def get_all_findings(self):
+        return sorted_filtered_findings(self.finding_results, lambda f: True)
 
-    def getActionableFindings(self):
-        return sortedFilteredFindings(
+    def get_actionable_findings(self):
+        return sorted_filtered_findings(
             self.finding_results, lambda f: f.change_type == ChangeType.MAJOR
         )
 
-    def toDictArr(self):
-        return [finding.toDict() for finding in self.finding_results]
+    def to_dict_arr(self):
+        return [finding.to_dict() for finding in self.finding_results]
 
-    def toHumanReadableMessage(self):
+    def to_human_readable_message(self):
         output_message = ""
         file_to_findings = defaultdict(list)
-        for finding in self.getActionableFindings():
+        for finding in self.get_actionable_findings():
             # Create a map to summarize the findings based on proto file name.
             file_to_findings[finding.location.proto_file_name].append(finding)
         # Add each finding to the output message.
@@ -89,9 +89,9 @@ class FindingContainer:
             # Customize sort key function to output the findings in the same
             # file based on the source code line number.
             # Sort message alphabetically if the line number is same.
-            sorted_findings = sortedFilteredFindings(findings, lambda f: True)
+            sorted_findings = sorted_filtered_findings(findings, lambda f: True)
             for finding in sorted_findings:
-                message = finding.getMessage()
+                message = finding.get_message()
                 if finding.location.source_code_line == -1:
                     output_message += f"{file_name}: {message}\n"
                 else:

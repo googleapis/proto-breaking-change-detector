@@ -71,12 +71,12 @@ class DectetorTest(unittest.TestCase):
                     update_descriptor_set_file_path=None,
                     human_readable_message=True,
                 )
-        with mock.patch("sys.stdout", new=StringIO()) as fakeOutput:
+        with mock.patch("sys.stdout", new=StringIO()) as fake_output:
             result = Detector(
                 file_set_original, file_set_update, opts
             ).detect_breaking_changes()
             self.assertEqual(
-                fakeOutput.getvalue(),
+                fake_output.getvalue(),
                 "my_proto.proto L2: An existing method `DoThing` is removed from service `Placeholder`.\n"
                 + "my_proto.proto L6: An existing message `input` is removed.\n"
                 + "my_proto.proto L12: An existing message `output` is removed.\n",
@@ -98,7 +98,7 @@ class DectetorTest(unittest.TestCase):
         ).detect_breaking_changes()
         # Without options, the detector returns an array of actionable Findings.
         self.assertEqual(
-            breaking_changes[0].getMessage(), "An existing enum `foo` is removed."
+            breaking_changes[0].get_message(), "An existing enum `foo` is removed."
         )
 
 

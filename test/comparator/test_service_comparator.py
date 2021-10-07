@@ -18,7 +18,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             self.service_foo, None, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -26,7 +26,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             None, self.service_foo, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
@@ -39,7 +39,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_HOST_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -53,7 +53,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_HOST_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -64,7 +64,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             service_original, service_update, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "SERVICE_HOST_CHANGE")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -81,14 +81,14 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "OAUTH_SCOPE_REMOVAL"
             and f.subject == "https://foo/user/"
         )
         self.assertEqual(finding.location.proto_file_name, "foo")
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "OAUTH_SCOPE_REMOVAL"
             and f.subject == "https://foo/admin/"
         )
@@ -103,7 +103,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             service_original, service_update, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -116,7 +116,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             service_original, service_update, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "METHOD_ADDTION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -135,7 +135,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_INPUT_TYPE_CHANGE"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -167,7 +167,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_RESPONSE_TYPE_CHANGE"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -186,13 +186,13 @@ class ServiceComparatorTest(unittest.TestCase):
 
         client_streaming_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_CLIENT_STREAMING_CHANGE"
         )
         self.assertEqual(client_streaming_finding.location.proto_file_name, "foo")
         server_streaming_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_SERVER_STREAMING_CHANGE"
         )
         self.assertEqual(server_streaming_finding.change_type.name, "MAJOR")
@@ -237,7 +237,7 @@ class ServiceComparatorTest(unittest.TestCase):
             ".example.v1.PaginatedRequestMessage": paginated_request_message,
         }
         paged_method = make_method(
-            name="notInteresting",
+            name="NotInteresting",
             input_message=paginated_request_message,
             output_message=paginated_response_message,
         )
@@ -249,7 +249,7 @@ class ServiceComparatorTest(unittest.TestCase):
                 name="MethodOutput", full_name=".example.v1alpha.MethodOutput"
             ),
         }
-        non_paged_method = make_method(name="notInteresting")
+        non_paged_method = make_method(name="NotInteresting")
         service_original = make_service(
             methods=(paged_method,), messages_map=messages_map_original
         )
@@ -261,7 +261,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_PAGINATED_RESPONSE_CHANGE"
         )
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -270,18 +270,18 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             make_service(
                 methods=(
-                    make_method(name="notInteresting", signatures=["sig1", "sig2"]),
+                    make_method(name="NotInteresting", signatures=["sig1", "sig2"]),
                 )
             ),
             make_service(
-                methods=(make_method(name="notInteresting", signatures=["sig1"]),)
+                methods=(make_method(name="NotInteresting", signatures=["sig1"]),)
             ),
             self.finding_container,
             context="ctx",
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "METHOD_SIGNATURE_REMOVAL"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -309,7 +309,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "LRO_ANNOTATION_ADDITION"
         )
         self.assertTrue(finding)
@@ -336,7 +336,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "LRO_ANNOTATION_REMOVAL"
         )
         self.assertTrue(finding)
@@ -368,7 +368,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "LRO_ANNOTATION_REMOVAL"
         )
         self.assertTrue(finding)
@@ -398,7 +398,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "LRO_RESPONSE_CHANGE"
         )
         self.assertEqual(finding.change_type.name, "MAJOR")
@@ -429,7 +429,7 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "LRO_METADATA_CHANGE"
         )
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -449,7 +449,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "HTTP_ANNOTATION_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
@@ -468,7 +468,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "HTTP_ANNOTATION_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -491,12 +491,12 @@ class ServiceComparatorTest(unittest.TestCase):
         ).compare()
         uri_change_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "HTTP_ANNOTATION_CHANGE" and f.type == "http_uri"
         )
         body_change_finding = next(
             f
-            for f in self.finding_container.getAllFindings()
+            for f in self.finding_container.get_all_findings()
             if f.category.name == "HTTP_ANNOTATION_CHANGE" and f.type == "http_body"
         )
         self.assertEqual(
@@ -525,7 +525,7 @@ class ServiceComparatorTest(unittest.TestCase):
             self.finding_container,
             context="ctx",
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
+        findings_map = {f.message: f for f in self.finding_container.get_all_findings()}
         # No breaking changes, since only minor version update in the http URI.
         self.assertFalse(findings_map)
 

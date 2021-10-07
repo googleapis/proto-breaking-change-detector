@@ -48,7 +48,7 @@ class Finding:
         self.type = type
         self.oldtype = oldtype
 
-    def toDict(self):
+    def to_dict(self):
         return {
             "category": self.category.name,
             "location": {
@@ -64,6 +64,6 @@ class Finding:
             "oldtype": self.oldtype,
         }
 
-    def getMessage(self):
-        format_parameters = self.toDict()
+    def get_message(self):
+        format_parameters = self.to_dict()
         return templates[self.category].format(**format_parameters)

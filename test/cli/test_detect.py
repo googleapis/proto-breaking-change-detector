@@ -127,7 +127,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L11: An existing method `shouldRemove` is removed from service `Example`.\n"
+                "service_v1.proto L11: An existing method `ShouldRemove` is removed from service `Example`.\n"
                 + "service_v1.proto L21: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
                 + "service_v1.proto L22: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
                 + "service_v1.proto L26: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
@@ -136,7 +136,7 @@ class CliDetectTest(unittest.TestCase):
                 + "service_v1beta1.proto L7: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
                 + "service_v1beta1.proto L9: Client streaming flag is changed for method `Bar` in service `Example`.\n"
                 + "service_v1beta1.proto L9: Server streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Pagination feature is changed for method `paginatedMethod` in service `Example`.\n",
+                + "service_v1beta1.proto L11: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n",
             )
 
     def test_single_directory_service_annotation(self):

@@ -54,7 +54,7 @@ class EnumComparatorTest(unittest.TestCase):
         EnumComparator(
             self.enum_foo, None, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
@@ -64,7 +64,7 @@ class EnumComparatorTest(unittest.TestCase):
         EnumComparator(
             None, self.enum_bar, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
@@ -74,7 +74,7 @@ class EnumComparatorTest(unittest.TestCase):
         EnumComparator(
             self.enum_foo, self.enum_bar, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
@@ -84,7 +84,7 @@ class EnumComparatorTest(unittest.TestCase):
         EnumComparator(
             self.enum_foo, self.enum_foo, self.finding_container, context="ctx"
         ).compare()
-        self.assertEqual(len(self.finding_container.getAllFindings()), 0)
+        self.assertEqual(len(self.finding_container.get_all_findings()), 0)
 
 
 if __name__ == "__main__":

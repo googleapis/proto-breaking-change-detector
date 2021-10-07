@@ -33,7 +33,7 @@ class ServiceComparator:
     def compare(self):
         # 1. If original service is None, then a new service is added.
         if self.service_original is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_ADDITION,
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
@@ -43,7 +43,7 @@ class ServiceComparator:
             return
         # 2. If updated service is None, then the original service is removed.
         if self.service_update is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
@@ -56,14 +56,14 @@ class ServiceComparator:
         # 4. Check the oauth scopes list.
         self._compare_oauth_scopes()
         # 5. Check the methods list
-        self._compareRpcMethods()
+        self._compare_rpc_methods()
 
     def _compare_host(self):
         if not self.service_original.host and not self.service_update.host:
             return
         if not self.service_original.host:
             host = self.service_update.host
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_HOST_ADDITION,
                 proto_file_name=host.proto_file_name,
                 source_code_line=host.source_code_line,
@@ -74,7 +74,7 @@ class ServiceComparator:
             return
         if not self.service_update.host:
             host = self.service_original.host
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_HOST_REMOVAL,
                 proto_file_name=host.proto_file_name,
                 source_code_line=host.source_code_line,
@@ -86,7 +86,7 @@ class ServiceComparator:
         host_original = self.service_original.host
         host_update = self.service_update.host
         if host_original.value != host_update.value:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_HOST_CHANGE,
                 proto_file_name=host_update.proto_file_name,
                 source_code_line=host_update.source_code_line,
@@ -110,7 +110,7 @@ class ServiceComparator:
         for scope in set(oauth_scopes_update.keys()) - set(
             oauth_scopes_original.keys()
         ):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.OAUTH_SCOPE_ADDITION,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=oauth_scopes_update[scope].source_code_line,
@@ -121,7 +121,7 @@ class ServiceComparator:
         for scope in set(oauth_scopes_original.keys()) - set(
             oauth_scopes_update.keys()
         ):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.OAUTH_SCOPE_REMOVAL,
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=oauth_scopes_original[scope].source_code_line,
@@ -130,7 +130,7 @@ class ServiceComparator:
                 change_type=ChangeType.MAJOR,
             )
 
-    def _compareRpcMethods(self):
+    def _compare_rpc_methods(self):
         methods_original = self.service_original.methods
         methods_update = self.service_update.methods
         methods_original_keys = set(methods_original.keys())
@@ -138,7 +138,7 @@ class ServiceComparator:
         # 3.1 An RPC method is removed.
         for name in methods_original_keys - methods_update_keys:
             removed_method = methods_original[name]
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.METHOD_REMOVAL,
                 proto_file_name=removed_method.proto_file_name,
                 source_code_line=removed_method.source_code_line,
@@ -149,7 +149,7 @@ class ServiceComparator:
         # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
             added_method = methods_update[name]
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.METHOD_ADDTION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
@@ -168,7 +168,7 @@ class ServiceComparator:
                 and self._get_version_update_name(input_type_original)
                 != input_type_update
             ):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.METHOD_INPUT_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.input.source_code_line,
@@ -190,7 +190,7 @@ class ServiceComparator:
                 and self._get_version_update_name(response_type_original)
                 != response_type_update
             ):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.METHOD_RESPONSE_TYPE_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.output.source_code_line,
@@ -209,7 +209,7 @@ class ServiceComparator:
                 method_original.client_streaming.value
                 != method_update.client_streaming.value
             ):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.METHOD_CLIENT_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.client_streaming.source_code_line,
@@ -226,7 +226,7 @@ class ServiceComparator:
                 method_original.server_streaming.value
                 != method_update.server_streaming.value
             ):
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.METHOD_SERVER_STREAMING_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.server_streaming.source_code_line,
@@ -246,7 +246,7 @@ class ServiceComparator:
                     or method_original.paged_result_field.name
                     != method_update.paged_result_field.name
                 ):
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.METHOD_PAGINATED_RESPONSE_CHANGE,
                         proto_file_name=method_update.proto_file_name,
                         source_code_line=method_update.source_code_line,
@@ -279,7 +279,7 @@ class ServiceComparator:
             # except for bi-directional streaming RPCs, so the http_annotation addition/removal indicates
             # streaming state changes of the RPC, which is a breaking change.
             if http_annotation_original and not http_annotation_update:
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.HTTP_ANNOTATION_REMOVAL,
                     proto_file_name=method_original.proto_file_name,
                     source_code_line=method_original.http_annotation.source_code_line,
@@ -288,7 +288,7 @@ class ServiceComparator:
                     change_type=ChangeType.MAJOR,
                 )
             if not http_annotation_original and http_annotation_update:
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.HTTP_ANNOTATION_ADDITION,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
@@ -302,7 +302,7 @@ class ServiceComparator:
             http_annotation_original["http_method"]
             != http_annotation_update["http_method"]
         ):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
@@ -319,7 +319,7 @@ class ServiceComparator:
             )
         # Compare http body, they should be identical.
         if http_annotation_original["http_body"] != http_annotation_update["http_body"]:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.http_annotation.source_code_line,
@@ -339,7 +339,7 @@ class ServiceComparator:
             annotation_value = http_annotation_original["http_uri"]
             transformed_value = self._get_version_update_name(annotation_value)
             if transformed_value != http_annotation_update["http_uri"]:
-                self.finding_container.addFinding(
+                self.finding_container.add_finding(
                     category=FindingCategory.HTTP_ANNOTATION_CHANGE,
                     proto_file_name=method_update.proto_file_name,
                     source_code_line=method_update.http_annotation.source_code_line,
@@ -362,7 +362,7 @@ class ServiceComparator:
             return
         # LRO operation_info annotation addition.
         if not lro_original:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.LRO_ANNOTATION_ADDITION,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=method_update.lro_annotation.source_code_line,
@@ -373,7 +373,7 @@ class ServiceComparator:
             return
         # LRO operation_info annotation removal.
         if not lro_update:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.LRO_ANNOTATION_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.lro_annotation.source_code_line,
@@ -388,7 +388,7 @@ class ServiceComparator:
             and self._get_version_update_name(lro_original.value["response_type"])
             != lro_update.value["response_type"]
         ):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.LRO_RESPONSE_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
@@ -410,7 +410,7 @@ class ServiceComparator:
             and self._get_version_update_name(lro_original.value["metadata_type"])
             != lro_update.value["metadata_type"]
         ):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.LRO_METADATA_CHANGE,
                 proto_file_name=method_update.proto_file_name,
                 source_code_line=lro_update.source_code_line,
@@ -431,7 +431,7 @@ class ServiceComparator:
         signatures_original = method_original.method_signatures.value
         signatures_update = method_update.method_signatures.value
         for sig in set(signatures_update) - set(signatures_original):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.METHOD_SIGNATURE_ADDITION,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,
@@ -441,7 +441,7 @@ class ServiceComparator:
                 change_type=ChangeType.MINOR,
             )
         for sig in set(signatures_original) - set(signatures_update):
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
                 source_code_line=method_original.method_signatures.source_code_line,

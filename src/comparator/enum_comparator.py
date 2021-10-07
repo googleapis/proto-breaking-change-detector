@@ -35,7 +35,7 @@ class EnumComparator:
         # 1. If the original EnumDescriptor is None,
         # then a new EnumDescriptor is added.
         if self.enum_original is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_ADDITION,
                 proto_file_name=self.enum_update.proto_file_name,
                 source_code_line=self.enum_update.source_code_line,
@@ -47,7 +47,7 @@ class EnumComparator:
         # 2. If the updated EnumDescriptor is None,
         # then the original EnumDescriptor is removed.
         elif self.enum_update is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_REMOVAL,
                 proto_file_name=self.enum_original.proto_file_name,
                 source_code_line=self.enum_original.source_code_line,
