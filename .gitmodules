@@ -2,9 +2,12 @@
 	path = protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
 	branch = 3.8.x
+	shallow = true
 [submodule "api-common-protos"]
 	path = api-common-protos
 	url = https://github.com/googleapis/api-common-protos.git
+	shallow = true
 [submodule "googleapis"]
 	path = googleapis
 	url = https://github.com/googleapis/googleapis.git
+	shallow = true

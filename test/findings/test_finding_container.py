@@ -14,7 +14,7 @@
 
 import unittest
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 
 
 class FindingContainerTest(unittest.TestCase):
@@ -25,50 +25,52 @@ class FindingContainerTest(unittest.TestCase):
     finding_container = FindingContainer()
 
     def test1_add_findings(self):
-        self.finding_container.addFinding(
+        self.finding_container.add_finding(
             category=FindingCategory.METHOD_REMOVAL,
             proto_file_name="my_proto.proto",
             source_code_line=12,
-            message="An rpc method bar is removed.",
             change_type=ChangeType.MAJOR,
+            subject="subject",
+            context="context",
         )
-        self.assertEqual(len(self.finding_container.getAllFindings()), 1)
+        self.assertEqual(len(self.finding_container.get_all_findings()), 1)
 
     def test2_get_actionable_findings(self):
-        self.finding_container.addFinding(
+        self.finding_container.add_finding(
             category=FindingCategory.FIELD_ADDITION,
             proto_file_name="my_proto.proto",
             source_code_line=15,
-            message="Not breaking change.",
             change_type=ChangeType.MINOR,
         )
-        self.assertEqual(len(self.finding_container.getActionableFindings()), 1)
+        self.assertEqual(len(self.finding_container.get_actionable_findings()), 1)
 
-    def test3_toDictArr(self):
-        dict_arr_output = self.finding_container.toDictArr()
+    def test3_to_dict_arr(self):
+        dict_arr_output = self.finding_container.to_dict_arr()
         self.assertEqual(dict_arr_output[0]["category"], "METHOD_REMOVAL")
         self.assertEqual(dict_arr_output[1]["category"], "FIELD_ADDITION")
 
-    def test4_toHumanReadableMessage(self):
-        self.finding_container.addFinding(
-            category=FindingCategory.RESOURCE_DEFINITION_CHANGE,
+    def test4_to_human_readable_message(self):
+        self.finding_container.add_finding(
+            category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
             proto_file_name="my_proto.proto",
             source_code_line=5,
-            message="An existing file-level resource definition has changed.",
             change_type=ChangeType.MAJOR,
+            subject="subject",
         )
-        self.finding_container.addFinding(
-            category=FindingCategory.METHOD_SIGNATURE_CHANGE,
+        self.finding_container.add_finding(
+            category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
             proto_file_name="my_other_proto.proto",
             source_code_line=-1,
-            message="An existing method_signature is changed from 'sig1' to 'sig2'.",
             change_type=ChangeType.MAJOR,
+            type="type",
+            subject="subject",
+            context="context",
         )
         self.assertEqual(
-            self.finding_container.toHumanReadableMessage(),
-            "my_proto.proto L5: An existing file-level resource definition has changed.\n"
-            + "my_proto.proto L12: An rpc method bar is removed.\n"
-            + "my_other_proto.proto: An existing method_signature is changed from 'sig1' to 'sig2'.\n",
+            self.finding_container.to_human_readable_message(),
+            "my_other_proto.proto: An existing method_signature `type` is removed from method `subject` in service `context`.\n"
+            + "my_proto.proto L5: An existing resource_definition `subject` is removed.\n"
+            + "my_proto.proto L12: An existing method `subject` is removed from service `context`.\n",
         )
 
 

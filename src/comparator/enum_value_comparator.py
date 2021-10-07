@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 from src.comparator.wrappers import EnumValue
 
 
@@ -23,37 +23,43 @@ class EnumValueComparator:
         enum_value_original: EnumValue,
         enum_value_update: EnumValue,
         finding_container: FindingContainer,
+        context: str,
     ):
         self.enum_value_original = enum_value_original
         self.enum_value_update = enum_value_update
         self.finding_container = finding_container
+        self.context = context
 
     def compare(self):
         # 1. If the original EnumValue is None, then a new EnumValue is added.
         if self.enum_value_original is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_ADDITION,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
-                message=f"A new EnumValue `{self.enum_value_update.name}` is added.",
+                subject=self.enum_value_update.name,
+                context=self.context,
                 change_type=ChangeType.MINOR,
             )
         # 2. If the updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_REMOVAL,
                 proto_file_name=self.enum_value_original.proto_file_name,
                 source_code_line=self.enum_value_original.source_code_line,
-                message=f"An existing EnumValue `{self.enum_value_original.name}` is removed.",
+                subject=self.enum_value_original.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
             )
         # 3. If both EnumValueDescriptors are existing, check if the name is identical.
         elif self.enum_value_original.name != self.enum_value_update.name:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
-                message=f"Name of the EnumValue is changed from `{self.enum_value_original.name}` to `{self.enum_value_update.name}`.",
+                subject=self.enum_value_update.name,
+                oldsubject=self.enum_value_original.name,
+                context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.enum_value_update.nested_path,
             )

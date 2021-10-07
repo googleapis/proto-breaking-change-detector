@@ -49,10 +49,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, "An existing service `Placeholder` is removed."
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_service_addition(self):
@@ -68,8 +65,8 @@ class FileSetComparatorTest(unittest.TestCase):
             file_set,
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new service `Placeholder` is added.")
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "SERVICE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
     def test_service_change(self):
@@ -97,10 +94,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(services=[service_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, "An existing rpc method `DoThing` is removed."
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "METHOD_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -115,11 +109,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(messages=[message_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Name of an existing field is changed from `field_one` to `field_two`.",
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -167,11 +157,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `.test.import.dep_message` to `test_message`.",
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "update.proto")
@@ -197,8 +183,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[make_file_pb2(enums=[enum_update])]),
             self.finding_container,
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "An existing EnumValue `BLUE` is removed.")
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_VALUE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "my_proto.proto")
@@ -247,11 +232,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `.test.import.dep_enum` to `test_enum`.",
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "update.proto")
@@ -275,13 +256,12 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "An existing pattern value of the resource definition `.example.v1.Bar` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar/`.",
+        finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.change_type.name == "MAJOR"
         )
-        self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_CHANGE")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVAL")
         self.assertEqual(
             finding.location.proto_file_name,
             "foo.proto",
@@ -308,13 +288,9 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "An existing pattern value of the resource definition `.example.v1.Bar` is removed.",
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVEL")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REMOVAL")
         self.assertEqual(
             finding.location.proto_file_name,
             "foo.proto",
@@ -335,11 +311,7 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A new resource definition `.example.v1.Bar` has been added.",
-        )
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(
             finding.category.name,
@@ -372,13 +344,10 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        file_resource_removal = findings_map[
-            "An existing resource definition `example.v1/Bar` has been removed."
-        ]
-        self.assertEqual(
-            file_resource_removal.category.name,
-            "RESOURCE_DEFINITION_REMOVAL",
+        file_resource_removal = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "RESOURCE_DEFINITION_REMOVAL"
         )
         self.assertEqual(
             file_resource_removal.location.proto_file_name,
@@ -410,12 +379,8 @@ class FileSetComparatorTest(unittest.TestCase):
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
-        finding = self.finding_container.getAllFindings()[0]
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "PACKAGING_OPTION_REMOVAL")
-        self.assertEqual(
-            finding.message,
-            "An existing packaging option `Foo` for `java_outer_classname` is removed.",
-        )
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_packaging_options_change(self):
@@ -446,26 +411,20 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[file_update]),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        java_classname_option_change = findings_map[
-            "An existing packaging option `ServiceProto` for `java_outer_classname` is removed."
-        ]
-        self.assertEqual(
-            java_classname_option_change.category.name, "PACKAGING_OPTION_REMOVAL"
+        java_classname_option_removal = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "PACKAGING_OPTION_REMOVAL"
+            and f.subject == "java_outer_classname"
         )
-        php_namespace_option_removal = findings_map[
-            "An existing packaging option `Google\\Cloud\\Service\\V1` for `php_namespace` is removed."
-        ]
-        self.assertEqual(
-            php_namespace_option_removal.category.name, "PACKAGING_OPTION_REMOVAL"
+        php_namespace_option_removal = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "PACKAGING_OPTION_REMOVAL"
+            and f.subject == "php_namespace"
         )
-
-        php_namespace_option_addition = findings_map[
-            "A new packaging option `Google\\Cloud\\Service\\V1beta` for `php_namespace` is added."
-        ]
-        self.assertEqual(
-            php_namespace_option_addition.category.name, "PACKAGING_OPTION_ADDITION"
-        )
+        self.assertTrue(java_classname_option_removal)
+        self.assertTrue(php_namespace_option_removal)
 
     def test_packaging_options_version_update(self):
         file_options_original = descriptor_pb2.FileOptions()
@@ -497,9 +456,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[file_update]),
             self.finding_container,
         ).compare()
-        findings_map = self.finding_container.getAllFindings()
-        # No breaking changes since there are only minor version updates.
-        self.assertFalse(findings_map)
+        self.assertTrue(len(self.finding_container.get_all_findings()) == 0)
 
 
 if __name__ == "__main__":

@@ -52,50 +52,44 @@ class ResourceReferenceTest(unittest.TestCase):
             FileSet(_INVOKER_UPDATE.get_descriptor_set()),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        # An existing pattern of a file-level resource definition is changed.
-        file_resource_pattern_change = findings_map[
-            "An existing pattern value of the resource definition `example.googleapis.com/t2` is updated from `foo/{foo}/bar/{bar}/t2` to `foo/{foo}/bar/{bar}/t2_update`."
-        ]
-        self.assertEqual(
-            file_resource_pattern_change.category.name, "RESOURCE_PATTERN_CHANGE"
+
+        addition_finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "RESOURCE_PATTERN_ADDITION"
+        )
+        removal_finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "RESOURCE_PATTERN_REMOVAL"
+        )
+        resource_definition_removal_finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "RESOURCE_DEFINITION_REMOVAL"
         )
         self.assertEqual(
-            file_resource_pattern_change.location.proto_file_name,
-            "resource_database_v1beta1.proto",
-        )
-        self.assertEqual(file_resource_pattern_change.location.source_code_line, 13)
-        # An existing pattern of a message-level resource annotation is changed.
-        message_resource_pattern_change = findings_map[
-            "An existing pattern value of the resource definition `example.googleapis.com/Foo` is updated from `foo/{foo}/bar/{bar}` to `foo/{foo}/bar`."
-        ]
-        self.assertEqual(
-            message_resource_pattern_change.category.name,
-            "RESOURCE_PATTERN_CHANGE",
-        )
-        self.assertEqual(
-            message_resource_pattern_change.location.proto_file_name,
-            "resource_database_v1beta1.proto",
-        )
-        self.assertEqual(
-            message_resource_pattern_change.location.source_code_line,
-            26,
-        )
-        # An existing message-level resource annotation is removed, and it is not moved to
-        # file-level resource definition. So it is a breaking change.
-        message_resource_removal = findings_map[
-            "An existing resource definition `example.googleapis.com/Test` has been removed."
-        ]
-        self.assertEqual(
-            message_resource_removal.category.name,
-            "RESOURCE_DEFINITION_REMOVAL",
-        )
-        self.assertEqual(
-            message_resource_removal.location.proto_file_name,
+            addition_finding.location.proto_file_name,
             "resource_database_v1.proto",
         )
-        self.assertEqual(message_resource_removal.location.source_code_line, 34)
-        self.assertEqual(message_resource_removal.change_type.value, 1)
+        self.assertEqual(addition_finding.location.source_code_line, 13)
+
+        self.assertEqual(
+            removal_finding.location.proto_file_name,
+            "resource_database_v1.proto",
+        )
+        self.assertEqual(
+            removal_finding.location.source_code_line,
+            13,
+        )
+        self.assertEqual(
+            resource_definition_removal_finding.location.proto_file_name,
+            "resource_database_v1.proto",
+        )
+        self.assertEqual(
+            resource_definition_removal_finding.location.source_code_line, 34
+        )
+        self.assertEqual(resource_definition_removal_finding.change_type.value, 1)
 
     def test_resource_reference_change(self):
         _INVOKER_ORIGNAL = Loader(
@@ -115,13 +109,11 @@ class ResourceReferenceTest(unittest.TestCase):
             FileSet(_INVOKER_UPDATE.get_descriptor_set()),
             self.finding_container,
         ).compare()
-        findings_map = {f.message: f for f in self.finding_container.getAllFindings()}
-        # Type of the resource_reference is changed from type to child_type, but
-        # they can not be resoved to the identical resource. Breaking change.
-        finding = findings_map[
-            "The child_type `example.googleapis.com/t1` and type `example.googleapis.com/t1` of resource reference option in field `topic` cannot be resolved to the identical resource."
-        ]
-        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
+        finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "RESOURCE_REFERENCE_CHANGE_CHILD_TYPE"
+        )
         self.assertEqual(
             finding.location.proto_file_name, "resource_reference_v1beta1.proto"
         )
@@ -131,7 +123,7 @@ class ResourceReferenceTest(unittest.TestCase):
         # but it is added in message-level. Non-breaking change.
         # 2. File-level resource definition `t2` is removed, but is added
         # to message-level resource. Non-breaking change.
-        breaking_changes = self.finding_container.getActionableFindings()
+        breaking_changes = self.finding_container.get_actionable_findings()
         self.assertEqual(len(breaking_changes), 1)
 
 

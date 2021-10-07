@@ -79,7 +79,7 @@ def detect(
         output_json_path,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
-    # It takes options, returns fileDescriptorSet.
+    # It takes options, returns file_descriptor_set.
     if options.use_descriptor_set():
         file_set_original = Loader(
             proto_definition_dirs=None,

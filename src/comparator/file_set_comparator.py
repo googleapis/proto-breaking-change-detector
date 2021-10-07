@@ -17,7 +17,7 @@ from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import FileSet
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 
 
 class FileSetComparator:
@@ -64,11 +64,12 @@ class FileSetComparator:
                     per_language_options_original - per_language_options_update
                 ):
                     classname_option = packaging_options_original[option][classname]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=classname_option.proto_file_name,
                         source_code_line=classname_option.source_code_line,
-                        message=f"An existing packaging option `{classname}` for `{option}` is removed.",
+                        type=classname,
+                        subject=option,
                         change_type=ChangeType.MAJOR,
                     )
             # Compare the option of language namespace. Minor version updates in consideration.
@@ -90,11 +91,12 @@ class FileSetComparator:
                     namespace_option = packaging_options_original[option][
                         original_option_value
                     ]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_REMOVAL,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
-                        message=f"An existing packaging option `{original_option_value}` for `{option}` is removed.",
+                        type=original_option_value,
+                        subject=option,
                         change_type=ChangeType.MAJOR,
                     )
                 for namespace in set(transformed_option_value_update.keys()) - set(
@@ -104,11 +106,12 @@ class FileSetComparator:
                     namespace_option = packaging_options_update[option][
                         original_option_value
                     ]
-                    self.finding_container.addFinding(
+                    self.finding_container.add_finding(
                         category=FindingCategory.PACKAGING_OPTION_ADDITION,
                         proto_file_name=namespace_option.proto_file_name,
                         source_code_line=namespace_option.source_code_line,
-                        message=f"A new packaging option `{original_option_value}` for `{option}` is added.",
+                        type=original_option_value,
+                        subject=option,
                         change_type=ChangeType.MAJOR,
                     )
 
@@ -117,17 +120,24 @@ class FileSetComparator:
         keys_update = set(self.fs_update.services_map.keys())
         for name in keys_original - keys_update:
             ServiceComparator(
-                self.fs_original.services_map[name], None, self.finding_container
+                self.fs_original.services_map[name],
+                None,
+                self.finding_container,
+                context=name,
             ).compare()
         for name in keys_update - keys_original:
             ServiceComparator(
-                None, self.fs_update.services_map[name], self.finding_container
+                None,
+                self.fs_update.services_map[name],
+                self.finding_container,
+                context=name,
             ).compare()
         for name in keys_update & keys_original:
             ServiceComparator(
                 self.fs_original.services_map[name],
                 self.fs_update.services_map[name],
                 self.finding_container,
+                context=name,
             ).compare()
 
     def _compare_messages(self):
@@ -144,6 +154,7 @@ class FileSetComparator:
                     self.fs_original.messages_map[name],
                     self.fs_update.messages_map[transformed_name],
                     self.finding_container,
+                    context=name,
                 ).compare()
                 compared_update_keys.add(transformed_name)
             else:
@@ -157,6 +168,7 @@ class FileSetComparator:
                     self.fs_original.messages_map[name],
                     None,
                     self.finding_container,
+                    context=name,
                 ).compare()
         for name in keys_update - compared_update_keys:
             # Message only exits in the update version.
@@ -169,6 +181,7 @@ class FileSetComparator:
                 None,
                 self.fs_update.messages_map[name],
                 self.finding_container,
+                context=name,
             ).compare()
 
     def _compare_enums(self):
@@ -185,6 +198,7 @@ class FileSetComparator:
                     self.fs_original.enums_map[name],
                     self.fs_update.enums_map[transformed_name],
                     self.finding_container,
+                    context=name,
                 ).compare()
                 compared_update_keys.add(transformed_name)
             else:
@@ -198,6 +212,7 @@ class FileSetComparator:
                     self.fs_original.enums_map[name],
                     None,
                     self.finding_container,
+                    context=name,
                 ).compare()
         for name in keys_update - compared_update_keys:
             # Enum only exits in the update version.
@@ -210,6 +225,7 @@ class FileSetComparator:
                 None,
                 self.fs_update.enums_map[name],
                 self.finding_container,
+                context=name,
             ).compare()
 
     def _compare_resources(self):
@@ -221,54 +237,53 @@ class FileSetComparator:
         for resource_type in resources_types_original & resources_types_update:
             patterns_original = resources_original.types[resource_type].value.pattern
             patterns_update = resources_update.types[resource_type].value.pattern
-            # An existing pattern is removed.
-            if len(patterns_original) > len(patterns_update):
-                self.finding_container.addFinding(
-                    category=FindingCategory.RESOURCE_PATTERN_REMOVEL,
+            # A new pattern is added.
+            for pattern in set(patterns_update) - set(patterns_original):
+                self.finding_container.add_finding(
+                    category=FindingCategory.RESOURCE_PATTERN_ADDITION,
                     proto_file_name=resources_original.types[
                         resource_type
                     ].proto_file_name,
                     source_code_line=resources_original.types[
                         resource_type
                     ].source_code_line,
-                    message=f"An existing pattern value of the resource definition `{resource_type}` is removed.",
+                    type=pattern,
+                    subject=resource_type,
+                    change_type=ChangeType.MINOR,
+                )
+            # An existing pattern is removed.
+            for pattern in set(patterns_original) - set(patterns_update):
+                self.finding_container.add_finding(
+                    category=FindingCategory.RESOURCE_PATTERN_REMOVAL,
+                    proto_file_name=resources_original.types[
+                        resource_type
+                    ].proto_file_name,
+                    source_code_line=resources_original.types[
+                        resource_type
+                    ].source_code_line,
+                    type=pattern,
+                    subject=resource_type,
                     change_type=ChangeType.MAJOR,
                 )
-            # An existing pattern value is changed.
-            # A new pattern value appended to the pattern list is not consider breaking change.
-            for old_pattern, new_pattern in zip(patterns_original, patterns_update):
-                if old_pattern != new_pattern:
-                    self.finding_container.addFinding(
-                        category=FindingCategory.RESOURCE_PATTERN_CHANGE,
-                        proto_file_name=resources_update.types[
-                            resource_type
-                        ].proto_file_name,
-                        source_code_line=resources_update.types[
-                            resource_type
-                        ].source_code_line,
-                        message=f"An existing pattern value of the resource definition `{resource_type}` is updated from `{old_pattern}` to `{new_pattern}`.",
-                        change_type=ChangeType.MAJOR,
-                        extra_info=[f'pattern: "{new_pattern}"'],
-                    )
 
         # 2. File-level resource definitions addition.
         for resource_type in resources_types_update - resources_types_original:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.RESOURCE_DEFINITION_ADDITION,
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
-                message=f"A new resource definition `{resource_type}` has been added.",
+                subject=resource_type,
                 change_type=ChangeType.MINOR,
             )
         # 3. File-level resource definitions removal.
         for resource_type in resources_types_original - resources_types_update:
-            self.finding_container.addFinding(
+            self.finding_container.add_finding(
                 category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
                 proto_file_name=resources_original.types[resource_type].proto_file_name,
                 source_code_line=resources_original.types[
                     resource_type
                 ].source_code_line,
-                message=f"An existing resource definition `{resource_type}` has been removed.",
+                subject=resource_type,
                 change_type=ChangeType.MAJOR,
             )
 

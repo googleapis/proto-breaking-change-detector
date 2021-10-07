@@ -51,35 +51,40 @@ class EnumComparatorTest(unittest.TestCase):
         # fmt: on
 
     def test_enum_removal(self):
-        EnumComparator(self.enum_foo, None, self.finding_container).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "An existing Enum `Foo` is removed.")
+        EnumComparator(
+            self.enum_foo, None, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_addition(self):
-        EnumComparator(None, self.enum_bar, self.finding_container).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new Enum `Bar` is added.")
+        EnumComparator(
+            None, self.enum_bar, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
     def test_enum_value_change(self):
-        EnumComparator(self.enum_foo, self.enum_bar, self.finding_container).compare()
-        finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new EnumValue `VALUE2` is added.")
+        EnumComparator(
+            self.enum_foo, self.enum_bar, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 3)
 
     def test_no_api_change(self):
-        EnumComparator(self.enum_foo, self.enum_foo, self.finding_container).compare()
-        self.assertEqual(len(self.finding_container.getAllFindings()), 0)
+        EnumComparator(
+            self.enum_foo, self.enum_foo, self.finding_container, context="ctx"
+        ).compare()
+        self.assertEqual(len(self.finding_container.get_all_findings()), 0)
 
 
 if __name__ == "__main__":
