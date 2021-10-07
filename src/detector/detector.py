@@ -53,6 +53,10 @@ class Detector:
                 )
 
         if self.opts and self.opts.human_readable_message:
-            sys.stdout.write(self.finding_container.to_human_readable_message())
+            sys.stdout.write(
+                self.finding_container.to_human_readable_message(
+                    line_numbers=self.opts.line_numbers
+                )
+            )
 
         return self.finding_container.get_actionable_findings()

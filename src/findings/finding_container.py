@@ -78,7 +78,7 @@ class FindingContainer:
     def to_dict_arr(self):
         return [finding.to_dict() for finding in self.finding_results]
 
-    def to_human_readable_message(self):
+    def to_human_readable_message(self, line_numbers=True):
         output_message = ""
         file_to_findings = defaultdict(list)
         for finding in self.get_actionable_findings():
@@ -92,7 +92,7 @@ class FindingContainer:
             sorted_findings = sorted_filtered_findings(findings, lambda f: True)
             for finding in sorted_findings:
                 message = finding.get_message()
-                if finding.location.source_code_line == -1:
+                if finding.location.source_code_line == -1 or not line_numbers:
                     output_message += f"{file_name}: {message}\n"
                 else:
                     output_message += (
