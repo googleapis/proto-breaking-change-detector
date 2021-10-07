@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,15 +36,16 @@ class FindingCategory(enum.Enum):
     RESOURCE_REFERENCE_REMOVAL = 15
     RESOURCE_REFERENCE_ADDITION = 16
     RESOURCE_REFERENCE_CHANGE = 17
+    RESOURCE_REFERENCE_MOVED = 18
+    RESOURCE_REFERENCE_CHANGE_CHILD_TYPE = 19
     # Messages
     MESSAGE_ADDITION = 20
     MESSAGE_REMOVAL = 21
     # Message annotations
     RESOURCE_DEFINITION_ADDITION = 22
-    RESOURCE_DEFINITION_CHANGE = 23
     RESOURCE_DEFINITION_REMOVAL = 24
-    RESOURCE_PATTERN_REMOVEL = 25
-    RESOURCE_PATTERN_CHANGE = 26
+    RESOURCE_PATTERN_REMOVAL = 25
+    RESOURCE_PATTERN_ADDITION = 26
     # Services
     SERVICE_ADDITION = 30
     SERVICE_REMOVAL = 31
@@ -53,8 +54,9 @@ class FindingCategory(enum.Enum):
     SERVICE_HOST_REMOVAL = 33
     SERVICE_HOST_CHANGE = 34
     METHOD_SIGNATURE_REMOVAL = 35
-    METHOD_SIGNATURE_CHANGE = 36
+    METHOD_SIGNATURE_ADDITION = 36
     OAUTH_SCOPE_REMOVAL = 37
+    OAUTH_SCOPE_ADDITION = 38
     # Methods
     METHOD_REMOVAL = 40
     METHOD_ADDTION = 41
@@ -79,40 +81,3 @@ class FindingCategory(enum.Enum):
 class ChangeType(enum.Enum):
     MAJOR = 1
     MINOR = 2
-
-
-class Finding:
-    class _Location:
-        proto_file_name: str
-        source_code_line: int
-
-        def __init__(self, proto_file_name, source_code_line):
-            self.proto_file_name = proto_file_name
-            self.source_code_line = source_code_line
-
-    def __init__(
-        self,
-        category,
-        proto_file_name,
-        source_code_line,
-        message,
-        change_type,
-        extra_info=None,
-    ):
-        self.category = category
-        self.location = self._Location(proto_file_name, source_code_line)
-        self.message = message
-        self.change_type = change_type
-        self.extra_info = extra_info
-
-    def toDict(self):
-        return {
-            "category": self.category.name,
-            "location": {
-                "proto_file_name": self.location.proto_file_name,
-                "source_code_line": self.location.source_code_line,
-            },
-            "message": self.message,
-            "change_type": self.change_type.name,
-            "extra_info": self.extra_info,
-        }

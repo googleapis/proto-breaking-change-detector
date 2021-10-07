@@ -32,41 +32,37 @@ class FieldComparatorTest(unittest.TestCase):
 
     def test_field_removal(self):
         field_foo = make_field("Foo")
-        FieldComparator(field_foo, None, self.finding_container).compare()
+        FieldComparator(
+            field_foo, None, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "An existing field `Foo` is removed.")
         self.assertEqual(finding.category.name, "FIELD_REMOVAL")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
     def test_field_addition(self):
         field_foo = make_field("Foo")
-        FieldComparator(None, field_foo, self.finding_container).compare()
+        FieldComparator(
+            None, field_foo, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.message, "A new field `Foo` is added.")
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
 
     def test_name_change(self):
         field_foo = make_field("Foo")
         field_bar = make_field("Bar")
-        FieldComparator(field_foo, field_bar, self.finding_container).compare()
+        FieldComparator(
+            field_foo, field_bar, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Name of an existing field is changed from `Foo` to `Bar`.",
-        )
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
 
     def test_repeated_label_change(self):
         field_repeated = make_field(repeated=True)
         field_non_repeated = make_field(repeated=False)
         FieldComparator(
-            field_repeated, field_non_repeated, self.finding_container
+            field_repeated, field_non_repeated, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Repeated state of an existing field `my_field` is changed.",
-        )
         self.assertEqual(finding.category.name, "FIELD_REPEATED_CHANGE")
 
     def test_field_behavior_change(self):
@@ -74,43 +70,33 @@ class FieldComparatorTest(unittest.TestCase):
         field_non_required = make_field(required=False)
         # Required to optional, non-breaking change.
         FieldComparator(
-            field_required, field_non_required, self.finding_container
+            field_required, field_non_required, self.finding_container, context="ctx"
         ).compare()
         findings = self.finding_container.getAllFindings()
         self.assertFalse(findings)
         # Required to optional, non-breaking change.
         FieldComparator(
-            field_non_required, field_required, self.finding_container
+            field_non_required, field_required, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Field behavior of an existing field `my_field` is changed.",
-        )
         self.assertEqual(finding.category.name, "FIELD_BEHAVIOR_CHANGE")
 
     def test_primitive_type_change(self):
         field_int = make_field(proto_type="TYPE_INT32")
         field_string = make_field(proto_type="TYPE_STRING")
-        FieldComparator(field_int, field_string, self.finding_container).compare()
+        FieldComparator(
+            field_int, field_string, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `int32` to `string`.",
-        )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
     def test_message_type_change(self):
         field_message = make_field(type_name=".example.v1.Enum")
         field_message_update = make_field(type_name=".example.v1beta1.EnumUpdate")
         FieldComparator(
-            field_message, field_message_update, self.finding_container
+            field_message, field_message_update, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `.example.v1.Enum` to `.example.v1beta1.EnumUpdate`.",
-        )
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
 
     def test_message_type_change_minor_version_update(self):
@@ -119,7 +105,7 @@ class FieldComparatorTest(unittest.TestCase):
             type_name=".example.v1beta1.Enum", api_version="v1beta1"
         )
         FieldComparator(
-            field_message, field_message_update, self.finding_container
+            field_message, field_message_update, self.finding_container, context="ctx"
         ).compare()
         findings = self.finding_container.getAllFindings()
         self.assertFalse(findings)
@@ -141,12 +127,10 @@ class FieldComparatorTest(unittest.TestCase):
             type_name=".exmaple.MapEntry",
             map_entry={"key": key_field, "value": value_field},
         )
-        FieldComparator(field_no_map, field_map, self.finding_container).compare()
+        FieldComparator(
+            field_no_map, field_map, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `.exmaple.MapEntry` to a map.",
-        )
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -168,12 +152,10 @@ class FieldComparatorTest(unittest.TestCase):
             type_name=".exmaple.MapEntry",
             map_entry={"key": key_field, "value": value_field},
         )
-        FieldComparator(field_map, field_no_map, self.finding_container).compare()
+        FieldComparator(
+            field_map, field_no_map, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from a map to `.exmaple.MapEntry`.",
-        )
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -201,12 +183,10 @@ class FieldComparatorTest(unittest.TestCase):
             map_entry={"key": key_update, "value": value_update},
         )
 
-        FieldComparator(field_original, field_update, self.finding_container).compare()
+        FieldComparator(
+            field_original, field_update, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Type of an existing field `my_field` is changed from `map<string, string>` to `map<.example.key, .example.value>`.",
-        )
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
         self.assertEqual(finding.location.proto_file_name, "foo")
@@ -237,25 +217,37 @@ class FieldComparatorTest(unittest.TestCase):
             api_version="v1beta1",
         )
 
-        FieldComparator(field_original, field_update, self.finding_container).compare()
+        FieldComparator(
+            field_original, field_update, self.finding_container, context="ctx"
+        ).compare()
         finding = self.finding_container.getAllFindings()
         self.assertFalse(finding)
 
     def test_out_oneof(self):
         field_oneof = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
         field_not_oneof = make_field(name="Foo")
-        FieldComparator(field_oneof, field_not_oneof, self.finding_container).compare()
-        findings = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings["An existing field `Foo` is moved out of One-of."]
-        self.assertEqual(finding.category.name, "FIELD_ONEOF_MOVE_OUT")
+        FieldComparator(
+            field_oneof, field_not_oneof, self.finding_container, context="ctx"
+        ).compare()
+        finding = next(
+            f
+            for f in self.finding_container.getAllFindings()
+            if f.category.name == "FIELD_ONEOF_MOVE_OUT"
+        )
+        self.assertTrue(finding)
 
     def test_into_oneof(self):
         field_oneof = make_field(name="Foo", oneof_index=0, oneof_name="oneof_field")
         field_not_oneof = make_field(name="Foo")
-        FieldComparator(field_not_oneof, field_oneof, self.finding_container).compare()
-        findings = {f.message: f for f in self.finding_container.getAllFindings()}
-        finding = findings["An existing field `Foo` is moved into One-of."]
-        self.assertEqual(finding.category.name, "FIELD_ONEOF_MOVE_IN")
+        FieldComparator(
+            field_not_oneof, field_oneof, self.finding_container, context="ctx"
+        ).compare()
+        finding = next(
+            f
+            for f in self.finding_container.getAllFindings()
+            if f.category.name == "FIELD_ONEOF_MOVE_IN"
+        )
+        self.assertTrue(finding)
 
     def test_proto3_optional_to_required(self):
         # Change an proto3 optional field to required. Breaking change.
@@ -266,13 +258,9 @@ class FieldComparatorTest(unittest.TestCase):
             name="Foo", oneof_index=0, oneof_name="oneof_field"
         )
         FieldComparator(
-            field_optional, field_not_optional, self.finding_container
+            field_optional, field_not_optional, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "Proto3 optional state of an existing field `Foo` is changed to required.",
-        )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 
     def test_proto3_required_to_optional(self):
@@ -284,13 +272,9 @@ class FieldComparatorTest(unittest.TestCase):
             name="Foo", oneof_index=0, oneof_name="oneof_field"
         )
         FieldComparator(
-            field_not_optional, field_optional, self.finding_container
+            field_not_optional, field_optional, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "An existing field `Foo` is changed to proto3 optional.",
-        )
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 
     def test_resource_reference_addition_breaking(self):
@@ -304,14 +288,13 @@ class FieldComparatorTest(unittest.TestCase):
         )
         field_with_reference = make_field(name="Test", options=field_options)
         FieldComparator(
-            field_without_reference, field_with_reference, self.finding_container
+            field_without_reference,
+            field_with_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
-        self.assertEqual(
-            finding.message,
-            "A resource reference option is added to the field `Test`, but it is not defined anywhere",
-        )
 
     def test_resource_reference_type_addition_non_breaking(self):
         # The added resource reference is in the database. Non-breaking change.
@@ -331,12 +314,12 @@ class FieldComparatorTest(unittest.TestCase):
             name="Test", options=field_options, resource_database=resource_database
         )
         FieldComparator(
-            field_without_reference, field_with_reference, self.finding_container
+            field_without_reference,
+            field_with_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, "A resource reference option is added to the field `Test`."
-        )
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
@@ -362,12 +345,12 @@ class FieldComparatorTest(unittest.TestCase):
             name="Test", options=field_options, resource_database=resource_database
         )
         FieldComparator(
-            field_without_reference, field_with_reference, self.finding_container
+            field_without_reference,
+            field_with_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message, "A resource reference option is added to the field `Test`."
-        )
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
 
@@ -382,13 +365,12 @@ class FieldComparatorTest(unittest.TestCase):
         # defined in the message.
         field_without_reference = make_field(name="Test")
         FieldComparator(
-            field_with_reference, field_without_reference, self.finding_container
+            field_with_reference,
+            field_without_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getActionableFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A resource reference option of the field `Test` is removed.",
-        )
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -409,13 +391,12 @@ class FieldComparatorTest(unittest.TestCase):
             name="Test", message_resource=message_resource
         )
         FieldComparator(
-            field_with_reference, field_without_reference, self.finding_container
+            field_with_reference,
+            field_without_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getActionableFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A resource reference option of the field `Test` is removed.",
-        )
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -446,14 +427,13 @@ class FieldComparatorTest(unittest.TestCase):
             message_resource=message_resource,
         )
         FieldComparator(
-            field_with_reference, field_without_reference, self.finding_container
+            field_with_reference,
+            field_without_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         # `bar/{bar}` is not parent resource of `foo/{foo}`.
         finding = self.finding_container.getActionableFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A resource reference option of the field `Test` is removed.",
-        )
         self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
@@ -475,14 +455,13 @@ class FieldComparatorTest(unittest.TestCase):
             name="Test", message_resource=message_resource
         )
         FieldComparator(
-            field_with_reference, field_without_reference, self.finding_container
+            field_with_reference,
+            field_without_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A resource reference option of the field `Test` is removed, but added back to the message options.",
-        )
-        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_MOVED")
         self.assertEqual(finding.change_type.name, "MINOR")
 
     def test_resource_reference_removal_non_breaking2(self):
@@ -512,14 +491,13 @@ class FieldComparatorTest(unittest.TestCase):
         )
         # `bar/{bar}` is the parent resource of `bar/{bar}/foo/{foo}`.
         FieldComparator(
-            field_with_reference, field_without_reference, self.finding_container
+            field_with_reference,
+            field_without_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "A resource reference option of the field `Test` is removed, but added back to the message options.",
-        )
-        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_REMOVAL")
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_MOVED")
         self.assertEqual(finding.change_type.name, "MINOR")
 
     def test_resource_reference_change_same_type_non_breaking(self):
@@ -529,7 +507,10 @@ class FieldComparatorTest(unittest.TestCase):
         )
         field_with_reference = make_field(name="Test", options=field_options)
         FieldComparator(
-            field_with_reference, field_with_reference, self.finding_container
+            field_with_reference,
+            field_with_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()
         # No breaking change should be detected.
@@ -542,7 +523,10 @@ class FieldComparatorTest(unittest.TestCase):
         )
         field_with_reference = make_field(name="Test", options=field_options)
         FieldComparator(
-            field_with_reference, field_with_reference, self.finding_container
+            field_with_reference,
+            field_with_reference,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()
         # No breaking change should be detected.
@@ -560,13 +544,12 @@ class FieldComparatorTest(unittest.TestCase):
         field_with_reference_foo = make_field(name="Test", options=field_options_foo)
         field_with_reference_bar = make_field(name="Test", options=field_options_bar)
         FieldComparator(
-            field_with_reference_foo, field_with_reference_bar, self.finding_container
+            field_with_reference_foo,
+            field_with_reference_bar,
+            self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(
-            finding.message,
-            "The type of resource reference option of the field `Test` is changed from `example.v1/Foo` to `example.v1/Bar`.",
-        )
         self.assertEqual(finding.change_type.name, "MAJOR")
 
     def test_resource_reference_change_type_conversion_non_breaking(self):
@@ -605,6 +588,7 @@ class FieldComparatorTest(unittest.TestCase):
             field_with_reference_child,
             field_with_reference_parent,
             self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()
         # No breaking change should be detected.
@@ -616,6 +600,7 @@ class FieldComparatorTest(unittest.TestCase):
             field_with_reference_parent,
             field_with_reference_child,
             self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()
         # No breaking change should be detected.
@@ -657,13 +642,10 @@ class FieldComparatorTest(unittest.TestCase):
             field_with_reference_child,
             field_with_reference_parent,
             self.finding_container,
+            context="ctx",
         ).compare()
         finding = self.finding_container.getAllFindings()[0]
-        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE")
-        self.assertEqual(
-            finding.message,
-            "The child_type `example.v1/Bar` and type `example.v1/Foo` of resource reference option in field `Test` cannot be resolved to the identical resource.",
-        )
+        self.assertEqual(finding.category.name, "RESOURCE_REFERENCE_CHANGE_CHILD_TYPE")
         self.assertEqual(finding.change_type.name, "MAJOR")
 
 

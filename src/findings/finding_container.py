@@ -12,8 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.findings.utils import FindingCategory, ChangeType, Finding
+from re import sub
+from typing import Callable
+from src.findings.finding import Finding
+from src.findings.finding_category import FindingCategory, ChangeType
 from collections import defaultdict
+
+
+def sortedFilteredFindings(findings: list, filter: Callable) -> list:
+    filtered = [f for f in findings if filter(f)]
+    filtered.sort(
+        key=lambda f: (
+            f.location.proto_file_name,
+            f.location.source_code_line,
+            f.subject,
+            f.oldsubject,
+            f.context,
+            f.type,
+            f.oldtype,
+        )
+    )
+    return filtered
 
 
 class FindingContainer:
@@ -25,30 +44,36 @@ class FindingContainer:
         category: FindingCategory,
         proto_file_name: str,
         source_code_line: int,
-        message: str,
         change_type: ChangeType,
         extra_info=None,
+        subject="",
+        oldsubject="",
+        context="",
+        type="",
+        oldtype="",
     ):
         self.finding_results.append(
             Finding(
                 category,
                 proto_file_name,
                 source_code_line,
-                message,
                 change_type,
                 extra_info,
+                subject=subject,
+                oldsubject=oldsubject,
+                context=context,
+                type=type,
+                oldtype=oldtype,
             )
         )
 
     def getAllFindings(self):
-        return self.finding_results
+        return sortedFilteredFindings(self.finding_results, lambda f: True)
 
     def getActionableFindings(self):
-        return [
-            finding
-            for finding in self.finding_results
-            if finding.change_type == ChangeType.MAJOR
-        ]
+        return sortedFilteredFindings(
+            self.finding_results, lambda f: f.change_type == ChangeType.MAJOR
+        )
 
     def toDictArr(self):
         return [finding.toDict() for finding in self.finding_results]
@@ -64,16 +89,13 @@ class FindingContainer:
             # Customize sort key function to output the findings in the same
             # file based on the source code line number.
             # Sort message alphabetically if the line number is same.
-            findings.sort(
-                key=lambda f: (
-                    f.location.proto_file_name,
-                    f.location.source_code_line,
-                    f.message,
-                )
-            )
-            for finding in findings:
+            sorted_findings = sortedFilteredFindings(findings, lambda f: True)
+            for finding in sorted_findings:
+                message = finding.getMessage()
                 if finding.location.source_code_line == -1:
-                    output_message += f"{file_name}: {finding.message}\n"
+                    output_message += f"{file_name}: {message}\n"
                 else:
-                    output_message += f"{file_name} L{finding.location.source_code_line}: {finding.message}\n"
+                    output_message += (
+                        f"{file_name} L{finding.location.source_code_line}: {message}\n"
+                    )
         return output_message

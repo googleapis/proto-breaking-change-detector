@@ -16,7 +16,7 @@ from src.comparator.field_comparator import FieldComparator
 from src.comparator.enum_comparator import EnumComparator
 from src.comparator.wrappers import Message
 from src.findings.finding_container import FindingContainer
-from src.findings.utils import FindingCategory, ChangeType
+from src.findings.finding_category import FindingCategory, ChangeType
 
 
 class DescriptorComparator:
@@ -25,10 +25,12 @@ class DescriptorComparator:
         message_original: Message,
         message_update: Message,
         finding_container: FindingContainer,
+        context: str,
     ):
         self.message_original = message_original
         self.message_update = message_update
         self.finding_container = finding_container
+        self.context = context
 
     def compare(self):
         # _compare method will be recursively called for nested message comparison.
@@ -41,7 +43,7 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_ADDITION,
                 proto_file_name=message_update.proto_file_name,
                 source_code_line=message_update.source_code_line,
-                message=f"A new message `{message_update.name}` is added.",
+                subject=message_update.name,
                 change_type=ChangeType.MINOR,
             )
             return
@@ -51,7 +53,7 @@ class DescriptorComparator:
                 category=FindingCategory.MESSAGE_REMOVAL,
                 proto_file_name=message_original.proto_file_name,
                 source_code_line=message_original.source_code_line,
-                message=f"An existing message `{message_original.name}` is removed.",
+                subject=message_original.name,
                 change_type=ChangeType.MAJOR,
             )
             return
@@ -95,18 +97,21 @@ class DescriptorComparator:
                 fields_dict_original[fieldNumber],
                 None,
                 self.finding_container,
+                context=self.context,
             ).compare()
         for fieldNumber in fields_number_update - fields_number_original:
             FieldComparator(
                 None,
                 fields_dict_update[fieldNumber],
                 self.finding_container,
+                context=self.context,
             ).compare()
         for fieldNumber in fields_number_original & fields_number_update:
             FieldComparator(
                 fields_dict_original[fieldNumber],
                 fields_dict_update[fieldNumber],
                 self.finding_container,
+                context=self.context,
             ).compare()
 
     def _compare_nested_messages(
@@ -134,16 +139,19 @@ class DescriptorComparator:
                 nested_enum_dict_original[name],
                 None,
                 self.finding_container,
+                context=self.context,
             ).compare()
         for name in enum_name_update - enum_name_original:
             EnumComparator(
                 None,
                 nested_enum_dict_update[name],
                 self.finding_container,
+                context=self.context,
             ).compare()
         for name in enum_name_original & enum_name_update:
             EnumComparator(
                 nested_enum_dict_original[name],
                 nested_enum_dict_update[name],
                 self.finding_container,
+                context=self.context,
             ).compare()
