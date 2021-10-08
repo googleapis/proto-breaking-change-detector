@@ -456,7 +456,7 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(files=[file_update]),
             self.finding_container,
         ).compare()
-        self.assertEqual(self.finding_container.get_all_findings(), 0)
+        self.assertEqual(self.finding_container.get_all_findings(), [])
 
 
 if __name__ == "__main__":
