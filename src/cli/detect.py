@@ -53,6 +53,12 @@ from src.detector.detector import Detector
     is_flag=True,
     help="Enable the human-readable message output if set to True. Default value is false.",
 )
+@click.option(
+    "--line_numbers/--no_line_numbers",
+    default=True,
+    is_flag=True,
+    help="Show line numbers in the human readable output. True by default, use --no_line_numbers to disable.",
+)
 def detect(
     original_api_definition_dirs: str,
     update_api_definition_dirs: str,
@@ -62,6 +68,7 @@ def detect(
     update_descriptor_set_file_path: str,
     output_json_path: str,
     human_readable_message: bool,
+    line_numbers: bool,
 ):
     """Detect the breaking changes of the original and updated versions of API definition files."""
     # 1. Read the stdin options and create the Options object for all the command args.
@@ -69,14 +76,15 @@ def detect(
     # a) proto API defintion files.
     # b) compiled FileDescriptorSet file which can be obtained by protocal compiler.
     options = Options(
-        original_api_definition_dirs,
-        update_api_definition_dirs,
-        original_proto_files,
-        update_proto_files,
-        original_descriptor_set_file_path,
-        update_descriptor_set_file_path,
-        human_readable_message,
-        output_json_path,
+        original_api_definition_dirs=original_api_definition_dirs,
+        update_api_definition_dirs=update_api_definition_dirs,
+        original_proto_files=original_proto_files,
+        update_proto_files=update_proto_files,
+        original_descriptor_set_file_path=original_descriptor_set_file_path,
+        update_descriptor_set_file_path=update_descriptor_set_file_path,
+        human_readable_message=human_readable_message,
+        output_json_path=output_json_path,
+        line_numbers=line_numbers,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
     # It takes options, returns file_descriptor_set.

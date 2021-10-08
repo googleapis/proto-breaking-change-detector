@@ -32,6 +32,7 @@ class Options:
     output_json_path: Optional. The path of the findings json file. If not specify,
                       we will create a json for the users which is in
                       `$root/detected_breaking_changes.json`.
+    line_numbers: Show line numbers from the human readable output. True by default.
     """
 
     def __init__(
@@ -44,6 +45,7 @@ class Options:
         update_descriptor_set_file_path: str,
         human_readable_message: bool = False,
         output_json_path: Optional[str] = None,
+        line_numbers: bool = True,
     ):
         self.original_api_definition_dirs = self._get_arg_arr(
             original_api_definition_dirs
@@ -60,6 +62,7 @@ class Options:
             )
         self.human_readable_message = human_readable_message
         self.output_json_path = self._get_output_json_path(output_json_path)
+        self.line_numbers = line_numbers
 
     def use_proto_dirs(self) -> bool:
         # User pass in the directorirs of proto definition files as input.

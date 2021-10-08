@@ -288,6 +288,32 @@ class CliDetectTest(unittest.TestCase):
                 + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L283: An existing message `Timepoint` is removed.\n",
             )
 
+    def test_tts_proto_no_line_numbers(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    f"--original_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=googleapis/,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=googleapis/google/cloud/texttospeech/v1beta1/cloud_tts.proto",
+                    "--update_proto_files=googleapis/google/cloud/texttospeech/v1/cloud_tts.proto",
+                    "--human_readable_message",
+                    "--no_line_numbers",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing value `MP3_64_KBPS` is removed from enum `AudioEncoding`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing value `MULAW` is removed from enum `AudioEncoding`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing enum `TimepointType` is removed.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `enable_time_pointing` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `timepoints` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `audio_config` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing message `Timepoint` is removed.\n",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
