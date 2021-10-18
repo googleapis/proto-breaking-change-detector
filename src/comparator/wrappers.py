@@ -645,7 +645,7 @@ class Method:
         # field in the message and have a field number of 1.
         for field in response_fields_map.values():
             if field.repeated.value and field.number == 1:
-                return field
+                return field  # pytype: disable=bad-return-type  # bind-properties
         return None
 
     # fmt: off
