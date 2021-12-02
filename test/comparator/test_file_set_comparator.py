@@ -132,13 +132,13 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(
                 files=[
                     make_file_pb2(
-                        name="orignal.proto",
+                        name="original.proto",
                         messages=[message_original],
-                        dependency="test/import/dep.proto",
+                        dependency=["test/import/dep.proto"],
                         package="example.v1",
                     ),
                     make_file_pb2(
-                        name="dep.proto",
+                        name="test/import/dep.proto",
                         messages=[field_type_original],
                         package="test.import",
                     ),
@@ -206,13 +206,13 @@ class FileSetComparatorTest(unittest.TestCase):
             make_file_set(
                 files=[
                     make_file_pb2(
-                        name="orignal.proto",
+                        name="original.proto",
                         messages=[message_original],
-                        dependency="test/import/dep.proto",
+                        dependency=["test/import/dep.proto"],
                         package="example.v1",
                     ),
                     make_file_pb2(
-                        name="dep.proto",
+                        name="test/import/dep.proto",
                         enums=[field_type_original],
                         package="test.import",
                     ),

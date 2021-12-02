@@ -43,7 +43,7 @@ python3 -m venv env
 source env/bin/activate
 ```
 
-2. Install the tool in the root directoty
+2. Install the tool in the root directory
 
 ```.sh
 python3 -m pip install --editable .
