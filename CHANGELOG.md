@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.1.1](https://www.github.com/googleapis/proto-breaking-change-detector/compare/v1.1.0...v1.1.1) (2021-12-02)
+
+
+### Bug Fixes
+
+* disable bad return type check ([#187](https://www.github.com/googleapis/proto-breaking-change-detector/issues/187)) ([c1488a6](https://www.github.com/googleapis/proto-breaking-change-detector/commit/c1488a6911829e051d92a3fde70bcb6a00f30bf3))
+* fix the logic for finding package name ([#192](https://www.github.com/googleapis/proto-breaking-change-detector/issues/192)) ([d0c5280](https://www.github.com/googleapis/proto-breaking-change-detector/commit/d0c52809cd337f286d3c34944a4f89d81c136a67))
+
 ## [1.1.0](https://www.github.com/googleapis/proto-breaking-change-detector/compare/v1.0.2...v1.1.0) (2021-10-08)
 
 
