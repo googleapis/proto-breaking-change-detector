@@ -25,6 +25,8 @@ from test.tools.mock_descriptors import (
 from google.api import resource_pb2
 from google.protobuf import descriptor_pb2
 
+from src.comparator.wrappers import FileSet
+
 
 class FileSetTest(unittest.TestCase):
     def test_file_set_properties(self):
@@ -358,6 +360,43 @@ class FileSetTest(unittest.TestCase):
         file_set = make_file_set(files=[dep1, dep2])
         self.assertEqual(file_set.root_package, "example.external")
         self.assertFalse(file_set.api_version)
+
+    def test_get_root_package(self):
+        common = descriptor_pb2.FileDescriptorProto(
+            name="google/cloud/common_resources.proto",
+            package="google.cloud",
+        )
+        speech_resource = descriptor_pb2.FileDescriptorProto(
+            name="google/cloud/speech/v1/resource.proto",
+            package="google.cloud.speech.v1",
+        )
+        speech_with_dep = descriptor_pb2.FileDescriptorProto(
+            name="google/cloud/speech/v1/cloud_speech.proto",
+            package="google.cloud.speech.v1",
+            dependency=["google/cloud/speech/v1/resource.proto"],
+        )
+        speech_no_dep = descriptor_pb2.FileDescriptorProto(
+            name="google/cloud/speech/v1/cloud_speech.proto",
+            package="google.cloud.speech.v1",
+        )
+        self.assertEqual(
+            FileSet.get_root_package(
+                descriptor_pb2.FileDescriptorSet(
+                    file=[common, speech_with_dep, speech_resource]
+                )
+            ),
+            "google.cloud.speech.v1",
+        )
+        self.assertEqual(
+            FileSet.get_root_package(
+                descriptor_pb2.FileDescriptorSet(file=[common, speech_no_dep])
+            ),
+            "google.cloud.speech.v1",
+        )
+        self.assertEqual(
+            FileSet.get_root_package(descriptor_pb2.FileDescriptorSet(file=[common])),
+            "",
+        )
 
 
 if __name__ == "__main__":
