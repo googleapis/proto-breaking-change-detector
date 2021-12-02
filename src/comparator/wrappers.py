@@ -22,6 +22,7 @@ describe descriptors).
 
 import dataclasses
 import re
+import os
 from collections import defaultdict
 from google.api import field_behavior_pb2
 from google.api import resource_pb2
@@ -32,6 +33,16 @@ from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
 from src.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional, Tuple, cast, List
+
+COMMON_PACKAGES = [
+    "google.longrunning",
+    "google.cloud",
+    "google.cloud.location",
+    "google.protobuf",
+    "google.type",
+    "google.rpc",
+    "google.api",
+]
 
 
 def _get_source_code_line(source_code_locations, path):
@@ -845,7 +856,7 @@ class FileSet:
         # source code information of every field.
         source_code_locations_map = self._get_source_code_locations_map()
         # Get the root package from the API definition files.
-        self.root_package = self._get_root_package()
+        self.root_package = self.get_root_package(self.file_set_pb)
         # Get API version from definition files.
         version = r"(?P<version>v[0-9]+(p[0-9]+)?((alpha|beta)[0-9]*)?)"
         search_version = re.search(version, self.root_package)
@@ -853,7 +864,7 @@ class FileSet:
         # Get API definition files. This helps us to compare only the definition files
         # and imported dependency information.
         self.definition_files = [
-            f for f in file_set_pb.file if f.package == self.root_package
+            f for f in file_set_pb.file if f.package.startswith(self.root_package)
         ]
         # Register all resources in the database.
         self.resources_database = self._get_resource_database(
@@ -1002,18 +1013,43 @@ class FileSet:
                     (enum.full_name, enum) for enum in message.nested_enums.values()
                 )
 
-    def _get_root_package(self) -> str:
-        dependency_map = defaultdict(list)
-        for fd in self.file_set_pb.file:
-            # Put the file descriptor and its dependencies to the dependency map.
-            for dep in fd.dependency:
-                dependency_map[dep].append(fd)
-        # Find the root API definition file.
-        for f, deps in dependency_map.items():
-            for dep in deps:
-                if dep.name not in dependency_map:
-                    return dep.package
-        return self.file_set_pb.file[0].package if self.file_set_pb.file else ""
+    @staticmethod
+    def get_root_package(file_set_pb: descriptor_pb2.FileDescriptorSet) -> str:
+        """
+        Return the package name of the API being checked.
+
+        In this code, we don't have an access to "file_to_generate" boolean flag.
+        We only have parsed proto files in a FileDescriptorSet.
+        So the idea is to find which files are not listed as imports of any other
+        proto files (are "roots" of the dependency tree) and take the common prefix
+        of their packages (ignoring known commmon protos such as
+        google/cloud/common_resources.proto).
+        """
+        all_files = set()
+        imported_files = set()
+        files_by_name = dict()
+        for file in file_set_pb.file:
+            files_by_name[file.name] = file
+
+        queue = [descriptor_proto for descriptor_proto in file_set_pb.file]
+        while len(queue) > 0:
+            descriptor_proto = queue.pop(0)
+            all_files.add(descriptor_proto.name)
+            files_by_name[descriptor_proto.name] = descriptor_proto
+            for dep in descriptor_proto.dependency:
+                imported_files.add(dep)
+                if dep not in all_files and dep in files_by_name:
+                    queue.append(files_by_name[dep])
+
+        never_imported = [
+            files_by_name[filename] for filename in all_files.difference(imported_files)
+        ]
+        api_definition_protos = [
+            file for file in never_imported if file.package not in COMMON_PACKAGES
+        ]
+        if len(api_definition_protos) == 0:
+            return ""
+        return os.path.commonprefix([file.package for file in api_definition_protos])
 
     def _get_source_code_locations_map(
         self,
