@@ -1018,7 +1018,7 @@ class FileSet:
         """
         Return the package name of the API being checked.
 
-        In this code, we don't have an access to "file_to_generate" boolean flag.
+        In this code we don't have an access to "file_to_generate" boolean flag.
         We only have parsed proto files in a FileDescriptorSet.
         So the idea is to find which files are not listed as imports of any other
         proto files (are "roots" of the dependency tree) and take the common prefix

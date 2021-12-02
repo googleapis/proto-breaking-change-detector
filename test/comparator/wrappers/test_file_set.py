@@ -361,7 +361,7 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(file_set.root_package, "example.external")
         self.assertFalse(file_set.api_version)
 
-    def test_get_root_package_with(self):
+    def test_get_root_package(self):
         common = descriptor_pb2.FileDescriptorProto(
             name="google/cloud/common_resources.proto",
             package="google.cloud",
