@@ -61,5 +61,5 @@ class EnumValueComparator:
                 oldsubject=self.enum_value_original.name,
                 context=self.context,
                 change_type=ChangeType.MAJOR,
-                extra_info=self.enum_value_update.nested_path,
+                extra_info=self.enum_value_original.nested_path,
             )

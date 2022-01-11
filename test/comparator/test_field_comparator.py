@@ -48,13 +48,14 @@ class FieldComparatorTest(unittest.TestCase):
         self.assertEqual(finding.category.name, "FIELD_ADDITION")
 
     def test_name_change(self):
-        field_foo = make_field("Foo")
-        field_bar = make_field("Bar")
+        field_foo = make_field("Foo", nested_path=["foo"])
+        field_bar = make_field("Bar", nested_path=["bar"])
         FieldComparator(
             field_foo, field_bar, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "FIELD_NAME_CHANGE")
+        self.assertEqual(finding.extra_info[0], "foo")
 
     def test_repeated_label_change(self):
         field_repeated = make_field(repeated=True)
