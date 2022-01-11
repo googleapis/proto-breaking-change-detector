@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.1.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.1.1...v1.1.2) (2022-01-11)
+
+
+### Bug Fixes
+
+* location info for field and enum name changes ([#197](https://github.com/googleapis/proto-breaking-change-detector/issues/197)) ([b824451](https://github.com/googleapis/proto-breaking-change-detector/commit/b824451a908894bf9e4d9b424e4b205e74276f08))
+
 ### [1.1.1](https://www.github.com/googleapis/proto-breaking-change-detector/compare/v1.1.0...v1.1.1) (2021-12-02)
 
 
