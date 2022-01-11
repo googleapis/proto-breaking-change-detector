@@ -73,7 +73,7 @@ class FieldComparator:
                 subject=self.field_update.name,
                 context=self.context,
                 change_type=ChangeType.MAJOR,
-                extra_info=self.field_update.nested_path,
+                extra_info=self.field_original.nested_path,
             )
             return
 
