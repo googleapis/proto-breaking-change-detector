@@ -78,8 +78,14 @@ class FileSetTest(unittest.TestCase):
             name="bar.proto", package="example.v1", messages=messages
         )
         file_set = make_file_set(files=[file_bar, file_foo])
-        # Default to be empty.
-        self.assertFalse(file_set.packaging_options_map)
+        # Default to have `java_multiple_files=False`.
+        self.assertEqual(
+            list(file_set.packaging_options_map.keys()),
+            ["java_multiple_files"],
+        )
+        self.assertEqual(
+            list(file_set.packaging_options_map["java_multiple_files"].keys()), [False]
+        )
         self.assertEqual(
             list(file_set.messages_map.keys()),
             [".example.v1.InnerMessage", ".example.v1.request", ".example.v1.response"],

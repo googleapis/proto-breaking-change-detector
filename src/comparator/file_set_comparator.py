@@ -79,10 +79,16 @@ class FileSetComparator:
                 transformed_option_value_original = {}
                 transformed_option_value_update = {}
                 for namespace in per_language_options_original:
-                    transformed_name = self._get_version_update_name(namespace.lower())
-                    transformed_option_value_original[transformed_name] = namespace
+                    if namespace:
+                        transformed_name = self._get_version_update_name(
+                            str(namespace).lower()
+                        )
+                        transformed_option_value_original[transformed_name] = namespace
                 for namespace in per_language_options_update:
-                    transformed_option_value_update[namespace.lower()] = namespace
+                    if namespace:
+                        transformed_option_value_update[
+                            str(namespace).lower()
+                        ] = namespace
 
                 for namespace in set(transformed_option_value_original.keys()) - set(
                     transformed_option_value_update.keys()

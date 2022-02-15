@@ -1147,6 +1147,7 @@ class FileSet:
         packaging_options_path = {
             "java_package": (1,),
             "java_outer_classname": (8,),
+            "java_multiple_files": (10,),
             "csharp_namespace": (37,),
             "go_package": (11,),
             "swift_prefix": (39,),
