@@ -91,13 +91,13 @@ A single unit test can be run by this command:
 python -m unittest test.comparator.test_enum_comparator
 ```
 
-All unit tests can be run by the following commands, we have all components covered by unit tests: 
+All unit tests can be run by the following command, we have all components covered by unit tests: 
 
 ```sh
-python -m unittest discover test/comparator/
-python -m unittest discover test/comparator/wrappers
-python -m unittest discover test/detector
-python -m unittest discover test/findings
+python -m unittest discover test/comparator/ && \
+python -m unittest discover test/comparator/wrappers && \
+python -m unittest discover test/detector && \
+python -m unittest discover test/findings && \
 python -m unittest discover test/cli
 ```
 
