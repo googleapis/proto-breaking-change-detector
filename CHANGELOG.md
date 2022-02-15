@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.1.2...v1.2.0) (2022-02-15)
+
+
+### Features
+
+* check for the java_multiple_files option ([#201](https://github.com/googleapis/proto-breaking-change-detector/issues/201)) ([f1fa654](https://github.com/googleapis/proto-breaking-change-detector/commit/f1fa654ee63d9a2238d0483ded4b98a1416463de))
+
 ### [1.1.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.1.1...v1.1.2) (2022-01-11)
 
 
