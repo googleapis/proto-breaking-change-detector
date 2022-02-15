@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from tkinter.font import names
-from unicodedata import name
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
