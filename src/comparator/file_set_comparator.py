@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from tkinter.font import names
+from unicodedata import name
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
@@ -79,10 +81,12 @@ class FileSetComparator:
                 transformed_option_value_original = {}
                 transformed_option_value_update = {}
                 for namespace in per_language_options_original:
-                    transformed_name = self._get_version_update_name(namespace.lower())
-                    transformed_option_value_original[transformed_name] = namespace
+                    if namespace:
+                        transformed_name = self._get_version_update_name(str(namespace).lower())
+                        transformed_option_value_original[transformed_name] = namespace
                 for namespace in per_language_options_update:
-                    transformed_option_value_update[namespace.lower()] = namespace
+                    if namespace:
+                        transformed_option_value_update[str(namespace).lower()] = namespace
 
                 for namespace in set(transformed_option_value_original.keys()) - set(
                     transformed_option_value_update.keys()

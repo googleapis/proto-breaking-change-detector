@@ -354,6 +354,58 @@ class FileSetComparatorTest(unittest.TestCase):
             "bar.proto",
         )
 
+    def test_java_multiple_files_removal(self):
+        option1 = descriptor_pb2.FileOptions()
+        option1.java_multiple_files = True
+        file1 = make_file_pb2(
+            name="file.proto",
+            package="example.v1",
+            options=option1,
+        )
+        file_set_original = make_file_set(files=[file1])
+
+        option2 = descriptor_pb2.FileOptions()
+        option2.java_multiple_files = False
+        file2 = make_file_pb2(
+            name="file.proto",
+            package="example.v1",
+            options=option2,
+        )
+        file_set_update = make_file_set(files=[file2])
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        self.assertTrue(len(self.finding_container.get_all_findings()))
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "PACKAGING_OPTION_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_java_multiple_files_addition(self):
+        option1 = descriptor_pb2.FileOptions()
+        option1.java_multiple_files = False
+        file1 = make_file_pb2(
+            name="file.proto",
+            package="example.v1",
+            options=option1,
+        )
+        file_set_original = make_file_set(files=[file1])
+
+        option2 = descriptor_pb2.FileOptions()
+        option2.java_multiple_files = True
+        file2 = make_file_pb2(
+            name="file.proto",
+            package="example.v1",
+            options=option2,
+        )
+        file_set_update = make_file_set(files=[file2])
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        self.assertTrue(len(self.finding_container.get_all_findings()))
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "PACKAGING_OPTION_ADDITION")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
     def test_java_outer_classname_removal(self):
         option1 = descriptor_pb2.FileOptions()
         option1.java_outer_classname = "Foo"
