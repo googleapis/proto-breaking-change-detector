@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.0...v1.2.1) (2022-05-05)
+
+
+### Bug Fixes
+
+* do not report file option changes for new or removed files ([#216](https://github.com/googleapis/proto-breaking-change-detector/issues/216)) ([93c215c](https://github.com/googleapis/proto-breaking-change-detector/commit/93c215ce0b73a7b29814fba5cf6fd54ea66b39bd))
+
 ## [1.2.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.1.2...v1.2.0) (2022-02-15)
 
 
