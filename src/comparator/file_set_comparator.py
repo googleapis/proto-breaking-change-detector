@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os.path
 from src.comparator.service_comparator import ServiceComparator
 from src.comparator.message_comparator import DescriptorComparator
 from src.comparator.enum_comparator import EnumComparator
@@ -50,6 +51,18 @@ class FileSetComparator:
     def _compare_packaging_options(self):
         packaging_options_original = self.fs_original.packaging_options_map
         packaging_options_update = self.fs_update.packaging_options_map
+
+        # Adding or deleting a file could bring or remove some packaging options defined in that file.
+        # It's not a breaking change.
+        # Since BCD, by design, should be able to compare files from different versions of the services
+        # (e.g. v1 against v1beta1), we cannot look at the full filenames when determining if a file is
+        # added or removed. Let's just look at their basenames just for this specific comparison.
+        file_basenames_in_original = [
+            os.path.basename(f.name) for f in self.fs_original.file_set_pb.file
+        ]
+        file_basenames_in_update = [
+            os.path.basename(f.name) for f in self.fs_update.file_set_pb.file
+        ]
         if not packaging_options_original and not packaging_options_update:
             return
         for option in packaging_options_original.keys():
@@ -64,14 +77,19 @@ class FileSetComparator:
                     per_language_options_original - per_language_options_update
                 ):
                     classname_option = packaging_options_original[option][classname]
-                    self.finding_container.add_finding(
-                        category=FindingCategory.PACKAGING_OPTION_REMOVAL,
-                        proto_file_name=classname_option.proto_file_name,
-                        source_code_line=classname_option.source_code_line,
-                        type=classname,
-                        subject=option,
-                        change_type=ChangeType.MAJOR,
-                    )
+                    basename = os.path.basename(classname_option.proto_file_name)
+                    if (
+                        basename in file_basenames_in_original
+                        and basename in file_basenames_in_update
+                    ):
+                        self.finding_container.add_finding(
+                            category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                            proto_file_name=classname_option.proto_file_name,
+                            source_code_line=classname_option.source_code_line,
+                            type=classname,
+                            subject=option,
+                            change_type=ChangeType.MAJOR,
+                        )
             # Compare the option of language namespace. Minor version updates in consideration.
             else:
                 # Replace the version in the original packaging options with new api version.
@@ -97,14 +115,19 @@ class FileSetComparator:
                     namespace_option = packaging_options_original[option][
                         original_option_value
                     ]
-                    self.finding_container.add_finding(
-                        category=FindingCategory.PACKAGING_OPTION_REMOVAL,
-                        proto_file_name=namespace_option.proto_file_name,
-                        source_code_line=namespace_option.source_code_line,
-                        type=original_option_value,
-                        subject=option,
-                        change_type=ChangeType.MAJOR,
-                    )
+                    basename = os.path.basename(namespace_option.proto_file_name)
+                    if (
+                        basename in file_basenames_in_original
+                        and basename in file_basenames_in_update
+                    ):
+                        self.finding_container.add_finding(
+                            category=FindingCategory.PACKAGING_OPTION_REMOVAL,
+                            proto_file_name=namespace_option.proto_file_name,
+                            source_code_line=namespace_option.source_code_line,
+                            type=original_option_value,
+                            subject=option,
+                            change_type=ChangeType.MAJOR,
+                        )
                 for namespace in set(transformed_option_value_update.keys()) - set(
                     transformed_option_value_original.keys()
                 ):
@@ -112,14 +135,19 @@ class FileSetComparator:
                     namespace_option = packaging_options_update[option][
                         original_option_value
                     ]
-                    self.finding_container.add_finding(
-                        category=FindingCategory.PACKAGING_OPTION_ADDITION,
-                        proto_file_name=namespace_option.proto_file_name,
-                        source_code_line=namespace_option.source_code_line,
-                        type=original_option_value,
-                        subject=option,
-                        change_type=ChangeType.MAJOR,
-                    )
+                    basename = os.path.basename(namespace_option.proto_file_name)
+                    if (
+                        basename in file_basenames_in_original
+                        and basename in file_basenames_in_update
+                    ):
+                        self.finding_container.add_finding(
+                            category=FindingCategory.PACKAGING_OPTION_ADDITION,
+                            proto_file_name=namespace_option.proto_file_name,
+                            source_code_line=namespace_option.source_code_line,
+                            type=original_option_value,
+                            subject=option,
+                            change_type=ChangeType.MAJOR,
+                        )
 
     def _compare_services(self):
         keys_original = set(self.fs_original.services_map.keys())

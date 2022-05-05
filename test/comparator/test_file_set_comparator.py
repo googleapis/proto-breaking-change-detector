@@ -410,24 +410,17 @@ class FileSetComparatorTest(unittest.TestCase):
         option1 = descriptor_pb2.FileOptions()
         option1.java_outer_classname = "Foo"
         file1 = make_file_pb2(
-            name="fil1.proto",
+            name="file.proto",
             package="example.v1",
             options=option1,
         )
+        file_set_original = make_file_set(files=[file1])
         option2 = descriptor_pb2.FileOptions()
         option2.java_outer_classname = "Bar"
         file2 = make_file_pb2(
-            name="fil2.proto",
-            package="example.v1",
-            options=option2,
+            name="file.proto", package="example.v1beta", options=option2
         )
-        file_set_original = make_file_set(files=[file1, file2])
-        option3 = descriptor_pb2.FileOptions()
-        option3.java_outer_classname = "Bar"
-        file3 = make_file_pb2(
-            name="file3.proto", package="example.v1beta", options=option3
-        )
-        file_set_update = make_file_set(files=[file3])
+        file_set_update = make_file_set(files=[file2])
         FileSetComparator(
             file_set_original, file_set_update, self.finding_container
         ).compare()
@@ -441,7 +434,7 @@ class FileSetComparatorTest(unittest.TestCase):
         file_options_original.csharp_namespace = "Google.Cloud.Service.V1"
         file_options_original.java_outer_classname = "ServiceProto"
         file_original = make_file_pb2(
-            name="original.proto",
+            name="file.proto",
             package="google.cloud.service.v1",
             options=file_options_original,
         )
@@ -453,7 +446,7 @@ class FileSetComparatorTest(unittest.TestCase):
         file_options_update.csharp_namespace = "Google.Cloud.Service.V1alpha"
         file_options_update.java_outer_classname = "ServiceUpdateProto"
         file_update = make_file_pb2(
-            name="update.proto",
+            name="file.proto",
             package="google.cloud.service.v1alpha",
             options=file_options_update,
         )
@@ -478,6 +471,46 @@ class FileSetComparatorTest(unittest.TestCase):
         self.assertTrue(java_classname_option_removal)
         self.assertTrue(php_namespace_option_removal)
 
+    def test_packaging_options_new_file(self):
+        file_options_original = descriptor_pb2.FileOptions()
+        file_options_original.php_namespace = "Google\\Cloud\\Service\\V1"
+        file_options_original.csharp_namespace = "Google.Cloud.Service.V1"
+        file_options_original.java_outer_classname = "ServiceProto"
+        file_original = make_file_pb2(
+            name="existing.proto",
+            package="google.cloud.service.v1",
+            options=file_options_original,
+        )
+
+        file_options_update_1 = descriptor_pb2.FileOptions()
+        file_options_update_1.php_namespace = "Google\\Cloud\\Service\\V1"
+        file_options_update_1.csharp_namespace = "Google.Cloud.Service.V1"
+        file_options_update_1.java_outer_classname = "ServiceProto"
+        file_update_1 = make_file_pb2(
+            name="existing.proto",
+            package="google.cloud.service.v1",
+            options=file_options_update_1,
+        )
+
+        file_options_update_2 = descriptor_pb2.FileOptions()
+        file_options_update_2.php_namespace = "Google\\Cloud\\Service\\V1\\Subdir"
+        file_options_update_2.csharp_namespace = "Google.Cloud.Service.V1.Subdir"
+        file_options_update_2.java_outer_classname = "ServiceProto"
+        file_update_2 = make_file_pb2(
+            name="new.proto",
+            package="google.cloud.service.v1",
+            options=file_options_update_2,
+        )
+
+        FileSetComparator(
+            make_file_set(files=[file_original]),
+            make_file_set(files=[file_update_1, file_update_2]),
+            self.finding_container,
+        ).compare()
+
+        findings = self.finding_container.get_all_findings()
+        self.assertListEqual(findings, [])
+
     def test_packaging_options_version_update(self):
         file_options_original = descriptor_pb2.FileOptions()
         file_options_original.java_outer_classname = "ServiceProto"
@@ -486,7 +519,7 @@ class FileSetComparatorTest(unittest.TestCase):
         file_options_original.php_namespace = "Google\\Cloud\\Service\\V1"
         file_options_original.ruby_package = "Google::Cloud::Service::V1"
         file_original = make_file_pb2(
-            name="original.proto",
+            name="existing.proto",
             package="google.cloud.service.v1",
             options=file_options_original,
         )
@@ -498,7 +531,7 @@ class FileSetComparatorTest(unittest.TestCase):
         file_options_update.php_namespace = "Google\\Cloud\\Service\\V1alpha"
         file_options_update.ruby_package = "Google::Cloud::Service::V1alpha"
         file_update = make_file_pb2(
-            name="update.proto",
+            name="existing.proto",
             package="google.cloud.service.v1alpha",
             options=file_options_update,
         )
