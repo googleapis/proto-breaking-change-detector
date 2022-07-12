@@ -778,7 +778,7 @@ class Service:
         """Return the methods defined in the service. Method is identified by name."""
         # fmt: off
         return {
-            method.name: Method(
+            method.name: Method(  # pytype: disable=wrong-arg-types
                 method,
                 self.messages_map,
                 self.proto_file_name,
@@ -899,7 +899,7 @@ class FileSet:
             # Creat services map.
             for i, service in enumerate(fd.service):
                 # fmt: off
-                service_wrapper = Service(
+                service_wrapper = Service(  # pytype: disable=wrong-arg-types
                     service_pb=service,
                     messages_map=self.global_messages_map,
                     proto_file_name=fd.name,
