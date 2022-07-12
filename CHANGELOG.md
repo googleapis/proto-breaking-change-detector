@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.1...v1.2.2) (2022-07-12)
+
+
+### Bug Fixes
+
+* silence some type errors ([#230](https://github.com/googleapis/proto-breaking-change-detector/issues/230)) ([1493660](https://github.com/googleapis/proto-breaking-change-detector/commit/149366093b14f3c873799cf174d5bbdb04d6db0b))
+
 ### [1.2.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.0...v1.2.1) (2022-05-05)
 
 
