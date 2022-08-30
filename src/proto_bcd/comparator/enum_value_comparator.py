@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.findings.finding_container import FindingContainer
-from src.findings.finding_category import FindingCategory, ChangeType
-from src.comparator.wrappers import EnumValue
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.comparator.wrappers import EnumValue
 
 
 class EnumValueComparator:

@@ -13,12 +13,12 @@
 # limitations under the License.
 
 import os.path
-from src.comparator.service_comparator import ServiceComparator
-from src.comparator.message_comparator import DescriptorComparator
-from src.comparator.enum_comparator import EnumComparator
-from src.comparator.wrappers import FileSet
-from src.findings.finding_container import FindingContainer
-from src.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.comparator.service_comparator import ServiceComparator
+from proto_bcd.comparator.message_comparator import DescriptorComparator
+from proto_bcd.comparator.enum_comparator import EnumComparator
+from proto_bcd.comparator.wrappers import FileSet
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
 
 
 class FileSetComparator:

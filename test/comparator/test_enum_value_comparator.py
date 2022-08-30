@@ -15,8 +15,8 @@
 import unittest
 from test.tools.mock_descriptors import make_enum_value
 from google.protobuf import descriptor_pb2
-from src.comparator.enum_value_comparator import EnumValueComparator
-from src.findings.finding_container import FindingContainer
+from proto_bcd.comparator.enum_value_comparator import EnumValueComparator
+from proto_bcd.findings.finding_container import FindingContainer
 
 
 class EnumValueComparatorTest(unittest.TestCase):

@@ -14,8 +14,9 @@
 
 import unittest
 import os
-from src.detector.loader import Loader, _ProtocInvokerException
 from google.protobuf import descriptor_pb2
+
+from proto_bcd.detector.loader import Loader, _ProtocInvokerException
 
 
 class LoaderTest(unittest.TestCase):

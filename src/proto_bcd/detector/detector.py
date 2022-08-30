@@ -16,10 +16,10 @@ import json
 import sys
 from typing import Optional
 from google.protobuf import descriptor_pb2 as desc
-from src.detector.options import Options
-from src.comparator.file_set_comparator import FileSetComparator
-from src.comparator.wrappers import FileSet
-from src.findings.finding_container import FindingContainer
+from proto_bcd.detector.options import Options
+from proto_bcd.comparator.file_set_comparator import FileSetComparator
+from proto_bcd.comparator.wrappers import FileSet
+from proto_bcd.findings.finding_container import FindingContainer
 
 
 class Detector:

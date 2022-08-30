@@ -14,7 +14,7 @@
 
 import unittest
 from test.tools.mock_descriptors import make_message, make_field, make_enum, make_oneof
-from src.comparator import wrappers
+from proto_bcd.comparator import wrappers
 from google.protobuf import descriptor_pb2
 from google.api import resource_pb2
 

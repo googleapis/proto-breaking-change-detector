@@ -25,7 +25,7 @@ from test.tools.mock_descriptors import (
 from google.api import resource_pb2
 from google.protobuf import descriptor_pb2
 
-from src.comparator.wrappers import FileSet
+from proto_bcd.comparator.wrappers import FileSet
 
 
 class FileSetTest(unittest.TestCase):

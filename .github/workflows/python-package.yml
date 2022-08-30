@@ -35,25 +35,15 @@ jobs:
       run: |
         # stop the build if there are Python syntax errors or undefined names
         python -m black . --check
-    - name: Run unit tests for comparators
+    - name: Run unit tests
       run: |
-        python -m unittest discover test/comparator
-    - name: Run unit tests for wrappers
-      run: |
-        python -m unittest discover test/comparator/wrappers
-    - name: Run unit tests for findings
-      run: |
-        python -m unittest discover test/findings
-    - name: Run unit tests for detector
-      run: |
-        python -m unittest discover test/detector
-    - name: Run unit tests for CLI
-      run: |
-        python -m unittest discover test/cli
+        python run_tests.py
     - name: Check test coverage
+      env:
+        PYTHONPATH: src
       run: |
-        coverage run -m unittest discover test/comparator && coverage report -m --include=src/comparator/** --fail-under=98
-        coverage run -m unittest discover test/comparator/wrappers && coverage report -m --include=src/comparator/wrappers.py --fail-under=96
-        coverage run -m unittest discover test/findings && coverage report -m --include=src/findings/** --fail-under=100
-        coverage run -m unittest discover test/cli && coverage report -m --include=src/cli/** --fail-under=100
-        coverage run -m unittest discover test/detector && coverage report -m --include=src/detector/** --fail-under=95
+        coverage run -m unittest discover test/comparator && coverage report -m --include=src/proto_bcd/comparator/** --fail-under=98
+        coverage run -m unittest discover test/comparator/wrappers && coverage report -m --include=src/proto_bcd/comparator/wrappers.py --fail-under=96
+        coverage run -m unittest discover test/findings && coverage report -m --include=src/proto_bcd/findings/** --fail-under=100
+        coverage run -m unittest discover test/cli && coverage report -m --include=src/proto_bcd/cli/** --fail-under=100
+        coverage run -m unittest discover test/detector && coverage report -m --include=src/proto_bcd/detector/** --fail-under=95

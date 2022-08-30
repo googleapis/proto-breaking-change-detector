@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.comparator.resource_database import ResourceDatabase
-from src.comparator.wrappers import WithLocation
+from proto_bcd.comparator.resource_database import ResourceDatabase
+from proto_bcd.comparator.wrappers import WithLocation
 from google.protobuf import descriptor_pb2 as desc
 from google.api import resource_pb2
 

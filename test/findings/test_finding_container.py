@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import unittest
-from src.findings.finding_container import FindingContainer
-from src.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
 
 
 class FindingContainerTest(unittest.TestCase):

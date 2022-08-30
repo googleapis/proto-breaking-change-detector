@@ -14,8 +14,8 @@
 
 import unittest
 from test.tools.mock_descriptors import make_enum
-from src.comparator.enum_comparator import EnumComparator
-from src.findings.finding_container import FindingContainer
+from proto_bcd.comparator.enum_comparator import EnumComparator
+from proto_bcd.findings.finding_container import FindingContainer
 from google.protobuf import descriptor_pb2
 
 
