@@ -85,20 +85,16 @@ proto-breaking-change-detector \
 
 ## Unit Tests
 
-A single unit test can be run by this command: 
+A single unit test can be run by this command:
 
 ```sh
-python -m unittest test.comparator.test_enum_comparator
+env PYTHONPATH=src python -m unittest test.comparator.test_enum_comparator
 ```
 
-All unit tests can be run by the following command, we have all components covered by unit tests: 
+All unit tests can be run by the following command, we have all components covered by unit tests:
 
 ```sh
-python -m unittest discover test/comparator/ && \
-python -m unittest discover test/comparator/wrappers && \
-python -m unittest discover test/detector && \
-python -m unittest discover test/findings && \
-python -m unittest discover test/cli
+python run_tests.py
 ```
 
 ## Format Source Code
