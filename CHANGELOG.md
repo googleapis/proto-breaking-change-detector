@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.2...v2.0.0) (2022-08-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* change directory structure (#235)
+
+### Bug Fixes
+
+* change directory structure ([#235](https://github.com/googleapis/proto-breaking-change-detector/issues/235)) ([af233bb](https://github.com/googleapis/proto-breaking-change-detector/commit/af233bbcfb7a9d904c0fdf6b69dade9e1f7e94fe))
+
 ## [1.2.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.1...v1.2.2) (2022-07-12)
 
 

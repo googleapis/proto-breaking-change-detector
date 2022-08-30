@@ -18,7 +18,7 @@ setup(
     name="proto-breaking-change-detector",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    version="0.2",
+    version="2.0.0",
     install_requires=[
         "Click",
         "protobuf >= 3.12.0",
