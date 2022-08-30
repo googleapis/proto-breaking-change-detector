@@ -15,7 +15,7 @@
 
 from collections import defaultdict
 from types import MappingProxyType
-from src.findings.finding_category import FindingCategory
+from proto_bcd.findings.finding_category import FindingCategory
 
 _templates = defaultdict(lambda: "Unknown change type")
 _templates[

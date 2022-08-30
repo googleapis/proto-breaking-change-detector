@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,23 +11,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from setuptools import setup, find_packages
-
-setup(
-    name="proto-breaking-change-detector",
-    packages=find_packages(where='src'),
-    package_dir={"": "src"},
-    version="0.2",
-    install_requires=[
-        "Click",
-        "protobuf >= 3.12.0",
-        "google-api-core >= 1.17.0",
-        "googleapis-common-protos >= 1.6.0",
-        "grpcio-tools >= 1.37.0",
-    ],
-    entry_points="""
-        [console_scripts]
-        proto-breaking-change-detector=proto_bcd.cli.detect:detect
-    """,
-)

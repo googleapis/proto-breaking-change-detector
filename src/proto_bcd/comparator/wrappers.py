@@ -31,7 +31,7 @@ from google.api import annotations_pb2
 from google.longrunning import operations_pb2
 from google.protobuf import descriptor_pb2
 from google.protobuf.descriptor_pb2 import FieldDescriptorProto
-from src.comparator.resource_database import ResourceDatabase
+from proto_bcd.comparator.resource_database import ResourceDatabase
 from typing import Dict, Sequence, Optional, Tuple, cast, List
 
 COMMON_PACKAGES = [

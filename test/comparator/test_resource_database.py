@@ -15,7 +15,7 @@
 import unittest
 import os
 from google.api import resource_pb2
-from src.comparator.resource_database import ResourceDatabase
+from proto_bcd.comparator.resource_database import ResourceDatabase
 from test.tools.mock_resources import make_resource_descriptor
 
 

@@ -14,10 +14,10 @@
 
 import unittest
 import os
-from src.detector.loader import Loader
-from src.comparator.file_set_comparator import FileSetComparator
-from src.findings.finding_container import FindingContainer
-from src.comparator.wrappers import FileSet
+from proto_bcd.detector.loader import Loader
+from proto_bcd.comparator.file_set_comparator import FileSetComparator
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.comparator.wrappers import FileSet
 
 
 class ResourceReferenceTest(unittest.TestCase):

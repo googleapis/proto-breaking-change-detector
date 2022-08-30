@@ -15,7 +15,8 @@
 import unittest
 from unittest import mock
 import os
-from src.detector.options import Options, _InvalidArgumentsException
+
+from proto_bcd.detector.options import Options, _InvalidArgumentsException
 
 
 class OptionsTest(unittest.TestCase):

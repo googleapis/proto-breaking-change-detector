@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.comparator.enum_value_comparator import EnumValueComparator
-from src.findings.finding_container import FindingContainer
-from src.findings.finding_category import FindingCategory, ChangeType
-from src.comparator.wrappers import Enum
+from proto_bcd.comparator.enum_value_comparator import EnumValueComparator
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.comparator.wrappers import Enum
 
 
 class EnumComparator:

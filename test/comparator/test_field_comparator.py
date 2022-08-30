@@ -19,9 +19,9 @@ from test.tools.mock_resources import (
     make_resource_database,
     make_field_annotation_resource_reference,
 )
-from src.comparator.field_comparator import FieldComparator
-from src.findings.finding_container import FindingContainer
-from src.comparator.resource_database import ResourceDatabase
+from proto_bcd.comparator.field_comparator import FieldComparator
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.comparator.resource_database import ResourceDatabase
 from google.protobuf import descriptor_pb2 as desc
 from google.api import resource_pb2
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-from src.findings.messages import templates
+from proto_bcd.findings.messages import templates
 
 
 class Finding:

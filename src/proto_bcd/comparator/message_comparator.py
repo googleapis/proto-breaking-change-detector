@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.comparator.field_comparator import FieldComparator
-from src.comparator.enum_comparator import EnumComparator
-from src.comparator.wrappers import Message
-from src.findings.finding_container import FindingContainer
-from src.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.comparator.field_comparator import FieldComparator
+from proto_bcd.comparator.enum_comparator import EnumComparator
+from proto_bcd.comparator.wrappers import Message
+from proto_bcd.findings.finding_container import FindingContainer
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
 
 
 class DescriptorComparator:

@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import click
-from src.detector.options import Options
-from src.detector.loader import Loader
-from src.detector.detector import Detector
+from proto_bcd.detector.options import Options
+from proto_bcd.detector.loader import Loader
+from proto_bcd.detector.detector import Detector
 
 
 @click.command()

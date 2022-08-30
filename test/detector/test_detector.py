@@ -12,7 +12,6 @@
 import unittest
 from unittest import mock
 from io import StringIO
-from src.detector.detector import Detector
 from google.protobuf import descriptor_pb2 as desc
 from test.tools.mock_descriptors import (
     make_file_pb2,
@@ -21,8 +20,10 @@ from test.tools.mock_descriptors import (
     make_message,
     make_enum,
 )
-from src.detector.options import Options
-from src.findings.finding import Finding
+
+from proto_bcd.detector.detector import Detector
+from proto_bcd.detector.options import Options
+from proto_bcd.findings.finding import Finding
 
 
 class DectetorTest(unittest.TestCase):

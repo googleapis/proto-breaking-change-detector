@@ -14,12 +14,12 @@
 
 import unittest
 import os
-from src.detector.loader import Loader
-from src.comparator.wrappers import FileSet, Field
+from proto_bcd.detector.loader import Loader
+from proto_bcd.comparator.wrappers import FileSet, Field
 
 
 class WrappersTest(unittest.TestCase):
-    # This is for tesing the behavior of classes in src.comparator.wrapper.
+    # This is for tesing the behavior of classes in proto_bcd.comparator.wrapper.
     # UnittestInvoker helps us to execute the protoc command to compile the proto file,
     # get a *_descriptor_set.pb file (by -o option) which contains the serialized data in protos, and
     # create a FileDescriptorSet out of it.

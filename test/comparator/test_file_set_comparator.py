@@ -26,8 +26,8 @@ from test.tools.mock_descriptors import (
     make_field,
     make_enum,
 )
-from src.comparator.file_set_comparator import FileSetComparator
-from src.findings.finding_container import FindingContainer
+from proto_bcd.comparator.file_set_comparator import FileSetComparator
+from proto_bcd.findings.finding_container import FindingContainer
 from google.protobuf import descriptor_pb2
 from google.api import resource_pb2
 

@@ -14,8 +14,8 @@
 
 from re import sub
 from typing import Callable
-from src.findings.finding import Finding
-from src.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding import Finding
+from proto_bcd.findings.finding_category import FindingCategory, ChangeType
 from collections import defaultdict
 
 

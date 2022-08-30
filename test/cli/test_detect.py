@@ -17,7 +17,7 @@ import os
 import tempfile
 import json
 from click.testing import CliRunner
-from src.cli.detect import detect
+from proto_bcd.cli.detect import detect
 from unittest.mock import patch
 from io import StringIO
 
