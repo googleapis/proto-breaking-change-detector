@@ -46,6 +46,9 @@ source env/bin/activate
 2. Install the tool in the root directory
 
 ```.sh
+# install dependencies with hashes
+python3 -m pip install -r requirements.txt --require-hashes
+# install proto_bcd locally
 python3 -m pip install --editable .
 ```
 
