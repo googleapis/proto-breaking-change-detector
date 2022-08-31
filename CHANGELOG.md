@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.0...v2.0.1) (2022-08-31)
+
+
+### Bug Fixes
+
+* use hash for requirements.txt ([#238](https://github.com/googleapis/proto-breaking-change-detector/issues/238)) ([5981542](https://github.com/googleapis/proto-breaking-change-detector/commit/598154208c216e4690205a0150fdccbef78e34e5))
+
 ## [2.0.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v1.2.2...v2.0.0) (2022-08-30)
 
 
