@@ -1,5 +1,4 @@
 releaseType: python
 handleGHRelease: true
 primaryBranch: main
-releaseLabels:
-  - "autorelease: published"
+releaseLabel: "autorelease: published"
