@@ -14,11 +14,13 @@
 
 from setuptools import setup, find_packages
 
+version = "2.0.0"
+
 setup(
     name="proto-breaking-change-detector",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    version="2.0.0",
+    version=version,
     install_requires=[
         "Click",
         "protobuf >= 3.12.0",
