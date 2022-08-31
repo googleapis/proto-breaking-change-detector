@@ -25,8 +25,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt --require-hashes; fi
-        if [ -f requirements.txt ]; then pip install -r requirements.txt --require-hashes; fi
+        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt --require-hashes --no-deps; fi
+        if [ -f requirements.txt ]; then pip install -r requirements.txt --require-hashes --no-deps; fi
         git submodule init
         git submodule update
     - name: Lint with Black

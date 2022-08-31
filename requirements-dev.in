@@ -1,4 +1,2 @@
 black==22.3.0
 coverage
-typed-ast>=1.4.2
-importlib-metadata
