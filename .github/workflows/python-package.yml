@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
+        python-version: [3.7, 3.8, 3.9, 3.10]
 
     steps:
     - uses: actions/checkout@v2
@@ -25,10 +25,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install black==22.3.0
-        pip install coverage
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt --require-hashes; fi
+        if [ -f requirements.txt ]; then pip install -r requirements.txt --require-hashes; fi
         git submodule init
         git submodule update
     - name: Lint with Black

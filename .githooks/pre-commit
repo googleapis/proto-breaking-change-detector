@@ -91,11 +91,7 @@ fi
 if [ $NUM_PYTHON_FILES_CHANGED -gt 0 ]
 then
   echo_status "Checking tests..."
-  python3 -m unittest discover test/comparator
-  python3 -m unittest discover test/comparator/wrappers
-  python3 -m unittest discover test/findings
-  python3 -m unittest discover test/detector
-  python3 -m unittest discover test/cli
+  python3 run_tests.py
   TEST_STATUS=$?
   if [ $TEST_STATUS != 0 ]
   then
