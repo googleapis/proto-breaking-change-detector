@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.1...v2.0.2) (2022-09-14)
+
+
+### Bug Fixes
+
+* Allow adding a new alias in Enum ([#249](https://github.com/googleapis/proto-breaking-change-detector/issues/249)) ([fe3d5ef](https://github.com/googleapis/proto-breaking-change-detector/commit/fe3d5efc6b12de97cef47c7543686295120f9499)), closes [#205](https://github.com/googleapis/proto-breaking-change-detector/issues/205)
+
 ## [2.0.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.0...v2.0.1) (2022-08-31)
 
 
