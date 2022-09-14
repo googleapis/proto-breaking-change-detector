@@ -71,6 +71,11 @@ class EnumValueComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 2)
+        # Test the message has both name and number in it
+        self.assertEqual(
+            finding.get_message(),
+            "Existing value `FOO = 1` is changed to `FOO = 2` in enum `ctx`."
+        )
 
     def test_no_api_change(self):
         EnumValueComparator(
