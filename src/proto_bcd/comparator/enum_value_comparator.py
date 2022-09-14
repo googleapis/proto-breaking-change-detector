@@ -51,14 +51,14 @@ class EnumValueComparator:
                 context=self.context,
                 change_type=ChangeType.MAJOR,
             )
-        # 3. If both EnumValueDescriptors are existing, check if the name is identical.
-        elif self.enum_value_original.name != self.enum_value_update.name:
+        # 3. If both EnumValueDescriptors are existing, check if the number is identical.
+        elif self.enum_value_original.number != self.enum_value_update.number:
             self.finding_container.add_finding(
-                category=FindingCategory.ENUM_VALUE_NAME_CHANGE,
+                category=FindingCategory.ENUM_VALUE_NUMBER_CHANGE,
                 proto_file_name=self.enum_value_update.proto_file_name,
                 source_code_line=self.enum_value_update.source_code_line,
-                subject=self.enum_value_update.name,
-                oldsubject=self.enum_value_original.name,
+                subject=f"{self.enum_value_update.name} = {self.enum_value_update.number}",
+                oldsubject=f"{self.enum_value_original.name} = {self.enum_value_original.number}",
                 context=self.context,
                 change_type=ChangeType.MAJOR,
                 extra_info=self.enum_value_original.nested_path,

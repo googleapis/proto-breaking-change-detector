@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package example.v1beta2;
+
+enum BookType {
+  option allow_alias = true;
+  NOVEL = 0;
+  POEM = 1;
+  POETRY = 1;
+}

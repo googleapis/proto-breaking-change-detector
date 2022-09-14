@@ -31,8 +31,8 @@ class EnumValueComparatorTest(unittest.TestCase):
             path=(2, 1),
         )
         self.enum_bar = make_enum_value(
-            name="BAR",
-            number=1,
+            name="FOO",
+            number=2,
             proto_file_name="test_update.proto",
             locations=locations,
             path=(2, 1),
@@ -62,15 +62,20 @@ class EnumValueComparatorTest(unittest.TestCase):
         self.assertEqual(finding.location.proto_file_name, "test.proto")
         self.assertEqual(finding.location.source_code_line, 2)
 
-    def test_name_change(self):
+    def test_number_change(self):
         EnumValueComparator(
             self.enum_foo, self.enum_bar, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.get_all_findings()[0]
-        self.assertEqual(finding.category.name, "ENUM_VALUE_NAME_CHANGE")
+        self.assertEqual(finding.category.name, "ENUM_VALUE_NUMBER_CHANGE")
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "test_update.proto")
         self.assertEqual(finding.location.source_code_line, 2)
+        # Test the message has both name and number in it
+        self.assertEqual(
+            finding.get_message(),
+            "Existing value `FOO = 1` is changed to `FOO = 2` in enum `ctx`.",
+        )
 
     def test_no_api_change(self):
         EnumValueComparator(

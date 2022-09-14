@@ -114,16 +114,16 @@ class Enum:
         return getattr(self.enum_pb, name)
 
     @property
-    def values(self) -> Dict[int, EnumValue]:
+    def values(self) -> Dict[str, EnumValue]:
         """Return EnumValues in this Enum.
 
         Returns:
-            Dict[int, EnumValue]: EnumValue is identified by number.
+            Dict[str, EnumValue]: EnumValue is identified by its name.
         """
         enum_value_map = {}
         for i, enum_value in enumerate(self.enum_pb.value):
             nested_path = self.nested_path + [enum_value.name]
-            enum_value_map[enum_value.number] = EnumValue(
+            enum_value_map[enum_value.name] = EnumValue(
                 enum_value_pb=enum_value,
                 proto_file_name=self.proto_file_name,
                 source_code_locations=self.source_code_locations,
