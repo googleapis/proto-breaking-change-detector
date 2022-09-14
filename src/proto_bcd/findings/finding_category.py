@@ -19,7 +19,7 @@ class FindingCategory(enum.Enum):
     # Enums
     ENUM_VALUE_ADDITION = 1
     ENUM_VALUE_REMOVAL = 2
-    ENUM_VALUE_NAME_CHANGE = 3
+    ENUM_VALUE_NAME_CHANGE = 3  # not used any more
     ENUM_ADDITION = 4
     ENUM_REMOVAL = 5
     # Fields
@@ -76,6 +76,8 @@ class FindingCategory(enum.Enum):
     # Packaging options
     PACKAGING_OPTION_REMOVAL = 60
     PACKAGING_OPTION_ADDITION = 61
+    # Enums
+    ENUM_VALUE_NUMBER_CHANGE = 62
 
 
 class ChangeType(enum.Enum):
