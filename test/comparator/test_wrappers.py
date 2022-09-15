@@ -238,12 +238,12 @@ class WrappersTest(unittest.TestCase):
 
     def test_enum_wrapper(self):
         enum = self._FILE_SET.enums_map[".example.v1alpha.Enum1"]
-        self.assertEqual(enum.values[0].name, "a")
-        self.assertEqual(enum.values[1].name, "b")
+        self.assertEqual(enum.values["a"].number, 0)
+        self.assertEqual(enum.values["b"].number, 1)
         # EnumValue `a` and `b` are defined at Line71 in .proto file.
-        self.assertEqual(enum.values[0].source_code_line, 71)
-        self.assertEqual(enum.values[1].source_code_line, 72)
-        self.assertEqual(enum.values[0].proto_file_name, "wrappers.proto")
+        self.assertEqual(enum.values["a"].source_code_line, 71)
+        self.assertEqual(enum.values["b"].source_code_line, 72)
+        self.assertEqual(enum.values["a"].proto_file_name, "wrappers.proto")
 
 
 if __name__ == "__main__":

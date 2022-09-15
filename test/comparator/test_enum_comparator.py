@@ -47,6 +47,16 @@ class EnumComparatorTest(unittest.TestCase):
             locations=locations,
             path=(4, 0,),
         )
+        self.enum_alias = make_enum(
+            name="Foo",
+            values=(
+                ("VALUE1", 1),
+                ("VALUE2", 1),
+            ),
+            proto_file_name="test_update.proto",
+            locations=locations,
+            path=(4, 0,),
+        )
         self.finding_container = FindingContainer()
         # fmt: on
 
@@ -74,6 +84,17 @@ class EnumComparatorTest(unittest.TestCase):
         EnumComparator(
             self.enum_foo, self.enum_bar, self.finding_container, context="ctx"
         ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+        self.assertEqual(finding.location.proto_file_name, "test_update.proto")
+        self.assertEqual(finding.location.source_code_line, 3)
+
+    def test_enum_alias(self):
+        EnumComparator(
+            self.enum_foo, self.enum_alias, self.finding_container, context="ctx"
+        ).compare()
+        self.assertEqual(len(self.finding_container.get_all_findings()), 1)
         finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "ENUM_VALUE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")

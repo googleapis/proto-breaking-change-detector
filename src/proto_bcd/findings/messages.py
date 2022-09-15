@@ -27,6 +27,9 @@ _templates[
 _templates[
     FindingCategory.ENUM_VALUE_NAME_CHANGE
 ] = "Existing value `{oldsubject}` is renamed to `{subject}` in enum `{context}`."
+_templates[
+    FindingCategory.ENUM_VALUE_NUMBER_CHANGE
+] = "Existing value `{oldsubject}` is changed to `{subject}` in enum `{context}`."
 _templates[FindingCategory.ENUM_ADDITION] = "A new enum `{subject}` is added."
 _templates[FindingCategory.ENUM_REMOVAL] = "An existing enum `{subject}` is removed."
 _templates[

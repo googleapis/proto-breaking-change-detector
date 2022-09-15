@@ -69,6 +69,25 @@ class CliDetectTest(unittest.TestCase):
                 "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
             )
 
+    def test_single_directory_enum_alias(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta2",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--update_proto_files=test/testdata/protos/enum/v1beta2/enum_v1beta2.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            # No major findings
+            self.assertEqual(result.output, "")
+
     def test_single_directory_enum_json(self):
         # Mock the stdout so that the unit test does not
         # print anything to the console.
