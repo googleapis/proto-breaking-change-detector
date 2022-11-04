@@ -305,11 +305,18 @@ class ServiceComparatorTest(unittest.TestCase):
         ServiceComparator(
             make_service(
                 methods=(
-                    make_method(name="NotInteresting", signatures=["id, content", "id, uri", "id"]),
+                    make_method(
+                        name="NotInteresting",
+                        signatures=["id, content", "id, uri", "id"],
+                    ),
                 )
             ),
             make_service(
-                methods=(make_method(name="NotInteresting", signatures=["id, content", "id, uri"]),)
+                methods=(
+                    make_method(
+                        name="NotInteresting", signatures=["id, content", "id, uri"]
+                    ),
+                )
             ),
             self.finding_container,
             context="ctx",
