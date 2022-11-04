@@ -178,7 +178,8 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n"
+                "service_annotation_v1.proto L18: An existing method_signature `content,error` is removed from method `Foo` in service `Example`.\n"
+                + "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n"
                 + "service_annotation_v1beta1.proto L14: An existing google.api.http annotation `http_method` is changed for method `Foo` in service `Example`.\n"
                 + "service_annotation_v1beta1.proto L22: An existing google.api.http annotation `http_body` is changed for method `Bar` in service `Example`.\n"
                 + "service_annotation_v1beta1.proto L26: Long running operation metadata type is changed from `FooMetadata` to `FooMetadataUpdate` for method `Bar` in service `Example`.\n",
@@ -208,12 +209,10 @@ class CliDetectTest(unittest.TestCase):
                 + "google/cloud/oslogin/v1/oslogin.proto L59: An existing method_signature `name` is removed from method `DeleteSshPublicKey` in service `OsLoginService`.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L68: An existing method_signature `name` is removed from method `GetLoginProfile` in service `OsLoginService`.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L76: An existing method_signature `name` is removed from method `GetSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `project_id` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `ssh_public_key` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `ssh_public_key` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `update_mask` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent,ssh_public_key` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent,ssh_public_key,project_id` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name,ssh_public_key` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name,ssh_public_key,update_mask` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L123: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeletePosixAccountRequest`.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L136: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeleteSshPublicKeyRequest`.\n"
                 + "google/cloud/oslogin/v1/oslogin.proto L147: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
