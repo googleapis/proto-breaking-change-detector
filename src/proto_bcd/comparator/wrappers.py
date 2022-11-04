@@ -686,9 +686,9 @@ class Method:
     def method_signatures(self) -> WithLocation:
         """Return the signatures defined for this method."""
         signatures = self.method_pb.options.Extensions[client_pb2.method_signature]
-        fields = [
-            field.strip() for sig in signatures for field in sig.split(",") if field
-        ]
+        fields = []
+        for sig in signatures:
+            fields.append(tuple([field.strip() for field in sig.split(",") if field]))
         # MethodDescriptorProto.method_options has field number 4,
         # and MethodOptions.extensions[method_signature] has field number 1051.
         return WithLocation(

@@ -129,7 +129,7 @@ class WrappersTest(unittest.TestCase):
         self.assertEqual(foo_method.input.value, ".example.v1alpha.FooRequest")
         self.assertEqual(foo_method.output.value, ".example.v1alpha.FooResponse")
         self.assertEqual(foo_method.paged_result_field, None)
-        self.assertEqual(foo_method.method_signatures.value, ["content", "error"])
+        self.assertEqual(foo_method.method_signatures.value, [("content", "error")])
         self.assertEqual(
             foo_method.http_annotation.value["http_uri"], "/v1/example:foo"
         )

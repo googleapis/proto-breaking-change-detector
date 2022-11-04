@@ -21,4 +21,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "src"
 
 if __name__ == "__main__":
     all_tests = unittest.TestLoader().discover("test")
-    unittest.TextTestRunner().run(all_tests)
+    result = unittest.TextTestRunner().run(all_tests)
+    if not result.wasSuccessful():
+        sys.exit(1)
