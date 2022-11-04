@@ -202,7 +202,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "signature_order_v1.proto L16: An existing method_signature `id,content` has changed its position in method `Foo` in service `Example`.\n"
-                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n"
+                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n",
             )
 
     def test_oslogin_proto_alpha(self):

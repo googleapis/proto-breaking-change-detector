@@ -309,7 +309,9 @@ class ServiceComparatorTest(unittest.TestCase):
                 )
             ),
             make_service(
-                methods=(make_method(name="NotInteresting", signatures=["sig2", "sig1"]),)
+                methods=(
+                    make_method(name="NotInteresting", signatures=["sig2", "sig1"]),
+                )
             ),
             self.finding_container,
             context="ctx",
