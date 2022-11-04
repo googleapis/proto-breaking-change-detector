@@ -440,7 +440,9 @@ class ServiceComparator:
                 context=self.context,
                 change_type=ChangeType.MINOR,
             )
+        removal_reported = False
         for sig in set(signatures_original) - set(signatures_update):
+            removal_reported = True
             self.finding_container.add_finding(
                 category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
                 proto_file_name=method_original.proto_file_name,
@@ -455,6 +457,26 @@ class ServiceComparator:
                     "option (google.api.method_signature)",
                 ],
             )
+        # Method signatures need to preserve the order.
+        # Only check it when there's no removal.
+        if removal_reported:
+            return
+        for index, sig in enumerate(signatures_original):
+            if len(signatures_update) > index and sig != signatures_update[index]:
+                self.finding_container.add_finding(
+                    category=FindingCategory.METHOD_SIGNATURE_ORDER_CHANGE,
+                    proto_file_name=method_original.proto_file_name,
+                    source_code_line=method_original.method_signatures.source_code_line,
+                    type=",".join(sig),
+                    subject=method_original.name,
+                    context=self.context,
+                    change_type=ChangeType.MAJOR,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {method_update.name}",
+                        "option (google.api.method_signature)",
+                    ],
+                )
 
     def _get_version_update_name(self, name):
         original_version = self.service_original.api_version

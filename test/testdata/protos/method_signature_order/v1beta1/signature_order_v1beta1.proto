@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package example.v1beta1;
+
+import "google/api/annotations.proto";
+import "google/api/client.proto";
+
+
+service Example {
+
+  rpc Foo(FooRequest) returns (FooResponse) {
+    option (google.api.http) = {
+      post: "/v1/example:foo"
+      body: "*"
+    };
+    option (google.api.method_signature) = "id, uri";
+    option (google.api.method_signature) = "id, content";
+  }
+}
+
+message FooRequest {
+  int32 id = 1;
+  oneof source {
+    bytes content = 2;
+    string uri = 3;
+  }
+}
+
+message FooResponse {}

@@ -185,6 +185,26 @@ class CliDetectTest(unittest.TestCase):
                 + "service_annotation_v1beta1.proto L26: Long running operation metadata type is changed from `FooMetadata` to `FooMetadataUpdate` for method `Bar` in service `Example`.\n",
             )
 
+    def test_single_directory_method_signature_order(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    f"--original_api_definition_dirs=test/testdata/protos/method_signature_order/v1,{self.COMMON_PROTOS_DIR}",
+                    f"--update_api_definition_dirs=test/testdata/protos/method_signature_order/v1beta1,{self.COMMON_PROTOS_DIR}",
+                    "--original_proto_files=test/testdata/protos/method_signature_order/v1/signature_order_v1.proto",
+                    "--update_proto_files=test/testdata/protos/method_signature_order/v1beta1/signature_order_v1beta1.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "signature_order_v1.proto L16: An existing method_signature `id,content` has changed its position in method `Foo` in service `Example`.\n"
+                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n",
+            )
+
     def test_oslogin_proto_alpha(self):
         with patch("sys.stdout", new=StringIO()):
             runner = CliRunner()
