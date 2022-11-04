@@ -38,7 +38,7 @@ jobs:
         python run_tests.py
     - name: Run executable
       run: |
-        python -m pip install --editable &&
+        python -m pip install . &&
         proto-breaking-change-detector --help
     - name: Check test coverage
       env:
