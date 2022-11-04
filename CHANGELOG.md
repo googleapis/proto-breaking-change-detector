@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.3](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.2...v2.0.3) (2022-11-04)
+
+
+### Dependencies
+
+* Update protobuf to 4.21.9 ([#271](https://github.com/googleapis/proto-breaking-change-detector/issues/271)) ([14cd00b](https://github.com/googleapis/proto-breaking-change-detector/commit/14cd00bf8a6b65093dfd4df123c9de8645ff1fc5))
+
 ## [2.0.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.1...v2.0.2) (2022-09-14)
 
 
