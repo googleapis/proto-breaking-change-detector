@@ -78,6 +78,8 @@ class FindingCategory(enum.Enum):
     PACKAGING_OPTION_ADDITION = 61
     # Enums
     ENUM_VALUE_NUMBER_CHANGE = 62
+    # Service annotations
+    METHOD_SIGNATURE_ORDER_CHANGE = 63
 
 
 class ChangeType(enum.Enum):

@@ -15,7 +15,7 @@ service Example {
       get: "/v1beta1/example:foo"
       body: "*"
     };
-    option (google.api.method_signature) = "error, content, id";
+    option (google.api.method_signature) = "content,error,id";
   }
 
   rpc Bar(FooRequest) returns (google.longrunning.Operation) {

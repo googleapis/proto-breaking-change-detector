@@ -110,6 +110,9 @@ _templates[
     FindingCategory.METHOD_SIGNATURE_ADDITION
 ] = "A new method_signature `{type}` is added to method `{subject}` in service `{context}`."
 _templates[
+    FindingCategory.METHOD_SIGNATURE_ORDER_CHANGE
+] = "An existing method_signature `{type}` has changed its position in method `{subject}` in service `{context}`."
+_templates[
     FindingCategory.OAUTH_SCOPE_REMOVAL
 ] = "An existing oauth_scope `{subject}` is removed from service `{context}`."
 _templates[
@@ -163,5 +166,4 @@ _templates[
 _templates[
     FindingCategory.PACKAGING_OPTION_ADDITION
 ] = "A new packaging option `{type}` for `{subject}` is added."
-
 templates = MappingProxyType(_templates)

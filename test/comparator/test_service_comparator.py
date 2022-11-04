@@ -301,6 +301,27 @@ class ServiceComparatorTest(unittest.TestCase):
         self.assertEqual(finding.change_type.name, "MAJOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 
+    def test_method_signature_order_change(self):
+        ServiceComparator(
+            make_service(
+                methods=(
+                    make_method(name="NotInteresting", signatures=["sig1", "sig2"]),
+                )
+            ),
+            make_service(
+                methods=(make_method(name="NotInteresting", signatures=["sig2", "sig1"]),)
+            ),
+            self.finding_container,
+            context="ctx",
+        ).compare()
+        finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.category.name == "METHOD_SIGNATURE_ORDER_CHANGE"
+        )
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.location.proto_file_name, "foo")
+
     def test_method_signature_removal_with_multiple_params(self):
         ServiceComparator(
             make_service(
