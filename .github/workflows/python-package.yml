@@ -36,6 +36,10 @@ jobs:
     - name: Run unit tests
       run: |
         python run_tests.py
+    - name: Run executable
+      run: |
+        python -m pip install --editable . &&
+        proto-breaking-change-detector --help
     - name: Check test coverage
       env:
         PYTHONPATH: src
