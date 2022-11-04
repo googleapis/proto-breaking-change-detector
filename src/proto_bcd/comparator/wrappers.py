@@ -688,7 +688,7 @@ class Method:
         signatures = self.method_pb.options.Extensions[client_pb2.method_signature]
         fields = []
         for sig in signatures:
-            fields.append(tuple([field.strip() for field in sig.split(",")]))
+            fields.append(tuple([field.strip() for field in sig.split(",") if field]))
         # MethodDescriptorProto.method_options has field number 4,
         # and MethodOptions.extensions[method_signature] has field number 1051.
         return WithLocation(
