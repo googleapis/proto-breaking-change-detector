@@ -264,6 +264,18 @@ class FieldComparatorTest(unittest.TestCase):
         finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
 
+    def test_proto3_change_to_optional(self):
+        # Change a field to `optional` field.
+        field_not_optional = make_field(name="Foo")
+        field_optional = make_field(
+            name="Foo", oneof_index=0, oneof_name="oneof_field", proto3_optional=True
+        )
+        FieldComparator(
+            field_not_optional, field_optional, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "FIELD_PROTO3_OPTIONAL_CHANGE")
+
     def test_proto3_required_to_optional(self):
         # Change required field to be proto3 optional. Non-breaking change.
         field_optional = make_field(
