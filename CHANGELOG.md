@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.0...v2.1.1) (2022-11-28)
+
+
+### Bug Fixes
+
+* Treat a change to an optional field correctly ([#283](https://github.com/googleapis/proto-breaking-change-detector/issues/283)) ([0eb0fda](https://github.com/googleapis/proto-breaking-change-detector/commit/0eb0fda6ea459ed8ec38ce0957a46e2a014d4d7b)), closes [#220](https://github.com/googleapis/proto-breaking-change-detector/issues/220)
+
 ## [2.1.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.0.2...v2.1.0) (2022-11-04)
 
 
