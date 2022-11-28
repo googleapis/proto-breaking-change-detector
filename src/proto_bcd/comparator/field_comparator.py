@@ -215,15 +215,29 @@ class FieldComparator:
                     extra_info=self.field_update.nested_path,
                 )
             else:
-                self.finding_container.add_finding(
-                    category=FindingCategory.FIELD_ONEOF_MOVE_IN,
-                    proto_file_name=proto_file_name,
-                    source_code_line=source_code_line,
-                    subject=self.field_original.name,
-                    context=self.context,
-                    change_type=ChangeType.MAJOR,
-                    extra_info=self.field_update.nested_path,
-                )
+                if self.field_update.proto3_optional:
+                    # Optional primitive fields are implemented as single member
+                    # oneofs. In this case, we treat it as just a change in
+                    # `optional` option.
+                    self.finding_container.add_finding(
+                        category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                        proto_file_name=proto_file_name,
+                        source_code_line=source_code_line,
+                        subject=self.field_original.name,
+                        context=self.context,
+                        change_type=ChangeType.MINOR,
+                        extra_info=self.field_update.nested_path,
+                    )
+                else:
+                    self.finding_container.add_finding(
+                        category=FindingCategory.FIELD_ONEOF_MOVE_IN,
+                        proto_file_name=proto_file_name,
+                        source_code_line=source_code_line,
+                        subject=self.field_original.name,
+                        context=self.context,
+                        change_type=ChangeType.MAJOR,
+                        extra_info=self.field_update.nested_path,
+                    )
         # 7. Check the proto3_optional state of the field.
         elif (
             self.field_original.oneof
