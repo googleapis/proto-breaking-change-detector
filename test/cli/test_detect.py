@@ -85,10 +85,9 @@ class CliDetectTest(unittest.TestCase):
                 ],
             )
             self.assertEqual(result.exit_code, 0)
-            # Changing to optional is not a breaking change.
             self.assertEqual(
                 result.output,
-                "",
+                "optional.proto L6: Changed proto3 optional flag of an existing field `enabled` in message `.example.v1.Test`.\n",
             )
 
     def test_single_directory_enum_alias(self):
