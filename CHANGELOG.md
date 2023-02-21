@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.1...v2.1.2) (2023-02-21)
+
+
+### Bug Fixes
+
+* Changing proto3 optional is a breaking change ([#303](https://github.com/googleapis/proto-breaking-change-detector/issues/303)) ([8518bf3](https://github.com/googleapis/proto-breaking-change-detector/commit/8518bf377050b1f83a06797d8400bf1a3a83d507))
+
 ## [2.1.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.0...v2.1.1) (2022-11-28)
 
 
