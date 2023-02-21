@@ -225,7 +225,7 @@ class FieldComparator:
                         source_code_line=source_code_line,
                         subject=self.field_original.name,
                         context=self.context,
-                        change_type=ChangeType.MINOR,
+                        change_type=ChangeType.MAJOR,
                         extra_info=self.field_update.nested_path,
                     )
                 else:
