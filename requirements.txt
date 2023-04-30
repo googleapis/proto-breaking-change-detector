@@ -175,9 +175,9 @@ six==1.16.0 \
     # via
     #   google-auth
     #   grpcio
-urllib3==2.0.0 \
-    --hash=sha256:8f7f917bc6ff1c021c4b7b677229c455a7612878748581f6de39fd45e4fa21ae \
-    --hash=sha256:da21131828d290d6331d0d93a18f062ead1ec4fe0cfebbcefc95ee5368f7188a
+urllib3==2.0.1 \
+    --hash=sha256:2ce66a68134be469f5df5d46d724237489b3cd85b2bba2223dbbee1746548826 \
+    --hash=sha256:d75e5ece05ff170e323303fd924edf29e705f5ae057c489f453a686b639bb68a
     # via requests
 
 # WARNING: The following packages were not pinned, but pip requires them to be
