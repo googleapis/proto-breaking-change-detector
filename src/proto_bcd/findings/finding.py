@@ -31,6 +31,7 @@ class Finding:
         proto_file_name,
         source_code_line,
         change_type,
+        conventional_commit_tag,
         extra_info=None,
         subject="",
         oldsubject="",
@@ -41,6 +42,7 @@ class Finding:
         self.category = category
         self.location = self._Location(proto_file_name, source_code_line)
         self.change_type = change_type
+        self.conventional_commit_tag = conventional_commit_tag
         self.extra_info = extra_info
         self.subject = subject
         self.oldsubject = oldsubject
@@ -56,6 +58,7 @@ class Finding:
                 "source_code_line": self.location.source_code_line,
             },
             "change_type": self.change_type.name,
+            "conventional_commit_tag": self.conventional_commit_tag.name,
             "extra_info": self.extra_info,
             "subject": self.subject,
             "oldsubject": self.oldsubject,

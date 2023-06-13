@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 from proto_bcd.comparator.wrappers import Field
 
 
@@ -45,7 +48,7 @@ class FieldComparator:
                 source_code_line=self.field_update.source_code_line,
                 subject=self.field_update.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
             return
 
@@ -58,7 +61,7 @@ class FieldComparator:
                 source_code_line=self.field_original.source_code_line,
                 subject=self.field_original.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
 
@@ -72,7 +75,7 @@ class FieldComparator:
                 oldsubject=self.field_original.name,
                 subject=self.field_update.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.field_original.nested_path,
             )
             return
@@ -86,7 +89,7 @@ class FieldComparator:
                 source_code_line=self.field_update.repeated.source_code_line,
                 subject=self.field_update.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.field_update.nested_path,
             )
         # Field option change from optional to required is breaking.
@@ -97,7 +100,7 @@ class FieldComparator:
                 source_code_line=self.field_update.required.source_code_line,
                 subject=self.field_update.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.field_update.nested_path
                 + ["(google.api.field_behavior)"],
             )
@@ -111,7 +114,7 @@ class FieldComparator:
                 context=self.context,
                 oldtype=self.field_original.proto_type.value,
                 type=self.field_update.proto_type.value,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.field_update.nested_path,
             )
         # If field has the same primitive type, then the type should be identical.
@@ -137,7 +140,7 @@ class FieldComparator:
                     context=self.context,
                     oldtype=self.field_original.type_name.value,
                     type=self.field_update.type_name.value,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=self.field_update.nested_path,
                 )
         # If the fields have the same type_name, but they are map type,
@@ -154,7 +157,7 @@ class FieldComparator:
                     context=self.context,
                     oldtype=f"map<{key_original}, {value_original}>",
                     type=self.field_update.type_name.value,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=self.field_update.nested_path,
                 )
             elif not self.field_original.is_map_type and self.field_update.is_map_type:
@@ -168,7 +171,7 @@ class FieldComparator:
                     context=self.context,
                     oldtype=self.field_original.type_name.value,
                     type=f"map<{key_update}, {value_update}>",
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=self.field_update.nested_path,
                 )
             # Both fields are map types, compare the key and value type.
@@ -196,7 +199,7 @@ class FieldComparator:
                         context=self.context,
                         oldtype=f"map<{key_original}, {value_original}>",
                         type=f"map<{key_update}, {value_update}>",
-                        change_type=ChangeType.MAJOR,
+                        conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         extra_info=self.field_update.nested_path,
                     )
 
@@ -211,7 +214,7 @@ class FieldComparator:
                     source_code_line=source_code_line,
                     subject=self.field_original.name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=self.field_update.nested_path,
                 )
             else:
@@ -225,7 +228,7 @@ class FieldComparator:
                         source_code_line=source_code_line,
                         subject=self.field_original.name,
                         context=self.context,
-                        change_type=ChangeType.MAJOR,
+                        conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         extra_info=self.field_update.nested_path,
                     )
                 else:
@@ -235,7 +238,7 @@ class FieldComparator:
                         source_code_line=source_code_line,
                         subject=self.field_original.name,
                         context=self.context,
-                        change_type=ChangeType.MAJOR,
+                        conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         extra_info=self.field_update.nested_path,
                     )
         # 7. Check the proto3_optional state of the field.
@@ -243,25 +246,15 @@ class FieldComparator:
             self.field_original.oneof
             and self.field_original.proto3_optional != self.field_update.proto3_optional
         ):
-            if self.field_original.proto3_optional:
-                self.finding_container.add_finding(
-                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
-                    proto_file_name=self.field_update.proto_file_name,
-                    source_code_line=self.field_update.source_code_line,
-                    subject=self.field_original.name,
-                    context=self.context,
-                    change_type=ChangeType.MAJOR,
-                    extra_info=self.field_update.nested_path,
-                )
-            if self.field_update.proto3_optional:
-                self.finding_container.add_finding(
-                    category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
-                    proto_file_name=self.field_update.proto_file_name,
-                    source_code_line=self.field_update.source_code_line,
-                    subject=self.field_original.name,
-                    context=self.context,
-                    change_type=ChangeType.MINOR,
-                )
+            self.finding_container.add_finding(
+                category=FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.source_code_line,
+                subject=self.field_original.name,
+                context=self.context,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+                extra_info=self.field_update.nested_path,
+            )
 
         # 8. Check `google.api.resource_reference` annotation.
         self._compare_resource_reference()
@@ -276,30 +269,16 @@ class FieldComparator:
             return
         # A `google.api.resource_reference` annotation is added.
         if not resource_ref_original and resource_ref_update:
-            # Check whether the new resource reference is in the database.
-            resource_in_database = self._resource_in_database(resource_ref_update)
-            # If the new resource reference is not in the database, breaking change.
-            if not resource_in_database:
-                self.finding_container.add_finding(
-                    category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
-                    proto_file_name=field_update.proto_file_name,
-                    source_code_line=resource_ref_update.source_code_line,
-                    subject=field_original.name,
-                    context=self.context,
-                    change_type=ChangeType.MINOR,
-                    extra_info=self.field_update.nested_path
-                    + ["(google.api.resource_reference)"],
-                )
-            # If the new resource reference is in the database, no breaking change.
-            else:
-                self.finding_container.add_finding(
-                    category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
-                    proto_file_name=field_update.proto_file_name,
-                    source_code_line=resource_ref_update.source_code_line,
-                    subject=field_original.name,
-                    context=self.context,
-                    change_type=ChangeType.MINOR,
-                )
+            self.finding_container.add_finding(
+                category=FindingCategory.RESOURCE_REFERENCE_ADDITION,
+                proto_file_name=field_update.proto_file_name,
+                source_code_line=resource_ref_update.source_code_line,
+                subject=field_original.name,
+                context=self.context,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
+                extra_info=self.field_update.nested_path
+                + ["(google.api.resource_reference)"],
+            )
             return
         # Resource annotation is removed, check if it is added as a message resource.
         if resource_ref_original and not resource_ref_update:
@@ -310,16 +289,17 @@ class FieldComparator:
                     source_code_line=resource_ref_original.source_code_line,
                     subject=field_original.name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 )
             else:
+                # TODO(@alexander-fenster): this looks suspicious, need to write tests and provide the correct message
                 self.finding_container.add_finding(
                     category=FindingCategory.RESOURCE_REFERENCE_MOVED,
                     proto_file_name=field_original.proto_file_name,
                     source_code_line=resource_ref_original.source_code_line,
                     subject=field_original.name,
                     context=self.context,
-                    change_type=ChangeType.MINOR,
+                    conventional_commit_tag=ConventionalCommitTag.FEAT,
                 )
             return
         # Resource annotation is both existing in the field for original and update versions.
@@ -341,7 +321,7 @@ class FieldComparator:
                     context=self.context,
                     oldtype=original_type,
                     type=update_type,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=self.field_update.nested_path
                     + ["(google.api.resource_reference)", f"{update_type}"],
                 )
@@ -436,7 +416,7 @@ class FieldComparator:
                 context=self.context,
                 oldtype=child_type,
                 type=parent_type,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.field_update.nested_path
                 + ["(google.api.resource_reference)"],
             )

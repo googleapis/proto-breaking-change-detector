@@ -15,7 +15,11 @@
 from re import sub
 from typing import Callable
 from proto_bcd.findings.finding import Finding
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ChangeType,
+    ConventionalCommitTag,
+)
 from collections import defaultdict
 
 
@@ -44,7 +48,8 @@ class FindingContainer:
         category: FindingCategory,
         proto_file_name: str,
         source_code_line: int,
-        change_type: ChangeType,
+        conventional_commit_tag: ConventionalCommitTag,
+        change_type=ChangeType.UNDEFINED,
         extra_info=None,
         subject="",
         oldsubject="",
@@ -52,13 +57,27 @@ class FindingContainer:
         type="",
         oldtype="",
     ):
+        if change_type == ChangeType.UNDEFINED:
+            if (
+                conventional_commit_tag == ConventionalCommitTag.FEAT_BREAKING
+                or conventional_commit_tag == ConventionalCommitTag.FIX_BREAKING
+            ):
+                change_type = ChangeType.MAJOR
+            elif conventional_commit_tag == ConventionalCommitTag.FEAT:
+                change_type = ChangeType.MINOR
+            elif conventional_commit_tag == ConventionalCommitTag.FIX:
+                change_type = ChangeType.PATCH
+            else:
+                change_type = ChangeType.NONE
+
         self.finding_results.append(
             Finding(
-                category,
-                proto_file_name,
-                source_code_line,
-                change_type,
-                extra_info,
+                category=category,
+                proto_file_name=proto_file_name,
+                source_code_line=source_code_line,
+                change_type=change_type,
+                conventional_commit_tag=conventional_commit_tag,
+                extra_info=extra_info,
                 subject=subject,
                 oldsubject=oldsubject,
                 context=context,
