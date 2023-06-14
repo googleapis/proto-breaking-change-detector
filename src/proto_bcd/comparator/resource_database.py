@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Sequence
-
 
 class ResourceDatabase:
     # Create resource database for file-level and messasge-level resouce definitions.

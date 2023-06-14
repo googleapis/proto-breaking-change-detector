@@ -16,7 +16,10 @@ from proto_bcd.comparator.field_comparator import FieldComparator
 from proto_bcd.comparator.enum_comparator import EnumComparator
 from proto_bcd.comparator.wrappers import Message
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 
 
 class DescriptorComparator:
@@ -44,7 +47,7 @@ class DescriptorComparator:
                 proto_file_name=message_update.proto_file_name,
                 source_code_line=message_update.source_code_line,
                 subject=message_update.name,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
             return
         # 2. If updated message is None, then the original message is removed.
@@ -54,7 +57,7 @@ class DescriptorComparator:
                 proto_file_name=message_original.proto_file_name,
                 source_code_line=message_original.source_code_line,
                 subject=message_original.name,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
         if message_update and message_original:

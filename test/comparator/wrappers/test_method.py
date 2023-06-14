@@ -159,7 +159,7 @@ class MethodTest(unittest.TestCase):
 
     def test_method_signatures(self):
         method = make_method("Method", signatures=["sig1", "sig2"])
-        self.assertEqual(method.method_signatures.value, ["sig1", "sig2"])
+        self.assertEqual(method.method_signatures.value, [("sig1",), ("sig2",)])
 
     def test_method_lro_annotationn(self):
         input_msg = make_message(name="Input", full_name=".example.v1.input")

@@ -14,7 +14,10 @@
 
 from proto_bcd.comparator.enum_value_comparator import EnumValueComparator
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 from proto_bcd.comparator.wrappers import Enum
 
 
@@ -41,7 +44,7 @@ class EnumComparator:
                 source_code_line=self.enum_update.source_code_line,
                 subject=self.enum_update.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
 
         # 2. If the updated EnumDescriptor is None,
@@ -53,7 +56,7 @@ class EnumComparator:
                 source_code_line=self.enum_original.source_code_line,
                 subject=self.enum_original.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
 
         # 3. If the EnumDescriptors have the same name, check the values

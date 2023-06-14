@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 from proto_bcd.comparator.wrappers import EnumValue
 
 
@@ -39,7 +42,7 @@ class EnumValueComparator:
                 source_code_line=self.enum_value_update.source_code_line,
                 subject=self.enum_value_update.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
         # 2. If the updated EnumValue is None, then the original EnumValue is removed.
         elif self.enum_value_update is None:
@@ -49,7 +52,7 @@ class EnumValueComparator:
                 source_code_line=self.enum_value_original.source_code_line,
                 subject=self.enum_value_original.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
         # 3. If both EnumValueDescriptors are existing, check if the number is identical.
         elif self.enum_value_original.number != self.enum_value_update.number:
@@ -60,6 +63,6 @@ class EnumValueComparator:
                 subject=f"{self.enum_value_update.name} = {self.enum_value_update.number}",
                 oldsubject=f"{self.enum_value_original.name} = {self.enum_value_original.number}",
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.enum_value_original.nested_path,
             )

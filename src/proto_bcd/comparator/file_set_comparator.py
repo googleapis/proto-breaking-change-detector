@@ -18,7 +18,10 @@ from proto_bcd.comparator.message_comparator import DescriptorComparator
 from proto_bcd.comparator.enum_comparator import EnumComparator
 from proto_bcd.comparator.wrappers import FileSet
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 
 
 class FileSetComparator:
@@ -88,7 +91,7 @@ class FileSetComparator:
                             source_code_line=classname_option.source_code_line,
                             type=classname,
                             subject=option,
-                            change_type=ChangeType.MAJOR,
+                            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         )
             # Compare the option of language namespace. Minor version updates in consideration.
             else:
@@ -126,7 +129,7 @@ class FileSetComparator:
                             source_code_line=namespace_option.source_code_line,
                             type=original_option_value,
                             subject=option,
-                            change_type=ChangeType.MAJOR,
+                            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         )
                 for namespace in set(transformed_option_value_update.keys()) - set(
                     transformed_option_value_original.keys()
@@ -146,7 +149,7 @@ class FileSetComparator:
                             source_code_line=namespace_option.source_code_line,
                             type=original_option_value,
                             subject=option,
-                            change_type=ChangeType.MAJOR,
+                            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         )
 
     def _compare_services(self):
@@ -283,7 +286,7 @@ class FileSetComparator:
                     ].source_code_line,
                     type=pattern,
                     subject=resource_type,
-                    change_type=ChangeType.MINOR,
+                    conventional_commit_tag=ConventionalCommitTag.FEAT,
                 )
             # An existing pattern is removed.
             for pattern in set(patterns_original) - set(patterns_update):
@@ -297,7 +300,7 @@ class FileSetComparator:
                     ].source_code_line,
                     type=pattern,
                     subject=resource_type,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 )
 
         # 2. File-level resource definitions addition.
@@ -307,7 +310,7 @@ class FileSetComparator:
                 proto_file_name=resources_update.types[resource_type].proto_file_name,
                 source_code_line=resources_update.types[resource_type].source_code_line,
                 subject=resource_type,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
         # 3. File-level resource definitions removal.
         for resource_type in resources_types_original - resources_types_update:
@@ -318,7 +321,7 @@ class FileSetComparator:
                     resource_type
                 ].source_code_line,
                 subject=resource_type,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
 
     def _get_version_update_name(self, name):
