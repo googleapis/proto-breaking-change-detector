@@ -97,7 +97,7 @@ class FileSetTest(unittest.TestCase):
             "hidden_message",
         )
         self.assertEqual(
-            file_set.enums_map[".example.v1.Irrelevant"].values[2].name, "GREEN"
+            file_set.enums_map[".example.v1.Irrelevant"].values["GREEN"].name, "GREEN"
         )
         self.assertEqual(
             list(file_set.services_map["ThingDoer"].methods.keys()),
@@ -222,7 +222,7 @@ class FileSetTest(unittest.TestCase):
         self.assertEqual(
             file_set.messages_map[".example.v1.OuterMessage"]
             .nested_enums["InterEnum"]
-            .values[2]
+            .values["GREEN"]
             .source_code_line,
             10,
         )

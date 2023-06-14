@@ -13,7 +13,10 @@
 # limitations under the License.
 
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ConventionalCommitTag,
+)
 from proto_bcd.comparator.wrappers import Service
 
 
@@ -38,7 +41,7 @@ class ServiceComparator:
                 proto_file_name=self.service_update.proto_file_name,
                 source_code_line=self.service_update.source_code_line,
                 subject=self.service_update.name,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
             return
         # 2. If updated service is None, then the original service is removed.
@@ -48,7 +51,7 @@ class ServiceComparator:
                 proto_file_name=self.service_original.proto_file_name,
                 source_code_line=self.service_original.source_code_line,
                 subject=self.service_original.name,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
         # 3. Check the default host.
@@ -69,7 +72,7 @@ class ServiceComparator:
                 source_code_line=host.source_code_line,
                 subject=host.value,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
             return
         if not self.service_update.host:
@@ -80,7 +83,7 @@ class ServiceComparator:
                 source_code_line=host.source_code_line,
                 subject=host.value,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
         host_original = self.service_original.host
@@ -93,7 +96,7 @@ class ServiceComparator:
                 subject=host_update.value,
                 oldsubject=host_original.value,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     "option (google.api.default_host)",
@@ -116,7 +119,7 @@ class ServiceComparator:
                 source_code_line=oauth_scopes_update[scope].source_code_line,
                 subject=scope,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
         for scope in set(oauth_scopes_original.keys()) - set(
             oauth_scopes_update.keys()
@@ -127,7 +130,7 @@ class ServiceComparator:
                 source_code_line=oauth_scopes_original[scope].source_code_line,
                 subject=scope,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
 
     def _compare_rpc_methods(self):
@@ -144,7 +147,7 @@ class ServiceComparator:
                 source_code_line=removed_method.source_code_line,
                 subject=name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
         # 3.2 An RPC method is added.
         for name in methods_update_keys - methods_original_keys:
@@ -155,7 +158,7 @@ class ServiceComparator:
                 source_code_line=added_method.source_code_line,
                 subject=name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
         for name in methods_update_keys & methods_original_keys:
             method_original = methods_original[name]
@@ -176,7 +179,7 @@ class ServiceComparator:
                     context=self.context,
                     oldtype=input_type_original,
                     type=input_type_update,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"rpc {name}",
@@ -198,7 +201,7 @@ class ServiceComparator:
                     context=self.context,
                     oldtype=response_type_original,
                     type=response_type_update,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"rpc {name}",
@@ -215,7 +218,7 @@ class ServiceComparator:
                     source_code_line=method_update.client_streaming.source_code_line,
                     subject=name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"rpc {name}",
@@ -232,7 +235,7 @@ class ServiceComparator:
                     source_code_line=method_update.server_streaming.source_code_line,
                     subject=name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"rpc {name}",
@@ -252,7 +255,7 @@ class ServiceComparator:
                         source_code_line=method_update.source_code_line,
                         subject=name,
                         context=self.context,
-                        change_type=ChangeType.MAJOR,
+                        conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                         extra_info=[
                             "service " + self.service_update.name + " {",
                             f"rpc {name}",
@@ -285,7 +288,7 @@ class ServiceComparator:
                     source_code_line=method_original.http_annotation.source_code_line,
                     subject=method_original.name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 )
             if not http_annotation_original and http_annotation_update:
                 self.finding_container.add_finding(
@@ -294,7 +297,7 @@ class ServiceComparator:
                     source_code_line=method_update.http_annotation.source_code_line,
                     subject=method_update.name,
                     context=self.context,
-                    change_type=ChangeType.MINOR,
+                    conventional_commit_tag=ConventionalCommitTag.FEAT,
                 )
             return
         # Compare http method, they should be identical.
@@ -309,7 +312,7 @@ class ServiceComparator:
                 subject=method_update.name,
                 context=self.context,
                 type="http_method",
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     f"{method_update.name}",
@@ -326,7 +329,7 @@ class ServiceComparator:
                 subject=method_update.name,
                 context=self.context,
                 type="http_body",
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     f"{method_update.name}",
@@ -346,7 +349,7 @@ class ServiceComparator:
                     subject=method_update.name,
                     context=self.context,
                     type="http_uri",
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"{method_update.name}",
@@ -368,7 +371,7 @@ class ServiceComparator:
                 source_code_line=method_update.lro_annotation.source_code_line,
                 subject=method_update.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
         # LRO operation_info annotation removal.
@@ -379,7 +382,7 @@ class ServiceComparator:
                 source_code_line=method_original.lro_annotation.source_code_line,
                 subject=method_update.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             )
             return
         # The response_type value of LRO operation_info is changed.
@@ -396,7 +399,7 @@ class ServiceComparator:
                 context=self.context,
                 oldtype=lro_original.value["response_type"],
                 type=lro_update.value["response_type"],
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     f"{method_update.name}",
@@ -418,7 +421,7 @@ class ServiceComparator:
                 context=self.context,
                 oldtype=lro_original.value["metadata_type"],
                 type=lro_update.value["metadata_type"],
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     f"{method_update.name}",
@@ -438,7 +441,7 @@ class ServiceComparator:
                 type=",".join(sig),
                 subject=method_original.name,
                 context=self.context,
-                change_type=ChangeType.MINOR,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
             )
         removal_reported = False
         for sig in set(signatures_original) - set(signatures_update):
@@ -450,7 +453,7 @@ class ServiceComparator:
                 type=",".join(sig),
                 subject=method_original.name,
                 context=self.context,
-                change_type=ChangeType.MAJOR,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=[
                     "service " + self.service_update.name + " {",
                     f"rpc {method_update.name}",
@@ -470,7 +473,7 @@ class ServiceComparator:
                     type=",".join(sig),
                     subject=method_original.name,
                     context=self.context,
-                    change_type=ChangeType.MAJOR,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                     extra_info=[
                         "service " + self.service_update.name + " {",
                         f"rpc {method_update.name}",

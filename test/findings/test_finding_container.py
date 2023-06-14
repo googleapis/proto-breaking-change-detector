@@ -14,7 +14,11 @@
 
 import unittest
 from proto_bcd.findings.finding_container import FindingContainer
-from proto_bcd.findings.finding_category import FindingCategory, ChangeType
+from proto_bcd.findings.finding_category import (
+    FindingCategory,
+    ChangeType,
+    ConventionalCommitTag,
+)
 
 
 class FindingContainerTest(unittest.TestCase):
@@ -29,7 +33,7 @@ class FindingContainerTest(unittest.TestCase):
             category=FindingCategory.METHOD_REMOVAL,
             proto_file_name="my_proto.proto",
             source_code_line=12,
-            change_type=ChangeType.MAJOR,
+            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             subject="subject",
             context="context",
         )
@@ -40,7 +44,7 @@ class FindingContainerTest(unittest.TestCase):
             category=FindingCategory.FIELD_ADDITION,
             proto_file_name="my_proto.proto",
             source_code_line=15,
-            change_type=ChangeType.MINOR,
+            conventional_commit_tag=ConventionalCommitTag.FEAT,
         )
         self.assertEqual(len(self.finding_container.get_actionable_findings()), 1)
 
@@ -54,14 +58,14 @@ class FindingContainerTest(unittest.TestCase):
             category=FindingCategory.RESOURCE_DEFINITION_REMOVAL,
             proto_file_name="my_proto.proto",
             source_code_line=5,
-            change_type=ChangeType.MAJOR,
+            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             subject="subject",
         )
         self.finding_container.add_finding(
             category=FindingCategory.METHOD_SIGNATURE_REMOVAL,
             proto_file_name="my_other_proto.proto",
             source_code_line=-1,
-            change_type=ChangeType.MAJOR,
+            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
             type="type",
             subject="subject",
             context="context",
@@ -72,6 +76,78 @@ class FindingContainerTest(unittest.TestCase):
             + "my_proto.proto L5: An existing resource_definition `subject` is removed.\n"
             + "my_proto.proto L12: An existing method `subject` is removed from service `context`.\n",
         )
+
+    def test_change_type_major_1(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "MAJOR")
+
+    def test_change_type_major_2(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FEAT_BREAKING,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "MAJOR")
+
+    def test_change_type_minor(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FEAT,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "MINOR")
+
+    def test_change_type_patch(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FIX,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "PATCH")
+
+    def test_change_type_none_1(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.DOCS,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "NONE")
+
+    def test_change_type_none_2(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_REMOVAL,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.CHORE,
+            subject="subject",
+        )
+        dict_arr_output = finding_container.to_dict_arr()
+        self.assertEqual(dict_arr_output[0]["change_type"], "NONE")
 
 
 if __name__ == "__main__":
