@@ -83,5 +83,17 @@ class FindingCategory(enum.Enum):
 
 
 class ChangeType(enum.Enum):
-    MAJOR = 1
-    MINOR = 2
+    UNDEFINED = 0
+    MAJOR = 1  # Requires SemVer major release
+    MINOR = 2  # Requires SemVer minor release
+    PATCH = 3  # Requires SemVer patch release
+    NONE = 4  # Does not require SemVer release
+
+
+class ConventionalCommitTag(enum.Enum):
+    FEAT_BREAKING = 1  # feat!: breaking change - currently unused
+    FEAT = 2  # feat: new feature, e.g. field added
+    FIX_BREAKING = 3  # fix!: breaking change, e.g. field removed
+    FIX = 4  # fix: non-breaking fix, e.g. field deprecated
+    DOCS = 5  # docs: documentation change
+    CHORE = 6  # chore: reformatting or other unrelated change
