@@ -85,9 +85,8 @@ coverage==6.4.4 \
     --hash=sha256:fde17bc42e0716c94bf19d92e4c9f5a00c5feb401f5bc01101fdf2a8b7cacf60 \
     --hash=sha256:ff934ced84054b9018665ca3967fc48e1ac99e811f6cc99ea65978e1d384454b
     # via -r requirements-dev.in
-mypy-extensions==0.4.3 \
-    --hash=sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d \
-    --hash=sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8
+mypy-extensions==0.4.4 \
+    --hash=sha256:c8b707883a96efe9b4bb3aaf0dcc07e7e217d7d8368eec4db4049ee9e142f4fd
     # via black
 pathspec==0.10.0 \
     --hash=sha256:01eecd304ba0e6eeed188ae5fa568e99ef10265af7fd9ab737d6412b4ee0ab85 \
