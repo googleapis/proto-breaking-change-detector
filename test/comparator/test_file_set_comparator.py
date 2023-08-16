@@ -157,6 +157,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
+        # One more breaking change is caused by the filename change.
         breaking = self.finding_container.get_actionable_findings()
         self.assertEqual(len(breaking), 2)
         self.assertEqual(breaking[0].category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
@@ -233,6 +234,7 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
+        # One more breaking change is caused by the filename change.
         breaking = self.finding_container.get_actionable_findings()
         self.assertEqual(len(breaking), 2)
         self.assertEqual(breaking[0].category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
