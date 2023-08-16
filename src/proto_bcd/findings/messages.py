@@ -79,6 +79,9 @@ _templates[
     FindingCategory.MESSAGE_REMOVAL
 ] = "An existing message `{subject}` is removed."
 _templates[
+    FindingCategory.MESSAGE_MOVED_TO_ANOTHER_FILE
+] = "An existing message `{subject}` is moved from `{oldcontext}` to `{context}`."
+_templates[
     FindingCategory.RESOURCE_DEFINITION_ADDITION
 ] = "A new resource_definition `{subject}` is added."
 _templates[

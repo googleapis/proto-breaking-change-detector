@@ -38,6 +38,7 @@ class Finding:
         context="",
         type="",
         oldtype="",
+        oldcontext="",
     ):
         self.category = category
         self.location = self._Location(proto_file_name, source_code_line)
@@ -49,6 +50,7 @@ class Finding:
         self.context = context
         self.type = type
         self.oldtype = oldtype
+        self.oldcontext = oldcontext
 
     def to_dict(self):
         return {
@@ -65,6 +67,7 @@ class Finding:
             "context": self.context,
             "type": self.type,
             "oldtype": self.oldtype,
+            "oldcontext": self.oldcontext,
         }
 
     def get_message(self):
