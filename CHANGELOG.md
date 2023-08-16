@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.2.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.2...v2.2.0) (2023-08-16)
+
+
+### Features
+
+* Detect when a message is moved to another file ([#374](https://github.com/googleapis/proto-breaking-change-detector/issues/374)) ([dd4d3f3](https://github.com/googleapis/proto-breaking-change-detector/commit/dd4d3f3337bc3268ce5f0e6fd5f8e872746857a2))
+* Introduce conventional commit tag ([#334](https://github.com/googleapis/proto-breaking-change-detector/issues/334)) ([f0317ff](https://github.com/googleapis/proto-breaking-change-detector/commit/f0317ffbc9c59719f9ecee72fab9acb8bab4fd38))
+
 ## [2.1.2](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.1...v2.1.2) (2023-02-21)
 
 
