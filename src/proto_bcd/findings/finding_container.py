@@ -56,6 +56,7 @@ class FindingContainer:
         context="",
         type="",
         oldtype="",
+        oldcontext="",
     ):
         if change_type == ChangeType.UNDEFINED:
             if (
@@ -83,6 +84,7 @@ class FindingContainer:
                 context=context,
                 type=type,
                 oldtype=oldtype,
+                oldcontext=oldcontext,
             )
         )
 

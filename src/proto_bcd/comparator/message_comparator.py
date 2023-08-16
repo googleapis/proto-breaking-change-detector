@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 from proto_bcd.comparator.field_comparator import FieldComparator
 from proto_bcd.comparator.enum_comparator import EnumComparator
 from proto_bcd.comparator.wrappers import Message
@@ -90,6 +91,26 @@ class DescriptorComparator:
             # 6. Check `google.api.resource` annotation.
             # This check has been done in file_set comparator. Since we have
             # registered all resources in the database.
+
+            # 7. Check that two messages come from the same file.
+            # Moving messages between files is breaking for some languages, e.g. C++ and Python.
+            # proto_file_name may contain version which we want to ignore:
+            original_proto_file_name = re.sub(
+                r"/v\d[^/]*/", "/VERSION/", message_original.proto_file_name
+            )
+            update_proto_file_name = re.sub(
+                r"/v\d[^/]*/", "/VERSION/", message_update.proto_file_name
+            )
+            if original_proto_file_name != update_proto_file_name:
+                self.finding_container.add_finding(
+                    category=FindingCategory.MESSAGE_MOVED_TO_ANOTHER_FILE,
+                    proto_file_name=message_original.proto_file_name,
+                    source_code_line=message_original.source_code_line,
+                    subject=message_original.name,
+                    oldcontext=message_original.proto_file_name,
+                    context=message_update.proto_file_name,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+                )
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
         fields_number_original = set(fields_dict_original.keys())

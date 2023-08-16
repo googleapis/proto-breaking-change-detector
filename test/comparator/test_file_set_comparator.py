@@ -157,10 +157,11 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.get_all_findings()[0]
-        self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "update.proto")
+        breaking = self.finding_container.get_actionable_findings()
+        self.assertEqual(len(breaking), 2)
+        self.assertEqual(breaking[0].category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
+        self.assertEqual(breaking[1].category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(breaking[1].location.proto_file_name, "update.proto")
 
     def test_enum_change(self):
         enum_original = make_enum(
@@ -232,10 +233,11 @@ class FileSetComparatorTest(unittest.TestCase):
         ).compare()
         # The breaking change should be in field level, instead of message removal,
         # since the message is imported from dependency file.
-        finding = self.finding_container.get_all_findings()[0]
-        self.assertEqual(finding.change_type.name, "MAJOR")
-        self.assertEqual(finding.category.name, "FIELD_TYPE_CHANGE")
-        self.assertEqual(finding.location.proto_file_name, "update.proto")
+        breaking = self.finding_container.get_actionable_findings()
+        self.assertEqual(len(breaking), 2)
+        self.assertEqual(breaking[0].category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
+        self.assertEqual(breaking[1].category.name, "FIELD_TYPE_CHANGE")
+        self.assertEqual(breaking[1].location.proto_file_name, "update.proto")
 
     def test_resources_existing_pattern_change(self):
         options_original = make_file_options_resource_definition(
@@ -542,6 +544,38 @@ class FileSetComparatorTest(unittest.TestCase):
             self.finding_container,
         ).compare()
         self.assertEqual(self.finding_container.get_all_findings(), [])
+
+    def test_message_moved_to_another_file(self):
+        message = make_message("Message")
+        file1_original = make_file_pb2("file1.proto", messages=[message])
+        file2_original = make_file_pb2("file2.proto")
+        file1_updated = make_file_pb2("file1.proto")
+        file2_updated = make_file_pb2("file2.proto", messages=[message])
+        FileSetComparator(
+            make_file_set(files=[file1_original, file2_original]),
+            make_file_set(files=[file1_updated, file2_updated]),
+            self.finding_container,
+        ).compare()
+        findings = self.finding_container.get_all_findings()
+        self.assertTrue(findings)
+        finding = findings[0]
+        self.assertEqual(finding.category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
+    def test_file_renamed(self):
+        message = make_message("Message")
+        file_original = make_file_pb2("file.proto", messages=[message])
+        file_updated = make_file_pb2("renamed.proto", messages=[message])
+        FileSetComparator(
+            make_file_set(files=[file_original]),
+            make_file_set(files=[file_updated]),
+            self.finding_container,
+        ).compare()
+        findings = self.finding_container.get_all_findings()
+        self.assertTrue(findings)
+        finding = findings[0]
+        self.assertEqual(finding.category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE")
+        self.assertEqual(finding.change_type.name, "MAJOR")
 
 
 if __name__ == "__main__":

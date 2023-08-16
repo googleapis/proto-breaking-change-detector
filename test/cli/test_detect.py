@@ -148,7 +148,10 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1.proto L18: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
+                "message_v1.proto L5: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L16: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L18: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
+                + "message_v1.proto L27: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
                 + "message_v1beta1.proto L7: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
                 + "message_v1beta1.proto L8: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
                 + "message_v1beta1.proto L21: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
@@ -172,8 +175,12 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "service_v1.proto L11: An existing method `ShouldRemove` is removed from service `Example`.\n"
+                + "service_v1.proto L16: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L18: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L20: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
                 + "service_v1.proto L21: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
                 + "service_v1.proto L22: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L25: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
                 + "service_v1.proto L26: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
                 + "service_v1.proto L27: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
                 + "service_v1beta1.proto L7: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
@@ -200,6 +207,8 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "service_annotation_v1.proto L18: An existing method_signature `content,error` is removed from method `Foo` in service `Example`.\n"
+                + "service_annotation_v1.proto L33: An existing message `FooRequest` is moved from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
+                + "service_annotation_v1.proto L38: An existing message `FooResponse` is moved from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
                 + "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n"
                 + "service_annotation_v1beta1.proto L14: An existing google.api.http annotation `http_method` is changed for method `Foo` in service `Example`.\n"
                 + "service_annotation_v1beta1.proto L22: An existing google.api.http annotation `http_body` is changed for method `Bar` in service `Example`.\n"
@@ -223,7 +232,9 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(
                 result.output,
                 "signature_order_v1.proto L16: An existing method_signature `id,content` has changed its position in method `Foo` in service `Example`.\n"
-                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n",
+                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n"
+                + "signature_order_v1.proto L21: An existing message `FooRequest` is moved from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n"
+                + "signature_order_v1.proto L29: An existing message `FooResponse` is moved from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n",
             )
 
     def test_oslogin_proto_alpha(self):
