@@ -105,6 +105,24 @@ class DectetorTest(unittest.TestCase):
             breaking_changes[0].get_message(), "An existing enum `foo` is removed."
         )
 
+    def test_detector_all_changes(self):
+        # Mock original and updated FileDescriptorSet.
+        enum_original = make_enum(name="foo", values=[("A", 1)])
+        enum_update = make_enum(name="foo", values=[("A", 1), ("B", 2)])
+        file_set_original = desc.FileDescriptorSet(
+            file=[make_file_pb2(name="file.proto", enums=[enum_original])]
+        )
+        file_set_update = desc.FileDescriptorSet(
+            file=[make_file_pb2(name="file.proto", enums=[enum_update])]
+        )
+        breaking_changes = Detector(
+            file_set_original, file_set_update
+        ).detect_breaking_changes()
+        # Without options, the detector returns an array of actionable Findings.
+        self.assertEqual(len(breaking_changes), 0)
+        all_changes = Detector(file_set_original, file_set_update).detect_all_changes()
+        self.assertEqual(len(all_changes), 1)
+
 
 if __name__ == "__main__":
     unittest.main()
