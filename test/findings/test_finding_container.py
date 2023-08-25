@@ -149,6 +149,20 @@ class FindingContainerTest(unittest.TestCase):
         dict_arr_output = finding_container.to_dict_arr()
         self.assertEqual(dict_arr_output[0]["change_type"], "NONE")
 
+    def test_human_readable_message_for_all_findings(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_ADDTION,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FEAT,
+            subject="subject",
+        )
+        message = finding_container.to_human_readable_message(all_changes=True)
+        self.assertEqual(
+            message, "test.proto L1: A new method `subject` is added to service ``.\n"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
