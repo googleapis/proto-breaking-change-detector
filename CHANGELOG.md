@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.2.0...v2.3.0) (2023-08-25)
+
+
+### Features
+
+* CLI flag and a method to return all changes ([#378](https://github.com/googleapis/proto-breaking-change-detector/issues/378)) ([28fb873](https://github.com/googleapis/proto-breaking-change-detector/commit/28fb87315db63bec7431f4cdcbdda620bed77803))
+
 ## [2.2.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.1.2...v2.2.0) (2023-08-16)
 
 
