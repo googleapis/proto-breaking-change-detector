@@ -388,6 +388,42 @@ class CliDetectTest(unittest.TestCase):
                 + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing message `Timepoint` is removed.\n",
             )
 
+    def test_nonbreaking_changes_not_reported(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/nonbreaking/old",
+                    "--update_api_definition_dirs=test/testdata/protos/nonbreaking/new",
+                    "--original_proto_files=test/testdata/protos/nonbreaking/old/file.proto",
+                    "--update_proto_files=test/testdata/protos/nonbreaking/new/file.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(result.output, "")
+
+    def test_nonbreaking_changes_reported_if_requested(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/nonbreaking/old",
+                    "--update_api_definition_dirs=test/testdata/protos/nonbreaking/new",
+                    "--original_proto_files=test/testdata/protos/nonbreaking/old/file.proto",
+                    "--update_proto_files=test/testdata/protos/nonbreaking/new/file.proto",
+                    "--human_readable_message",
+                    "--all_changes",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "file.proto L7: A new field `added` is added to message `.test_non_breaking.Message`.\n",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

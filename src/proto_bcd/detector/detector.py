@@ -36,13 +36,15 @@ class Detector:
         self.opts = opts
         self.finding_container = FindingContainer()
 
-    def detect_breaking_changes(self):
+    def _compare(self):
         # Init FileSetComparator and compare the two FileDescriptorSet.
-        FileSetComparator(
+        # Result is stored in self.finding_container, and printed to stdout if requested.
+        comparator = FileSetComparator(
             FileSet(self.descriptor_set_original),
             FileSet(self.descriptor_set_update),
             self.finding_container,
-        ).compare()
+        )
+        comparator.compare()
 
         if self.opts and self.opts.output_json_path:
             # Output json file of findings and human-readable messages if the
@@ -55,8 +57,15 @@ class Detector:
         if self.opts and self.opts.human_readable_message:
             sys.stdout.write(
                 self.finding_container.to_human_readable_message(
-                    line_numbers=self.opts.line_numbers
+                    line_numbers=self.opts.line_numbers,
+                    all_changes=self.opts.all_changes,
                 )
             )
 
+    def detect_breaking_changes(self):
+        self._compare()
         return self.finding_container.get_actionable_findings()
+
+    def detect_all_changes(self):
+        self._compare()
+        return self.finding_container.get_all_findings()

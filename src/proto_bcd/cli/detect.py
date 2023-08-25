@@ -59,6 +59,12 @@ from proto_bcd.detector.detector import Detector
     is_flag=True,
     help="Show line numbers in the human readable output. True by default, use --no_line_numbers to disable.",
 )
+@click.option(
+    "--all_changes",
+    default=False,
+    is_flag=True,
+    help="Show all changes between two API definitions, not only breaking changes.",
+)
 def detect(
     original_api_definition_dirs: str,
     update_api_definition_dirs: str,
@@ -69,6 +75,7 @@ def detect(
     output_json_path: str,
     human_readable_message: bool,
     line_numbers: bool,
+    all_changes: bool,
 ):
     """Detect the breaking changes of the original and updated versions of API definition files."""
     # 1. Read the stdin options and create the Options object for all the command args.
@@ -85,6 +92,7 @@ def detect(
         human_readable_message=human_readable_message,
         output_json_path=output_json_path,
         line_numbers=line_numbers,
+        all_changes=all_changes,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
     # It takes options, returns file_descriptor_set.
@@ -111,10 +119,13 @@ def detect(
             descriptor_set=None,
         ).get_descriptor_set()
     # 4. Create the detector with two FileDescriptorSet and options.
-    # It creates output_json file and prints human-readable message if the option is enabled.
-    result = Detector(
-        file_set_original, file_set_update, options
-    ).detect_breaking_changes()
+    detector = Detector(file_set_original, file_set_update, options)
+    # 5. Invoke the detector. It creates output_json file and prints
+    # human-readable message if the option is enabled.
+    if all_changes:
+        result = detector.detect_all_changes()
+    else:
+        result = detector.detect_breaking_changes()
     return len(result)
 
 
