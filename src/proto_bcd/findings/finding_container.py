@@ -99,10 +99,14 @@ class FindingContainer:
     def to_dict_arr(self):
         return [finding.to_dict() for finding in self.finding_results]
 
-    def to_human_readable_message(self, line_numbers=True):
+    def to_human_readable_message(self, line_numbers=True, all_changes=False):
         output_message = ""
         file_to_findings = defaultdict(list)
-        for finding in self.get_actionable_findings():
+        if all_changes:
+            findings = self.get_all_findings()
+        else:
+            findings = self.get_actionable_findings()
+        for finding in findings:
             # Create a map to summarize the findings based on proto file name.
             file_to_findings[finding.location.proto_file_name].append(finding)
         # Add each finding to the output message.
