@@ -17,7 +17,7 @@ from proto_bcd.findings.finding_category import (
     FindingCategory,
     ConventionalCommitTag,
 )
-from proto_bcd.comparator.wrappers import Service
+from proto_bcd.comparator.wrappers import Service, get_location
 
 
 class ServiceComparator:
@@ -60,6 +60,22 @@ class ServiceComparator:
         self._compare_oauth_scopes()
         # 5. Check the methods list
         self._compare_rpc_methods()
+        # 6. Check comments
+        original_location = get_location(self.service_original)
+        update_location = get_location(self.service_update)
+        if (
+            original_location.leading_comments != update_location.leading_comments
+            or original_location.trailing_comments
+            != update_location.trailing_comments
+        ):
+            self.finding_container.add_finding(
+                category=FindingCategory.SERVICE_COMMENT_CHANGE,
+                proto_file_name=self.service_update.proto_file_name,
+                source_code_line=self.service_update.source_code_line,
+                subject=self.service_original.name,
+                conventional_commit_tag=ConventionalCommitTag.DOCS,
+            )
+
 
     def _compare_host(self):
         if not self.service_original.host and not self.service_update.host:
@@ -153,7 +169,7 @@ class ServiceComparator:
         for name in methods_update_keys - methods_original_keys:
             added_method = methods_update[name]
             self.finding_container.add_finding(
-                category=FindingCategory.METHOD_ADDTION,
+                category=FindingCategory.METHOD_ADDITION,
                 proto_file_name=added_method.proto_file_name,
                 source_code_line=added_method.source_code_line,
                 subject=name,
@@ -269,6 +285,27 @@ class ServiceComparator:
 
             # 3.10 The google.api.http annotation is changed.
             self._compare_http_annotation(method_original, method_update)
+
+            # 3.11 Check comments
+            original_location = get_location(method_original)
+            update_location = get_location(method_update)
+            if (
+                original_location.leading_comments != update_location.leading_comments
+                or original_location.trailing_comments
+                != update_location.trailing_comments
+            ):
+                self.finding_container.add_finding(
+                    category=FindingCategory.METHOD_COMMENT_CHANGE,
+                    proto_file_name=method_update.proto_file_name,
+                    source_code_line=method_update.source_code_line,
+                    subject=method_original.name,
+                    context=self.context,
+                    conventional_commit_tag=ConventionalCommitTag.DOCS,
+                    extra_info=[
+                        "service " + self.service_update.name + " {",
+                        f"rpc {name}",
+                    ],
+                )
 
     def _compare_http_annotation(self, method_original, method_update):
         """Compare the fields `http_method, http_uri, http_body` of google.api.http annotation."""

@@ -17,7 +17,7 @@ from proto_bcd.findings.finding_category import (
     FindingCategory,
     ConventionalCommitTag,
 )
-from proto_bcd.comparator.wrappers import EnumValue
+from proto_bcd.comparator.wrappers import EnumValue, get_location
 
 
 class EnumValueComparator:
@@ -66,3 +66,22 @@ class EnumValueComparator:
                 conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 extra_info=self.enum_value_original.nested_path,
             )
+
+        # 4. Check comments
+        if self.enum_value_original and self.enum_value_update:
+            original_location = get_location(self.enum_value_original)
+            update_location = get_location(self.enum_value_update)
+            if (
+                original_location.leading_comments != update_location.leading_comments
+                or original_location.trailing_comments
+                != update_location.trailing_comments
+            ):
+                self.finding_container.add_finding(
+                    category=FindingCategory.ENUM_VALUE_COMMENT_CHANGE,
+                    proto_file_name=self.enum_value_update.proto_file_name,
+                    source_code_line=self.enum_value_update.source_code_line,
+                    subject=self.enum_value_original.name,
+                    context=self.context,
+                    conventional_commit_tag=ConventionalCommitTag.DOCS,
+                    extra_info=self.enum_value_update.nested_path,
+                )

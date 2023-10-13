@@ -125,7 +125,7 @@ _templates[
     FindingCategory.METHOD_REMOVAL
 ] = "An existing method `{subject}` is removed from service `{context}`."
 _templates[
-    FindingCategory.METHOD_ADDTION
+    FindingCategory.METHOD_ADDITION
 ] = "A new method `{subject}` is added to service `{context}`."
 _templates[
     FindingCategory.METHOD_INPUT_TYPE_CHANGE
@@ -169,4 +169,27 @@ _templates[
 _templates[
     FindingCategory.PACKAGING_OPTION_ADDITION
 ] = "A new packaging option `{type}` for `{subject}` is added."
+
+
+
+_templates[
+    FindingCategory.SERVICE_COMMENT_CHANGE
+] = "A comment for service `{subject}` is changed."
+_templates[
+    FindingCategory.METHOD_COMMENT_CHANGE
+] = "A comment for method `{subject}` in service `{context}` is changed."
+_templates[
+    FindingCategory.MESSAGE_COMMENT_CHANGE
+] = "A comment for message `{subject}` is changed."
+_templates[
+    FindingCategory.FIELD_COMMENT_CHANGE
+] = "A comment for field `{subject}` in message `{context}` is changed."
+_templates[
+    FindingCategory.ENUM_COMMENT_CHANGE
+] = "A comment for enum `{subject}` is changed."
+_templates[
+    FindingCategory.ENUM_VALUE_COMMENT_CHANGE
+] = "A comment for enum value `{subject}` in enum `{context}` is changed."
+
+
 templates = MappingProxyType(_templates)

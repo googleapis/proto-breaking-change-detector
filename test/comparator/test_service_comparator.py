@@ -131,7 +131,7 @@ class ServiceComparatorTest(unittest.TestCase):
             service_original, service_update, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.get_all_findings()[0]
-        self.assertEqual(finding.category.name, "METHOD_ADDTION")
+        self.assertEqual(finding.category.name, "METHOD_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
 

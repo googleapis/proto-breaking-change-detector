@@ -2,8 +2,10 @@ syntax = "proto3";
 
 package example.v1;
 
+// Updated comment for service Example
 service Example {
 
+  // Updated comment for RPC Foo
   rpc Foo(FooRequest) returns (FooResponse) {}
 
   rpc Bar(FooRequest) returns (FooResponse) {}

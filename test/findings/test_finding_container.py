@@ -152,7 +152,7 @@ class FindingContainerTest(unittest.TestCase):
     def test_human_readable_message_for_all_findings(self):
         finding_container = FindingContainer()
         finding_container.add_finding(
-            category=FindingCategory.METHOD_ADDTION,
+            category=FindingCategory.METHOD_ADDITION,
             proto_file_name="test.proto",
             source_code_line=1,
             conventional_commit_tag=ConventionalCommitTag.FEAT,
