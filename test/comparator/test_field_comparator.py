@@ -24,6 +24,7 @@ from proto_bcd.findings.finding_container import FindingContainer
 from proto_bcd.comparator.resource_database import ResourceDatabase
 from google.protobuf import descriptor_pb2 as desc
 from google.api import resource_pb2
+from google.api.field_info_pb2 import FieldInfo
 
 
 class FieldComparatorTest(unittest.TestCase):
@@ -81,6 +82,16 @@ class FieldComparatorTest(unittest.TestCase):
         ).compare()
         finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "FIELD_BEHAVIOR_CHANGE")
+
+    def test_field_format_change(self):
+        field_orig = make_field(format=FieldInfo.IPV4)
+        field_changed = make_field(format=FieldInfo.IPV6)
+        # Format change, breaking change.
+        FieldComparator(
+            field_orig, field_changed, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "FIELD_FORMAT_CHANGE")
 
     def test_primitive_type_change(self):
         field_int = make_field(proto_type="TYPE_INT32")
