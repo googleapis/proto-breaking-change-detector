@@ -94,7 +94,7 @@ class FieldTest(unittest.TestCase):
     def test_format(self):
         field = make_field(format=FieldInfo.UUID4)
         self.assertEqual(field.fieldInfo.value.format, FieldInfo.UUID4)
-    
+
     def test_format_unspecified(self):
         field = make_field()
         self.assertEqual(field.fieldInfo.value.format, FieldInfo.FORMAT_UNSPECIFIED)
