@@ -169,8 +169,6 @@ _templates[
 _templates[
     FindingCategory.PACKAGING_OPTION_ADDITION
 ] = "A new packaging option `{type}` for `{subject}` is added."
-
-
 _templates[
     FindingCategory.SERVICE_COMMENT_CHANGE
 ] = "A comment for service `{subject}` is changed."
@@ -189,6 +187,5 @@ _templates[
 _templates[
     FindingCategory.ENUM_VALUE_COMMENT_CHANGE
 ] = "A comment for enum value `{subject}` in enum `{context}` is changed."
-
 
 templates = MappingProxyType(_templates)
