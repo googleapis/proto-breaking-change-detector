@@ -112,9 +112,8 @@ google-api-core==2.12.0 \
     --hash=sha256:c22e01b1e3c4dcd90998494879612c38d0a3411d1f7b679eb89e2abe3ce1f553 \
     --hash=sha256:ec6054f7d64ad13b41e43d96f735acbd763b0f3b695dabaa2d579673f6a6e160
     # via proto-breaking-change-detector (setup.py)
-google-auth==2.23.0 \
-    --hash=sha256:2cec41407bd1e207f5b802638e32bb837df968bb5c05f413d0fa526fac4cf7a7 \
-    --hash=sha256:753a26312e6f1eaeec20bc6f2644a10926697da93446e1f8e24d6d32d45a922a
+google-auth==2.23.3 \
+    --hash=sha256:a8f4608e65c244ead9e0538f181a96c6e11199ec114d41f1d7b1bffa96937bda
     # via google-api-core
 googleapis-common-protos==1.61.0 \
     --hash=sha256:22f1915393bb3245343f6efe87f6fe868532efc12aa26b391b15132e1279f1c0
