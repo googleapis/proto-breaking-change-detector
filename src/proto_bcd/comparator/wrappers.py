@@ -25,6 +25,8 @@ import re
 import os
 from collections import defaultdict
 from google.api import field_behavior_pb2
+from google.api import field_info_pb2
+from google.api.field_info_pb2 import FieldInfo
 from google.api import resource_pb2
 from google.api import client_pb2
 from google.api import annotations_pb2
@@ -43,6 +45,8 @@ COMMON_PACKAGES = [
     "google.rpc",
     "google.api",
 ]
+
+FORMAT_UNSPECIFIED = FieldInfo.FORMAT_UNSPECIFIED
 
 
 def _get_source_code_line(source_code_locations, path):
@@ -235,6 +239,24 @@ class Field:
             # number 1052. One field can have multiple behaviors and
             # required attribute has index 0.
             self.path + (8, 1052, 0),
+        )
+        # fmt: on
+
+    @property
+    def fieldInfo(self):
+        """Return FieldInfo value from google.api.field_info extension.
+
+        Returns:
+            FieldInfo: The annotated field info.
+        """
+        fieldInfo = self.field_pb.options.Extensions[field_info_pb2.field_info]
+        # fmt: off
+        return WithLocation(
+            fieldInfo,
+            self.source_code_locations,
+            # FieldOption has field number 8, field_info has field
+            # number 291403980.
+            self.path + (8, 291403980),
         )
         # fmt: on
 
@@ -1170,3 +1192,10 @@ class FileSet:
 
     def _get_full_name(self, package_name, name) -> str:
         return "." + package_name + "." + name
+
+
+def get_location(element) -> descriptor_pb2.SourceCodeInfo.Location:
+    try:
+        return element.source_code_locations[element.path]
+    except:
+        return descriptor_pb2.SourceCodeInfo.Location()

@@ -148,14 +148,47 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1.proto L5: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L16: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L18: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
-                + "message_v1.proto L27: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1beta1.proto L7: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L8: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L21: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L22: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
+                "message_v1.proto L6: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L24: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L26: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
+                + "message_v1.proto L37: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1beta1.proto L12: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L14: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L29: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L30: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
+            )
+
+    def test_single_directory_message_all_changes(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/message/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/message/v1beta1",
+                    "--original_proto_files=test/testdata/protos/message/v1/message_v1.proto",
+                    "--update_proto_files=test/testdata/protos/message/v1beta1/message_v1beta1.proto",
+                    "--human_readable_message",
+                    "--all_changes",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "message_v1.proto L6: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L24: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L26: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
+                + "message_v1.proto L37: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1beta1.proto L6: A comment for message `Person` is changed.\n"
+                + "message_v1beta1.proto L8: A comment for field `name` in message `.tutorial.v1.Person` is changed.\n"
+                + "message_v1beta1.proto L12: A comment for field `id` in message `.tutorial.v1.Person` is changed.\n"
+                + "message_v1beta1.proto L12: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L14: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L17: A comment for enum `PhoneType` is changed.\n"
+                + "message_v1beta1.proto L19: A comment for enum value `MOBILE` in enum `PhoneType` is changed.\n"
+                + "message_v1beta1.proto L22: A new value `SCHOOL` is added to enum `PhoneType`.\n"
+                + "message_v1beta1.proto L29: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
+                + "message_v1beta1.proto L30: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
             )
 
     def test_single_directory_service(self):
@@ -174,20 +207,57 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L11: An existing method `ShouldRemove` is removed from service `Example`.\n"
-                + "service_v1.proto L16: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L18: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L20: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L21: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L22: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L25: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L26: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1.proto L27: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1beta1.proto L7: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L7: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L9: Client streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L9: Server streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n",
+                "service_v1.proto L13: An existing method `ShouldRemove` is removed from service `Example`.\n"
+                + "service_v1.proto L18: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L20: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L22: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L23: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L24: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L27: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L28: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1.proto L29: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1beta1.proto L9: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L9: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L11: Client streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L11: Server streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L13: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n",
+            )
+
+    def test_single_directory_service_all_changes(self):
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/service/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/service/v1beta1",
+                    "--original_proto_files=test/testdata/protos/service/v1/service_v1.proto",
+                    "--update_proto_files=test/testdata/protos/service/v1beta1/service_v1beta1.proto",
+                    "--human_readable_message",
+                    "--all_changes",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "service_v1.proto L13: An existing method `ShouldRemove` is removed from service `Example`.\n"
+                + "service_v1.proto L18: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L20: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L22: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L23: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L24: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
+                + "service_v1.proto L27: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L28: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1.proto L29: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
+                + "service_v1beta1.proto L6: A comment for service `Example` is changed.\n"
+                + "service_v1beta1.proto L9: A comment for method `Foo` in service `Example` is changed.\n"
+                + "service_v1beta1.proto L9: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L9: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
+                + "service_v1beta1.proto L11: Client streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L11: Server streaming flag is changed for method `Bar` in service `Example`.\n"
+                + "service_v1beta1.proto L13: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n"
+                + "service_v1beta1.proto L20: A new message `FooRequestUpdate` is added.\n"
+                + "service_v1beta1.proto L22: A new message `FooResponseUpdate` is added.\n",
             )
 
     def test_single_directory_service_annotation(self):

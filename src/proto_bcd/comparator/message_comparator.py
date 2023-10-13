@@ -16,6 +16,7 @@ import re
 from proto_bcd.comparator.field_comparator import FieldComparator
 from proto_bcd.comparator.enum_comparator import EnumComparator
 from proto_bcd.comparator.wrappers import Message
+from proto_bcd.comparator.wrappers import get_location
 from proto_bcd.findings.finding_container import FindingContainer
 from proto_bcd.findings.finding_category import (
     FindingCategory,
@@ -110,6 +111,23 @@ class DescriptorComparator:
                     oldcontext=message_original.proto_file_name,
                     context=message_update.proto_file_name,
                     conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+                )
+
+            # 8. Check comments
+            original_location = get_location(message_original)
+            update_location = get_location(message_update)
+            if (
+                original_location.leading_comments != update_location.leading_comments
+                or original_location.trailing_comments
+                != update_location.trailing_comments
+            ):
+                self.finding_container.add_finding(
+                    category=FindingCategory.MESSAGE_COMMENT_CHANGE,
+                    proto_file_name=self.message_update.proto_file_name,
+                    source_code_line=self.message_update.source_code_line,
+                    subject=self.message_original.name,
+                    conventional_commit_tag=ConventionalCommitTag.DOCS,
+                    extra_info=self.message_update.nested_path,
                 )
 
     def _compare_nested_fields(self, fields_dict_original, fields_dict_update):
