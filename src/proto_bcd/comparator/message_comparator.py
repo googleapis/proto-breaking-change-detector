@@ -15,7 +15,8 @@
 import re
 from proto_bcd.comparator.field_comparator import FieldComparator
 from proto_bcd.comparator.enum_comparator import EnumComparator
-from proto_bcd.comparator.wrappers import Message, get_location
+from proto_bcd.comparator.wrappers import Message
+from proto_bcd.comparator.wrappers import get_location
 from proto_bcd.findings.finding_container import FindingContainer
 from proto_bcd.findings.finding_category import (
     FindingCategory,

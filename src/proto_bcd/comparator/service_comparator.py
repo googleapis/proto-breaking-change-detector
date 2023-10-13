@@ -17,7 +17,8 @@ from proto_bcd.findings.finding_category import (
     FindingCategory,
     ConventionalCommitTag,
 )
-from proto_bcd.comparator.wrappers import Service, get_location
+from proto_bcd.comparator.wrappers import Service
+from proto_bcd.comparator.wrappers import get_location
 
 
 class ServiceComparator:

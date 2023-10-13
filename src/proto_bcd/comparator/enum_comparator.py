@@ -18,7 +18,8 @@ from proto_bcd.findings.finding_category import (
     FindingCategory,
     ConventionalCommitTag,
 )
-from proto_bcd.comparator.wrappers import Enum, get_location
+from proto_bcd.comparator.wrappers import Enum
+from proto_bcd.comparator.wrappers import get_location
 
 
 class EnumComparator:
