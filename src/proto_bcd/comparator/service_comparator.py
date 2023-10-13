@@ -65,8 +65,7 @@ class ServiceComparator:
         update_location = get_location(self.service_update)
         if (
             original_location.leading_comments != update_location.leading_comments
-            or original_location.trailing_comments
-            != update_location.trailing_comments
+            or original_location.trailing_comments != update_location.trailing_comments
         ):
             self.finding_container.add_finding(
                 category=FindingCategory.SERVICE_COMMENT_CHANGE,
@@ -75,7 +74,6 @@ class ServiceComparator:
                 subject=self.service_original.name,
                 conventional_commit_tag=ConventionalCommitTag.DOCS,
             )
-
 
     def _compare_host(self):
         if not self.service_original.host and not self.service_update.host:

@@ -171,7 +171,6 @@ _templates[
 ] = "A new packaging option `{type}` for `{subject}` is added."
 
 
-
 _templates[
     FindingCategory.SERVICE_COMMENT_CHANGE
 ] = "A comment for service `{subject}` is changed."
