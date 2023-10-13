@@ -1172,17 +1172,7 @@ class FileSet:
         return "." + package_name + "." + name
 
 
-def get_location(
-    element: WithLocation
-    | EnumValue
-    | Enum
-    | Field
-    | Oneof
-    | Message
-    | Method
-    | Service
-    | FileSet,
-) -> descriptor_pb2.SourceCodeInfo.Location:
+def get_location(element) -> descriptor_pb2.SourceCodeInfo.Location:
     try:
         return element.source_code_locations[element.path]
     except:
