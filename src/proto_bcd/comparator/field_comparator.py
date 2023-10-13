@@ -262,9 +262,9 @@ class FieldComparator:
 
         # 9. Field changing a field format is breaking.
         if (
-            self.field_original.valueFormat.value != FORMAT_UNSPECIFIED
-            and self.field_original.valueFormat.value
-            != self.field_update.valueFormat.value
+            self.field_original.fieldInfo.value.format != FORMAT_UNSPECIFIED
+            and self.field_original.fieldInfo.value.format
+            != self.field_update.fieldInfo.value.format
         ):
             self.finding_container.add_finding(
                 category=FindingCategory.FIELD_FORMAT_CHANGE,

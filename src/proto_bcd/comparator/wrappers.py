@@ -243,16 +243,16 @@ class Field:
         # fmt: on
 
     @property
-    def valueFormat(self):
-        """Return Format value from google.api.field_info extension.
+    def fieldInfo(self):
+        """Return FieldInfo value from google.api.field_info extension.
 
         Returns:
-            Format: The annotated field format.
+            FieldInfo: The annotated field info.
         """
-        valueFormat = self.field_pb.options.Extensions[field_info_pb2.field_info]
+        fieldInfo = self.field_pb.options.Extensions[field_info_pb2.field_info]
         # fmt: off
         return WithLocation(
-            valueFormat,
+            fieldInfo,
             self.source_code_locations,
             # FieldOption has field number 8, field_info has field
             # number 291403980.
