@@ -125,10 +125,10 @@ class ResourceReferenceTest(unittest.TestCase):
         # to message-level resource. Non-breaking change.
         breaking_changes = self.finding_container.get_actionable_findings()
         self.assertEqual(len(breaking_changes), 2)
-        self.assertEquals(
+        self.assertEqual(
             breaking_changes[0].category.name, "MESSAGE_MOVED_TO_ANOTHER_FILE"
         )
-        self.assertEquals(
+        self.assertEqual(
             breaking_changes[1].category.name, "RESOURCE_REFERENCE_CHANGE_CHILD_TYPE"
         )
 

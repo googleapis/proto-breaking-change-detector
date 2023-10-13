@@ -18,6 +18,7 @@ from proto_bcd.findings.finding_category import (
     ConventionalCommitTag,
 )
 from proto_bcd.comparator.wrappers import Field
+from proto_bcd.comparator.wrappers import FORMAT_UNSPECIFIED
 from proto_bcd.comparator.wrappers import get_location
 
 
@@ -260,7 +261,24 @@ class FieldComparator:
         # 8. Check `google.api.resource_reference` annotation.
         self._compare_resource_reference()
 
-        # 9. Check comments
+        # 9. Field changing a field format is breaking.
+        if (
+            self.field_original.fieldInfo.value.format != FORMAT_UNSPECIFIED
+            and self.field_original.fieldInfo.value.format
+            != self.field_update.fieldInfo.value.format
+        ):
+            self.finding_container.add_finding(
+                category=FindingCategory.FIELD_FORMAT_CHANGE,
+                proto_file_name=self.field_update.proto_file_name,
+                source_code_line=self.field_update.required.source_code_line,
+                subject=self.field_update.name,
+                context=self.context,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+                extra_info=self.field_update.nested_path
+                + ["(google.api.field_info).format"],
+            )
+
+        # 10. Check comments
         if self.field_original and self.field_update:
             original_location = get_location(self.field_original)
             update_location = get_location(self.field_update)

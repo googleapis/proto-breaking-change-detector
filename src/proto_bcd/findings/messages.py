@@ -60,6 +60,9 @@ _templates[
     FindingCategory.FIELD_BEHAVIOR_CHANGE
 ] = "Changed field behavior for an existing field `{subject}` in message `{context}`."
 _templates[
+    FindingCategory.FIELD_FORMAT_CHANGE
+] = "Changed field format for an existing field `{subject}` in message `{context}`."
+_templates[
     FindingCategory.RESOURCE_REFERENCE_REMOVAL
 ] = "An existing resource_reference option of the field `{subject}` is removed in message `{context}`."
 _templates[
