@@ -1192,3 +1192,10 @@ class FileSet:
 
     def _get_full_name(self, package_name, name) -> str:
         return "." + package_name + "." + name
+
+
+def get_location(element) -> descriptor_pb2.SourceCodeInfo.Location:
+    try:
+        return element.source_code_locations[element.path]
+    except:
+        return descriptor_pb2.SourceCodeInfo.Location()

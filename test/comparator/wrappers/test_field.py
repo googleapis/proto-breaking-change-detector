@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import unittest
+from proto_bcd.comparator.wrappers import get_location
 from test.tools.mock_descriptors import make_field
 from google.protobuf import descriptor_pb2
 from google.api.field_info_pb2 import FieldInfo
@@ -29,6 +30,7 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(field.proto_file_name, "foo")
         self.assertEqual(field.api_version, None)
         self.assertEqual(field.map_entry, None)
+        self.assertEqual(get_location(field), descriptor_pb2.SourceCodeInfo.Location())
 
     def test_api_version(self):
         field = make_field("Foo", api_version="v1")
@@ -111,6 +113,7 @@ class FieldTest(unittest.TestCase):
         )
         self.assertEqual(field.source_code_line, 2)
         self.assertEqual(field.proto_file_name, "test.proto")
+        self.assertEqual(get_location(field), locations[0])
 
     def test_map_entry(self):
         # Key in map fields cannot be float/double, bytes, enums or message types.

@@ -19,6 +19,7 @@ from proto_bcd.findings.finding_category import (
 )
 from proto_bcd.comparator.wrappers import Field
 from proto_bcd.comparator.wrappers import FORMAT_UNSPECIFIED
+from proto_bcd.comparator.wrappers import get_location
 
 
 class FieldComparator:
@@ -276,6 +277,25 @@ class FieldComparator:
                 extra_info=self.field_update.nested_path
                 + ["(google.api.field_info).format"],
             )
+
+        # 10. Check comments
+        if self.field_original and self.field_update:
+            original_location = get_location(self.field_original)
+            update_location = get_location(self.field_update)
+            if (
+                original_location.leading_comments != update_location.leading_comments
+                or original_location.trailing_comments
+                != update_location.trailing_comments
+            ):
+                self.finding_container.add_finding(
+                    category=FindingCategory.FIELD_COMMENT_CHANGE,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    subject=self.field_original.name,
+                    context=self.context,
+                    conventional_commit_tag=ConventionalCommitTag.DOCS,
+                    extra_info=self.field_update.nested_path,
+                )
 
     def _compare_resource_reference(self):
         field_original = self.field_original
