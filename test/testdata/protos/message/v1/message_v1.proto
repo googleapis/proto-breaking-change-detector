@@ -2,12 +2,20 @@ syntax = "proto3";
 
 package tutorial.v1;
 
+// Updated comment for message Person
 message Person {
+  // Updated comment for field name
   string name = 1;
+
+  // Updated multi-line comment
+  // for field id
   int32 id = 2;
+
   optional string email = 3;
 
+  // Updated comment for enum
   enum PhoneType {
+    // Updated comment for enum value
     MOBILE = 0;
     HOME = 1;
     WORK = 2;
@@ -24,6 +32,8 @@ message Person {
   }
 }
 
+// Unchanged multi-line comment
+// for message AddressBook
 message AddressBook {
   repeated Person people = 1;
 }
