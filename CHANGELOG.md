@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.4.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.3.0...v2.4.0) (2023-10-13)
+
+
+### Features
+
+* Check field format changes ([#404](https://github.com/googleapis/proto-breaking-change-detector/issues/404)) ([461206c](https://github.com/googleapis/proto-breaking-change-detector/commit/461206c230cdeba41b43d0f17c8205fbbbc8fea6))
+* Detect docs changes ([#405](https://github.com/googleapis/proto-breaking-change-detector/issues/405)) ([8a24168](https://github.com/googleapis/proto-breaking-change-detector/commit/8a24168af875235cedf4009f865e2e0649c12e27))
+
 ## [2.3.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.2.0...v2.3.0) (2023-08-25)
 
 
