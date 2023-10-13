@@ -26,6 +26,7 @@ import os
 from collections import defaultdict
 from google.api import field_behavior_pb2
 from google.api import field_info_pb2
+from google.api.field_info_pb2 import FieldInfo
 from google.api import resource_pb2
 from google.api import client_pb2
 from google.api import annotations_pb2
@@ -45,7 +46,7 @@ COMMON_PACKAGES = [
     "google.api",
 ]
 
-FORMAT_UNSPECIFIED = field_info_pb2.FieldInfo_Format.Value("FORMAT_UNSPECIFIED")
+FORMAT_UNSPECIFIED = FieldInfo.FORMAT_UNSPECIFIED
 
 
 def _get_source_code_line(source_code_locations, path):
