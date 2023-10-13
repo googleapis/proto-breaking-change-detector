@@ -16,7 +16,14 @@ from typing import Tuple, Sequence, Dict
 from google.protobuf import descriptor_pb2 as desc
 import proto_bcd.comparator.wrappers as wrappers
 from proto_bcd.comparator.resource_database import ResourceDatabase
-from google.api import resource_pb2, client_pb2, annotations_pb2, field_behavior_pb2
+from google.api import (
+    resource_pb2,
+    client_pb2,
+    annotations_pb2,
+    field_behavior_pb2,
+    field_info_pb2,
+)
+from google.api.field_info_pb2 import FieldInfo
 from google.longrunning import operations_pb2  # type: ignore
 
 
@@ -115,6 +122,7 @@ def make_field(
     oneof_name: str = None,
     proto3_optional: bool = False,
     nested_path: Sequence[str] = [],
+    format=None,
     **kwargs,
 ) -> wrappers.Field:
     T = desc.FieldDescriptorProto.Type
@@ -136,6 +144,11 @@ def make_field(
     if required:
         field_pb.options.Extensions[field_behavior_pb2.field_behavior].append(
             field_behavior_pb2.FieldBehavior.Value("REQUIRED")
+        )
+    # Set the field_info format option.
+    if format:
+        field_pb.options.Extensions[field_info_pb2.field_info].MergeFrom(
+            FieldInfo(format=format)
         )
     source_code_locations = {tuple(location.path): location for location in locations}
 

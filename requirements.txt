@@ -115,9 +115,8 @@ google-api-core==2.12.0 \
 google-auth==2.23.3 \
     --hash=sha256:a8f4608e65c244ead9e0538f181a96c6e11199ec114d41f1d7b1bffa96937bda
     # via google-api-core
-googleapis-common-protos==1.60.0 \
-    --hash=sha256:69f9bbcc6acde92cab2db95ce30a70bd2b81d20b12eff3f1aabaffcbe8a93918 \
-    --hash=sha256:e73ebb404098db405ba95d1e1ae0aa91c3e15a71da031a2eeb6b2e23e7bc3708
+googleapis-common-protos==1.61.0 \
+    --hash=sha256:22f1915393bb3245343f6efe87f6fe868532efc12aa26b391b15132e1279f1c0
     # via
     #   google-api-core
     #   proto-breaking-change-detector (setup.py)
@@ -237,20 +236,8 @@ idna==3.4 \
     --hash=sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4 \
     --hash=sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2
     # via requests
-protobuf==4.24.3 \
-    --hash=sha256:067f750169bc644da2e1ef18c785e85071b7c296f14ac53e0900e605da588719 \
-    --hash=sha256:12e9ad2ec079b833176d2921be2cb24281fa591f0b119b208b788adc48c2561d \
-    --hash=sha256:1b182c7181a2891e8f7f3a1b5242e4ec54d1f42582485a896e4de81aa17540c2 \
-    --hash=sha256:20651f11b6adc70c0f29efbe8f4a94a74caf61b6200472a9aea6e19898f9fcf4 \
-    --hash=sha256:2da777d34b4f4f7613cdf85c70eb9a90b1fbef9d36ae4a0ccfe014b0b07906f1 \
-    --hash=sha256:3d42e9e4796a811478c783ef63dc85b5a104b44aaaca85d4864d5b886e4b05e3 \
-    --hash=sha256:6e514e8af0045be2b56e56ae1bb14f43ce7ffa0f68b1c793670ccbe2c4fc7d2b \
-    --hash=sha256:b0271a701e6782880d65a308ba42bc43874dabd1a0a0f41f72d2dac3b57f8e76 \
-    --hash=sha256:ba53c2f04798a326774f0e53b9c759eaef4f6a568ea7072ec6629851c8435959 \
-    --hash=sha256:e29d79c913f17a60cf17c626f1041e5288e9885c8579832580209de8b75f2a52 \
-    --hash=sha256:f631bb982c5478e0c1c70eab383af74a84be66945ebf5dd6b06fc90079668d0b \
-    --hash=sha256:f6ccbcf027761a2978c1406070c3788f6de4a4b2cc20800cc03d52df716ad675 \
-    --hash=sha256:f6f8dc65625dadaad0c8545319c2e2f0424fede988368893ca3844261342c11a
+protobuf==4.24.4 \
+    --hash=sha256:b493cb590960ff863743b9ff1452c413c2ee12b782f48beca77c8da3e2ffe9d9
     # via
     #   google-api-core
     #   googleapis-common-protos

@@ -14,3 +14,5 @@ pip-wheel-metadata
 
 # coverage reports
 .coverage
+
+build
