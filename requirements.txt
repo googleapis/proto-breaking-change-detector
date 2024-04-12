@@ -234,9 +234,9 @@ grpcio-tools==1.59.2 \
     --hash=sha256:fa1b9dee7811fad081816e884d063c4dd4946dba61aa54243b4c76c311090c48 \
     --hash=sha256:feca316e17cfead823af6eae0fc20c0d5299a94d71cfb7531a0e92d050a5fb2f
     # via proto-breaking-change-detector (setup.py)
-idna==3.4 \
-    --hash=sha256:814f528e8dead7d329833b91c5faa87d60bf71824cd12a7530b5526063d02cb4 \
-    --hash=sha256:90b77e79eaa3eba6de819a0c442c0b4ceefc341a7a2ab77d7562bf49f425c5c2
+idna==3.7 \
+    --hash=sha256:028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc \
+    --hash=sha256:82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
     # via requests
 protobuf==4.24.4 \
     --hash=sha256:b493cb590960ff863743b9ff1452c413c2ee12b782f48beca77c8da3e2ffe9d9
