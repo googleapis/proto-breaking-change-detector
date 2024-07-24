@@ -238,8 +238,18 @@ idna==3.7 \
     --hash=sha256:028ff3aadf0609c1fd278d8ea3089299412a7a8b9bd005dd08b9f8285bcb5cfc \
     --hash=sha256:82fee1fc78add43492d3a1898bfa6d8a904cc97d8427f683ed8e798d07761aa0
     # via requests
-protobuf==4.24.4 \
-    --hash=sha256:b493cb590960ff863743b9ff1452c413c2ee12b782f48beca77c8da3e2ffe9d9
+protobuf==4.25.4 \
+    --hash=sha256:051e97ce9fa6067a4546e75cb14f90cf0232dcb3e3d508c448b8d0e4265b61c1 \
+    --hash=sha256:0dc4a62cc4052a036ee2204d26fe4d835c62827c855c8a03f29fe6da146b380d \
+    --hash=sha256:3319e073562e2515c6ddc643eb92ce20809f5d8f10fead3332f71c63be6a7040 \
+    --hash=sha256:4c8a70fdcb995dcf6c8966cfa3a29101916f7225e9afe3ced4395359955d3835 \
+    --hash=sha256:7e372cbbda66a63ebca18f8ffaa6948455dfecc4e9c1029312f6c2edcd86c4e1 \
+    --hash=sha256:90bf6fd378494eb698805bbbe7afe6c5d12c8e17fca817a646cd6a1818c696ca \
+    --hash=sha256:ac79a48d6b99dfed2729ccccee547b34a1d3d63289c71cef056653a846a2240f \
+    --hash=sha256:ba3d8504116a921af46499471c63a85260c1a5fc23333154a427a310e015d26d \
+    --hash=sha256:bfbebc1c8e4793cfd58589acfb8a1026be0003e852b9da7db5a4285bde996978 \
+    --hash=sha256:db9fd45183e1a67722cafa5c1da3e85c6492a5383f127c86c4c4aa4845867dc4 \
+    --hash=sha256:eecd41bfc0e4b1bd3fa7909ed93dd14dd5567b98c941d6c1ad08fdcab3d6884b
     # via
     #   google-api-core
     #   googleapis-common-protos
