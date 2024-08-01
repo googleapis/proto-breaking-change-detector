@@ -302,6 +302,31 @@ class FileSetComparator:
                     subject=resource_type,
                     conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
                 )
+            num_original = len(patterns_original)
+            num_update = len(patterns_update)
+            # This check is for detecting changes to the order of the patterns
+            # which is considered a breaking change.
+            # Check if a new pattern is inserted rather than appended or
+            # if the order of patterns has changed in place.
+            if (
+                num_original < num_update
+                and patterns_original != patterns_update[:num_original]
+            ) or (
+                set(patterns_original) == set(patterns_update)
+                and patterns_original != patterns_update
+            ):
+                self.finding_container.add_finding(
+                    category=FindingCategory.RESOURCE_PATTERN_REORDER,
+                    proto_file_name=resources_original.types[
+                        resource_type
+                    ].proto_file_name,
+                    source_code_line=resources_original.types[
+                        resource_type
+                    ].source_code_line,
+                    type=resource_type,
+                    subject=resource_type,
+                    conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+                )
 
         # 2. File-level resource definitions addition.
         for resource_type in resources_types_update - resources_types_original:

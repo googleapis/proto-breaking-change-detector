@@ -47,6 +47,7 @@ class FindingCategory(enum.Enum):
     RESOURCE_DEFINITION_REMOVAL = 24
     RESOURCE_PATTERN_REMOVAL = 25
     RESOURCE_PATTERN_ADDITION = 26
+    RESOURCE_PATTERN_REORDER = 28
     # Messages-to-files mapping
     MESSAGE_MOVED_TO_ANOTHER_FILE = 27
     # Services
