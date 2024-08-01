@@ -286,7 +286,8 @@ class Field:
     @property
     def type_name(self):
         """Return the type_name if the proto_type is not primitive, return `None` otherwise.
-        For message and enum types, this is the name of full type like `.tutorial.example.Enum`"""
+        For message and enum types, this is the name of full type like `.tutorial.example.Enum`
+        """
         return (
             None
             if self.is_primitive_type
@@ -1181,13 +1182,13 @@ class FileSet:
         # Put default empty set for every packaging options.
         for option in packaging_options_path.keys():
             if getattr(file_options, option) != "":
-                self.packaging_options_map[option][
-                    getattr(file_options, option)
-                ] = WithLocation(
-                    getattr(file_options, option),
-                    source_code_locations,
-                    path + packaging_options_path[option],
-                    proto_file_name,
+                self.packaging_options_map[option][getattr(file_options, option)] = (
+                    WithLocation(
+                        getattr(file_options, option),
+                        source_code_locations,
+                        path + packaging_options_path[option],
+                        proto_file_name,
+                    )
                 )
 
     def _get_full_name(self, package_name, name) -> str:

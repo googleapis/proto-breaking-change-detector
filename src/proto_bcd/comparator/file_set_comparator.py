@@ -107,9 +107,9 @@ class FileSetComparator:
                         transformed_option_value_original[transformed_name] = namespace
                 for namespace in per_language_options_update:
                     if namespace:
-                        transformed_option_value_update[
-                            str(namespace).lower()
-                        ] = namespace
+                        transformed_option_value_update[str(namespace).lower()] = (
+                            namespace
+                        )
 
                 for namespace in set(transformed_option_value_original.keys()) - set(
                     transformed_option_value_update.keys()
