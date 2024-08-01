@@ -304,13 +304,16 @@ class FileSetComparator:
                 )
             num_original = len(patterns_original)
             num_update = len(patterns_update)
-            # Order of patterns changed
-            if (  # new pattern inserted rather than appended
+            # This check is for detecting changes to the order of the patterns
+            # which is considered a breaking change. 
+            # For more information, see <link to issue>.
+            # Check if a new pattern is inserted rather than appended or 
+            # if the order of patterns has changed in place.
+            if (
                 num_original < num_update
-                and patterns_original != patterns_update[: num_original - 1]
-            ) or (  # existing patterns moved in place
-                num_original == num_update
-                and len(set(patterns_original) - set(patterns_update)) == 0
+                and patterns_original != patterns_update[:num_original]
+            ) or (
+                set(patterns_original) == set(patterns_update)
                 and patterns_original != patterns_update
             ):
                 self.finding_container.add_finding(
