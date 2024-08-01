@@ -20,6 +20,7 @@ setup(
     name="proto-breaking-change-detector",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    python_requires=">=3.9",
     version=version,
     install_requires=[
         "Click",
