@@ -14,12 +14,13 @@
 
 from setuptools import setup, find_packages
 
-version = "2.4.0"
+version = "2.5.1"
 
 setup(
     name="proto-breaking-change-detector",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    python_requires=">=3.9",
     version=version,
     install_requires=[
         "Click",
