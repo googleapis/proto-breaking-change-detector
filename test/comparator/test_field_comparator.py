@@ -331,9 +331,9 @@ class FieldComparatorTest(unittest.TestCase):
         resource_database = make_resource_database(resources=[resource])
         # The update field has resource reference of type `example.v1/Foo`.
         field_options = desc.FieldOptions()
-        field_options.Extensions[
-            resource_pb2.resource_reference
-        ].type = "example.v1/Foo"
+        field_options.Extensions[resource_pb2.resource_reference].type = (
+            "example.v1/Foo"
+        )
         field_with_reference = make_field(
             name="Test", options=field_options, resource_database=resource_database
         )
@@ -362,9 +362,9 @@ class FieldComparatorTest(unittest.TestCase):
         resource_database = make_resource_database(resources=[resource, resource_child])
         # The update field has resource reference of child_type `example.v1/Bar`.
         field_options = desc.FieldOptions()
-        field_options.Extensions[
-            resource_pb2.resource_reference
-        ].child_type = "example.v1/Bar"
+        field_options.Extensions[resource_pb2.resource_reference].child_type = (
+            "example.v1/Bar"
+        )
         field_with_reference = make_field(
             name="Test", options=field_options, resource_database=resource_database
         )
