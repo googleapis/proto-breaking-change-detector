@@ -306,7 +306,6 @@ class FileSetComparator:
             num_update = len(patterns_update)
             # This check is for detecting changes to the order of the patterns
             # which is considered a breaking change.
-            # For more information, see <link to issue>.
             # Check if a new pattern is inserted rather than appended or
             # if the order of patterns has changed in place.
             if (

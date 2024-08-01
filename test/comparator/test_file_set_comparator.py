@@ -271,6 +271,37 @@ class FileSetComparatorTest(unittest.TestCase):
             "foo.proto",
         )
 
+    def test_resources_existing_pattern_append(self):
+        options_original = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar", resource_patterns=["foos/{foo}"]
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_original
+        )
+        file_set_original = make_file_set(files=[file_pb2])
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["foos/{foo}", "bar/{bar}"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        finding = next(
+            f
+            for f in self.finding_container.get_all_findings()
+            if f.change_type.name == "MINOR"
+        )
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_ADDITION")
+        self.assertEqual(
+            finding.location.proto_file_name,
+            "foo.proto",
+        )
+
     def test_resources_existing_pattern_removal(self):
         options_original = make_file_options_resource_definition(
             resource_type=".example.v1.Bar",
