@@ -6,6 +6,10 @@ branchProtectionRules:
   isAdminEnforced: true
   requiredStatusCheckContexts:
     - 'cla/google'
+    - 'build (3.9)'
+    - 'build (3.10)'
+    - 'build (3.11)'
+    - 'build (3.12)'
   requiredApprovingReviewCount: 1
   requiresCodeOwnerReviews: true
   requiresStrictStatusChecks: true

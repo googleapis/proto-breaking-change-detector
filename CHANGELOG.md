@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.5.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.5.0...v2.5.1) (2024-08-01)
+
+
+### Bug Fixes
+
+* **deps:** Update dependency black to v24 [security] ([#437](https://github.com/googleapis/proto-breaking-change-detector/issues/437)) ([8ed03cd](https://github.com/googleapis/proto-breaking-change-detector/commit/8ed03cd5ca2ccbf56705b7cbb6d4fdde35ecaabc))
+* **deps:** Update dependency certifi to v2024 [security] ([#453](https://github.com/googleapis/proto-breaking-change-detector/issues/453)) ([d325d07](https://github.com/googleapis/proto-breaking-change-detector/commit/d325d07ee8f6ce3a6a93e7da87fbb6aad966572a))
+* Require min py 3.9 and test with newer runtimes ([#458](https://github.com/googleapis/proto-breaking-change-detector/issues/458)) ([0c4bf7f](https://github.com/googleapis/proto-breaking-change-detector/commit/0c4bf7fd545e9d36e002b93d2f81cfb92fa1cbeb))
+
+## [2.5.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.4.0...v2.5.0) (2024-08-01)
+
+
+### Features
+
+* Warn on resource pattern reorder ([#455](https://github.com/googleapis/proto-breaking-change-detector/issues/455)) ([4bf7b78](https://github.com/googleapis/proto-breaking-change-detector/commit/4bf7b7800244e1e9767669b0a1f00a0178b03954))
+
 ## [2.4.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.3.0...v2.4.0) (2023-10-13)
 
 
