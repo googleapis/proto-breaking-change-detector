@@ -300,6 +300,66 @@ class FileSetComparatorTest(unittest.TestCase):
             "foo.proto",
         )
 
+    def test_resources_existing_patterns_reorder_in_place(self):
+        options_original = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["bars/{bar}", "foos/{foo}"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_original
+        )
+        file_set_original = make_file_set(files=[file_pb2])
+
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["foos/{foo}", "bars/{bar}"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REORDER")
+        self.assertEqual(
+            finding.location.proto_file_name,
+            "foo.proto",
+        )
+
+    def test_resources_existing_patterns_reorder_insertion(self):
+        options_original = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["bars/{bar}", "foos/{foo}"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_original
+        )
+        file_set_original = make_file_set(files=[file_pb2])
+
+        options_update = make_file_options_resource_definition(
+            resource_type=".example.v1.Bar",
+            resource_patterns=["foos/{foo}", "bizs/{biz}", "bars/{bar}"],
+        )
+        file_pb2 = make_file_pb2(
+            name="foo.proto", package=".example.v1", options=options_update
+        )
+        file_set_update = make_file_set(files=[file_pb2])
+
+        FileSetComparator(
+            file_set_original, file_set_update, self.finding_container
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.change_type.name, "MAJOR")
+        self.assertEqual(finding.category.name, "RESOURCE_PATTERN_REORDER")
+        self.assertEqual(
+            finding.location.proto_file_name,
+            "foo.proto",
+        )
+
     def test_resources_addition(self):
         file_set_original = make_file_set(
             files=[make_file_pb2(name="foo.proto", package=".example.v1")]
