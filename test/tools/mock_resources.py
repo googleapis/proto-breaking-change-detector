@@ -51,9 +51,9 @@ def make_message_options_resource_definition(
 def make_field_annotation_resource_reference(resource_type: str, is_child_type: bool):
     field_options = desc.FieldOptions()
     if is_child_type:
-        field_options.Extensions[
-            resource_pb2.resource_reference
-        ].child_type = resource_type
+        field_options.Extensions[resource_pb2.resource_reference].child_type = (
+            resource_type
+        )
     else:
         field_options.Extensions[resource_pb2.resource_reference].type = resource_type
     return field_options

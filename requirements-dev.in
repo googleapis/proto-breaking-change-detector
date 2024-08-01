@@ -1,3 +1,5 @@
-black==22.3.0
+black==24.3.0
 coverage
 typed_ast
+typing_extensions
+tomli
