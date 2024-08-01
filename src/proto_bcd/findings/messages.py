@@ -94,6 +94,9 @@ _templates[
     FindingCategory.RESOURCE_PATTERN_REMOVAL
 ] = "An existing resource pattern value `{type}` from the resource definition `{subject}` is removed."
 _templates[
+    FindingCategory.RESOURCE_PATTERN_REORDER
+] = "An existing resource's patterns were reordered in `{subject}`."
+_templates[
     FindingCategory.RESOURCE_PATTERN_ADDITION
 ] = "A new resource pattern value `{type}` added to the resource definition `{subject}`."
 _templates[FindingCategory.SERVICE_ADDITION] = "A new service `{subject}` is added."

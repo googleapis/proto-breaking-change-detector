@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.5.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.4.0...v2.5.0) (2024-08-01)
+
+
+### Features
+
+* Warn on resource pattern reorder ([#455](https://github.com/googleapis/proto-breaking-change-detector/issues/455)) ([4bf7b78](https://github.com/googleapis/proto-breaking-change-detector/commit/4bf7b7800244e1e9767669b0a1f00a0178b03954))
+
 ## [2.4.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.3.0...v2.4.0) (2023-10-13)
 
 
