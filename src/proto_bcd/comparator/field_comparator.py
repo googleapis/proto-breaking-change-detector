@@ -44,6 +44,16 @@ class FieldComparator:
         # 1. If original FieldDescriptor is None, then a
         # new FieldDescriptor is added.
         if self.field_original is None:
+            if self.field_update.required.value:
+                self.finding_container.add_finding(
+                    category=FindingCategory.NEW_REQUIRED_FIELD,
+                    proto_file_name=self.field_update.proto_file_name,
+                    source_code_line=self.field_update.source_code_line,
+                    subject=self.field_update,
+                    context=self.context,
+                    conventional_commit_tag=ConventionalCommitTag.FEAT_BREAKING,
+                )
+                return
             self.finding_container.add_finding(
                 category=FindingCategory.FIELD_ADDITION,
                 proto_file_name=self.field_update.proto_file_name,

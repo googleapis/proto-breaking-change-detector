@@ -59,6 +59,9 @@ _templates[FindingCategory.FIELD_PROTO3_OPTIONAL_CHANGE] = (
 _templates[FindingCategory.FIELD_BEHAVIOR_CHANGE] = (
     "Changed field behavior for an existing field `{subject}` in message `{context}`."
 )
+_templates[FindingCategory.NEW_REQUIRED_FIELD] = (
+    "New REQUIRED field `{subject}` in message `{context}`."
+)
 _templates[FindingCategory.FIELD_FORMAT_CHANGE] = (
     "Changed field format for an existing field `{subject}` in message `{context}`."
 )

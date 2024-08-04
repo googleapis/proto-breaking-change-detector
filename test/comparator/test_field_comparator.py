@@ -76,12 +76,21 @@ class FieldComparatorTest(unittest.TestCase):
         ).compare()
         findings = self.finding_container.get_all_findings()
         self.assertFalse(findings)
-        # Required to optional, non-breaking change.
+        # Optional to required, breaking change.
         FieldComparator(
             field_non_required, field_required, self.finding_container, context="ctx"
         ).compare()
         finding = self.finding_container.get_all_findings()[0]
         self.assertEqual(finding.category.name, "FIELD_BEHAVIOR_CHANGE")
+
+    def test_new_required_field(self):
+        field_required = make_field(required=True)
+        # New required field, breaking change.
+        FieldComparator(
+            None, field_required, self.finding_container, context="ctx"
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "NEW_REQUIRED_FIELD")
 
     def test_field_format_change(self):
         field_orig = make_field(format=FieldInfo.IPV4)
