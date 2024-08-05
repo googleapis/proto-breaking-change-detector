@@ -38,7 +38,9 @@ class DescriptorComparatorTest(unittest.TestCase):
         DescriptorComparator(
             None, self.message_foo, self.finding_container, context="ctx"
         ).compare()
-        finding = self.finding_container.get_all_findings()[0]
+        findings = self.finding_container.get_all_findings()
+        self.assertEqual(len(findings), 1)
+        finding = findings[0]
         self.assertEqual(finding.category.name, "MESSAGE_ADDITION")
         self.assertEqual(finding.change_type.name, "MINOR")
         self.assertEqual(finding.location.proto_file_name, "foo")
