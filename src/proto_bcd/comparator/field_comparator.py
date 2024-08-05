@@ -49,7 +49,7 @@ class FieldComparator:
                     category=FindingCategory.NEW_REQUIRED_FIELD,
                     proto_file_name=self.field_update.proto_file_name,
                     source_code_line=self.field_update.source_code_line,
-                    subject=self.field_update,
+                    subject=self.field_update.name,
                     context=self.context,
                     conventional_commit_tag=ConventionalCommitTag.FEAT_BREAKING,
                 )
