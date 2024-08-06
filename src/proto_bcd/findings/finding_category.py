@@ -33,6 +33,7 @@ class FindingCategory(enum.Enum):
     FIELD_PROTO3_OPTIONAL_CHANGE = 13
     # Field annotations
     FIELD_BEHAVIOR_CHANGE = 14
+    NEW_REQUIRED_FIELD = 76
     FIELD_FORMAT_CHANGE = 64
     RESOURCE_REFERENCE_REMOVAL = 15
     RESOURCE_REFERENCE_ADDITION = 16
@@ -102,7 +103,7 @@ class ChangeType(enum.Enum):
 
 
 class ConventionalCommitTag(enum.Enum):
-    FEAT_BREAKING = 1  # feat!: breaking change - currently unused
+    FEAT_BREAKING = 1  # feat!: breaking change, e.g. new required field
     FEAT = 2  # feat: new feature, e.g. field added
     FIX_BREAKING = 3  # fix!: breaking change, e.g. field removed
     FIX = 4  # fix: non-breaking fix, e.g. field deprecated

@@ -401,6 +401,7 @@ class CliDetectTest(unittest.TestCase):
                 + "google/pubsub/v1/pubsub.proto L966: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.PullRequest`.\n"
                 + "google/pubsub/v1/pubsub.proto L985: Changed field behavior for an existing field `max_messages` in message `.google.pubsub.v1beta2.PullRequest`.\n"
                 + "google/pubsub/v1/pubsub.proto L1002: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
+                + "google/pubsub/v1/pubsub.proto L1009: New REQUIRED field `ack_ids` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
                 + "google/pubsub/v1/pubsub.proto L1019: Changed field behavior for an existing field `ack_deadline_seconds` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
                 + "google/pubsub/v1/pubsub.proto L1027: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
                 + "google/pubsub/v1/pubsub.proto L1036: Changed field behavior for an existing field `ack_ids` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
