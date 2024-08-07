@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.5.1...v2.6.0) (2024-08-06)
+
+
+### Features
+
+* Warn on new required fields ([#454](https://github.com/googleapis/proto-breaking-change-detector/issues/454)) ([6689d56](https://github.com/googleapis/proto-breaking-change-detector/commit/6689d561baddf570d02a660399e4e99792c31343))
+
 ## [2.5.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.5.0...v2.5.1) (2024-08-01)
 
 
