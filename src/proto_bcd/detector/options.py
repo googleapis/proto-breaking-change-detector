@@ -69,10 +69,7 @@ class Options:
 
     def use_proto_dirs(self) -> bool:
         # User pass in the directories of proto definition files as input.
-        if (
-            self.original_api_definition_dirs
-            and self.original_proto_files
-        ):
+        if self.original_api_definition_dirs and self.original_proto_files:
             return True
         return False
 
