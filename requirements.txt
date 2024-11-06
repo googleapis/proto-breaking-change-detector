@@ -170,7 +170,7 @@ grpcio==1.66.0 \
     --hash=sha256:e36fa838ac1d6c87198ca149cbfcc92e1af06bb8c8cd852622f8e58f33ea3324 \
     --hash=sha256:e8d20308eeae15b3e182f47876f05acbdec1eebd9473a9814a44e46ec4a84c04
     # via grpcio-tools
-grpcio-tools==1.66.0 \
+grpcio-tools==1.67.1 \
     --hash=sha256:00aafd7714f2e2f618ec75b0f13df6a6f174f2bc50ad70c79443d8f5aa60df96 \
     --hash=sha256:01449e9b20347fc7661f79090a9c0317e6de2759748170ac04cc0a4db74a681f \
     --hash=sha256:24773294210f554cdf282feaa3f95b79e22de56f78ec7a2e66c990266100480b \
