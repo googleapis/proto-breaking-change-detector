@@ -86,6 +86,20 @@ class LoaderTest(unittest.TestCase):
             loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
         )
 
+    def test_loader_proto_dirs_none(self):
+        loader = Loader(
+            proto_definition_dirs=None,
+            proto_files=None,
+            descriptor_set=None,
+        )
+        self.assertTrue(loader)
+        self.assertFalse(loader.proto_definition_dirs)
+        self.assertFalse(loader.proto_files)
+        self.assertTrue(loader.get_descriptor_set())
+        self.assertIsInstance(
+            loader.get_descriptor_set(), descriptor_pb2.FileDescriptorSet
+        )
+
     def test_loader_descriptor_set(self):
         loader = Loader(
             proto_definition_dirs=None,

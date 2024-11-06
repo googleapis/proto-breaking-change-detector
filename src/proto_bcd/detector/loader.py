@@ -54,12 +54,21 @@ class Loader:
     def get_descriptor_set(self) -> desc.FileDescriptorSet:
         local_dir = os.getcwd()
         desc_set = desc.FileDescriptorSet()
+
         # If users pass in descriptor set file directly, we
         # can skip running the protoc command.
         if self.descriptor_set:
             with open(self.descriptor_set, "rb") as f:
                 desc_set.ParseFromString(f.read())
             return desc_set
+
+        # Exit early with an empty description set if no directories or
+        # proto files are provided.
+        if self.proto_definition_dirs is None:
+            return desc_set
+        if self.proto_files is None:
+            return desc_set
+
         # Construct the protoc command with proper argument prefix.
         protoc_command = [self.protoc_binary]
         for directory in self.proto_definition_dirs:

@@ -117,6 +117,30 @@ class OptionsTest(unittest.TestCase):
                 update_descriptor_set_file_path=None,
             )
 
+    def test_options_update_directory_none(self):
+        with mock.patch("os.path.isdir") as mocked_isdir:
+            with mock.patch("os.path.isfile") as mocked_isfile:
+                mocked_isdir.return_value = True
+                mocked_isfile.return_value = True
+                opts = Options(
+                    original_api_definition_dirs="c,d",
+                    update_api_definition_dirs=None,
+                    original_proto_files="pf1, pf2",
+                    update_proto_files=None,
+                    original_descriptor_set_file_path=None,
+                    update_descriptor_set_file_path=None,
+                    human_readable_message=True,
+                    output_json_path="mock_path.json",
+                )
+        self.assertEqual(opts.original_api_definition_dirs, ["c", "d"])
+        self.assertEqual(opts.update_api_definition_dirs, None)
+        # Strip the unneeded whitespaces.
+        self.assertEqual(opts.original_proto_files, ["pf1", "pf2"])
+        self.assertEqual(opts.update_proto_files, None)
+        self.assertTrue(opts.human_readable_message)
+        # Use custom json path if set.
+        self.assertEqual(opts.output_json_path, "mock_path.json")
+
     def test_options_descriptor_set_not_existing(self):
         with self.assertRaises(TypeError):
             # The directory is not existing, raise TypeError.

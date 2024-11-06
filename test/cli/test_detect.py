@@ -69,6 +69,91 @@ class CliDetectTest(unittest.TestCase):
                 "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
             )
 
+    def test_single_directory_enum_completely_removed(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+            )
+
+    def test_single_directory_enum_without_updated_protos(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+            )
+
+    def test_single_directory_enum_empty_updated_protos_list(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/enum/v1",
+                    "--update_api_definition_dirs=test/testdata/protos/enum/v1beta1",
+                    "--original_proto_files=test/testdata/protos/enum/v1/enum_v1.proto",
+                    "--update_proto_files=",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+            )
+
+    def test_single_directory_service_empty(self):
+        # Mock the stdout so that the unit test does not
+        # print anything to the console.
+        with patch("sys.stdout", new=StringIO()):
+            runner = CliRunner()
+            result = runner.invoke(
+                detect,
+                [
+                    "--original_api_definition_dirs=test/testdata/protos/service/v1",
+                    "--original_proto_files=test/testdata/protos/service/v1/service_v1.proto",
+                    "--update_api_definition_dirs=",
+                    "--update_proto_files=",
+                    "--human_readable_message",
+                ],
+            )
+            self.assertEqual(result.exit_code, 0)
+            self.assertEqual(
+                result.output,
+                "service_v1.proto L6: An existing service `Example` is removed.\n"
+                + "service_v1.proto L18: An existing message `FooRequest` is removed.\n"
+                + "service_v1.proto L20: An existing message `FooResponse` is removed.\n"
+                + "service_v1.proto L22: An existing message `BarRequest` is removed.\n"
+                + "service_v1.proto L27: An existing message `BarResponse` is removed.\n",
+            )
+
     def test_single_directory_change_to_optional(self):
         # Mock the stdout so that the unit test does not
         # print anything to the console.
