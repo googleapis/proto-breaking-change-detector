@@ -68,13 +68,8 @@ class Options:
         self.all_changes = all_changes
 
     def use_proto_dirs(self) -> bool:
-        # User pass in the directorirs of proto definition files as input.
-        if (
-            self.original_api_definition_dirs
-            and self.update_api_definition_dirs
-            and self.original_proto_files
-            and self.update_proto_files
-        ):
+        # User pass in the directories of proto definition files as input.
+        if self.original_api_definition_dirs and self.original_proto_files:
             return True
         return False
 
@@ -91,13 +86,18 @@ class Options:
         # Either directories of the proto definition files or path of
         # the descriptor set files should be specified. And the pass in
         # directory or file path should be valid. Else return False.
-
         if not self.use_proto_dirs() and not self.use_descriptor_set():
             return False
+
         if self.use_proto_dirs():
-            return self._check_valid_dirs(
-                self.original_api_definition_dirs
-            ) and self._check_valid_dirs(self.update_api_definition_dirs)
+            if not self._check_valid_dirs(self.original_api_definition_dirs):
+                return False
+            if not self.update_api_definition_dirs:
+                # Allow args to not specify updated directories, as these
+                # may have been deleted.
+                return True
+            return self._check_valid_dirs(self.update_api_definition_dirs)
+
         return self._check_valid_file(
             self.original_descriptor_set_file_path
         ) and self._check_valid_file(self.update_descriptor_set_file_path)
