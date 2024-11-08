@@ -122,7 +122,7 @@ googleapis-common-protos==1.65.0 \
     # via
     #   google-api-core
     #   proto-breaking-change-detector (setup.py)
-grpcio==1.66.0 \
+grpcio==1.67.1 \
     --hash=sha256:0f3010bf46b2a01c9e40644cb9ed91b4b8435e5c500a275da5f9f62580e31e80 \
     --hash=sha256:1c5466222470cb7fbc9cc898af1d48eefd297cb2e2f59af6d4a851c862fa90ac \
     --hash=sha256:1eb03524d0f55b965d6c86aa44e5db9e5eaa15f9ed3b164621e652e5b927f4b8 \
