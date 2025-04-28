@@ -964,12 +964,16 @@ class FileSet:
                 for _, field in message.fields.items():
                     # If the field is a map type, the message type is auto-generated.
                     if field.is_map_type:
+                        # pytype: disable=attribute-error
                         for _, entry_type in field.map_entry_type.items():
+                            # pytype: enable=attribute-error
                             self._register_field(entry_type)
                     elif not field.is_primitive_type:
                         # If the field is not a map and primitive type, add the
                         # referenced type to map.
+                        # pytype: disable=attribute-error
                         self._register_field(field.type_name.value)
+                        # pytype: enable=attribute-error
                 message_stack.extend(list(message.nested_messages.values()))
 
     def _register_field(self, register_type):
