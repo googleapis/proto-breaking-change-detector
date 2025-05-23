@@ -72,9 +72,9 @@ class FindingContainerTest(unittest.TestCase):
         )
         self.assertEqual(
             self.finding_container.to_human_readable_message(),
-            "my_other_proto.proto: An existing method_signature `type` is removed from method `subject` in service `context`.\n"
-            + "my_proto.proto L5: An existing resource_definition `subject` is removed.\n"
-            + "my_proto.proto L12: An existing method `subject` is removed from service `context`.\n",
+            "my_other_proto.proto: remove method_signature `type` from rpc method `context.subject`.\n"
+            + "my_proto.proto L5: remove resource_definition `subject`.\n"
+            + "my_proto.proto L12: remove rpc method `context.subject`.\n",
         )
 
     def test_change_type_major_1(self):
@@ -159,9 +159,7 @@ class FindingContainerTest(unittest.TestCase):
             subject="subject",
         )
         message = finding_container.to_human_readable_message(all_changes=True)
-        self.assertEqual(
-            message, "test.proto L1: A new method `subject` is added to service ``.\n"
-        )
+        self.assertEqual(message, "test.proto L1: add rpc method `.subject`.\n")
 
 
 if __name__ == "__main__":

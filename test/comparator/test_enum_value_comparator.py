@@ -74,7 +74,7 @@ class EnumValueComparatorTest(unittest.TestCase):
         # Test the message has both name and number in it
         self.assertEqual(
             finding.get_message(),
-            "Existing value `FOO = 1` is changed to `FOO = 2` in enum `ctx`.",
+            "change enum value `ctx.FOO = 1` to `ctx.FOO = 2`.",
         )
 
     def test_no_api_change(self):
