@@ -15,9 +15,7 @@
 
 from collections import defaultdict
 from types import MappingProxyType
-from google3.third_party.proto_breaking_change_detector.src.proto_bcd.findings.finding_category import (
-    FindingCategory,
-)
+from proto_bcd.findings.finding_category import FindingCategory
 
 _templates = defaultdict(lambda: "Unknown change type")
 _templates[FindingCategory.ENUM_VALUE_ADDITION] = "add enum value `{context}.{subject}."
