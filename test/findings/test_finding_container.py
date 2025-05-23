@@ -159,9 +159,7 @@ class FindingContainerTest(unittest.TestCase):
             subject="subject",
         )
         message = finding_container.to_human_readable_message(all_changes=True)
-        self.assertEqual(
-            message, "test.proto L1: add rpc method `.subject`.\n"
-        )
+        self.assertEqual(message, "test.proto L1: add rpc method `.subject`.\n")
 
 
 if __name__ == "__main__":

@@ -18,7 +18,9 @@ from types import MappingProxyType
 from proto_bcd.findings.finding_category import FindingCategory
 
 _templates = defaultdict(lambda: "Unknown change type")
-_templates[FindingCategory.ENUM_VALUE_ADDITION] = "add enum value `{context}.{subject}`."
+_templates[FindingCategory.ENUM_VALUE_ADDITION] = (
+    "add enum value `{context}.{subject}`."
+)
 _templates[FindingCategory.ENUM_VALUE_REMOVAL] = (
     "remove enum value `{context}.{subject}`."
 )

@@ -101,9 +101,7 @@ class DectetorTest(unittest.TestCase):
             file_set_original, file_set_update
         ).detect_breaking_changes()
         # Without options, the detector returns an array of actionable Findings.
-        self.assertEqual(
-            breaking_changes[0].get_message(), "remove enum `foo`."
-        )
+        self.assertEqual(breaking_changes[0].get_message(), "remove enum `foo`.")
 
     def test_detector_all_changes(self):
         # Mock original and updated FileDescriptorSet.
