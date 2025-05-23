@@ -15,12 +15,12 @@
 
 from collections import defaultdict
 from types import MappingProxyType
-from google3.third_party.proto_breaking_change_detector.src.proto_bcd.findings.finding_category import FindingCategory
+from google3.third_party.proto_breaking_change_detector.src.proto_bcd.findings.finding_category import (
+    FindingCategory,
+)
 
 _templates = defaultdict(lambda: "Unknown change type")
-_templates[FindingCategory.ENUM_VALUE_ADDITION] = (
-    "add enum value `{context}.{subject}."
-)
+_templates[FindingCategory.ENUM_VALUE_ADDITION] = "add enum value `{context}.{subject}."
 _templates[FindingCategory.ENUM_VALUE_REMOVAL] = (
     "remove enum value `{context}.{subject}`."
 )
@@ -32,12 +32,8 @@ _templates[FindingCategory.ENUM_VALUE_NUMBER_CHANGE] = (
 )
 _templates[FindingCategory.ENUM_ADDITION] = "add enum `{subject}`."
 _templates[FindingCategory.ENUM_REMOVAL] = "remove enum `{subject}`."
-_templates[FindingCategory.FIELD_ADDITION] = (
-    "add field `{context}.{subject}`."
-)
-_templates[FindingCategory.FIELD_REMOVAL] = (
-    "remove field `{context}.{subject}`."
-)
+_templates[FindingCategory.FIELD_ADDITION] = "add field `{context}.{subject}`."
+_templates[FindingCategory.FIELD_REMOVAL] = "remove field `{context}.{subject}`."
 _templates[FindingCategory.FIELD_NAME_CHANGE] = (
     "rename field `{context}.{oldsubject}` to `{context}.{subject}`."
 )
@@ -81,9 +77,7 @@ _templates[FindingCategory.RESOURCE_REFERENCE_CHANGE_CHILD_TYPE] = (
     "change resource_reference option child_type of field `{context}.{subject}` from `{oldtype}` to `{type}`."
 )
 _templates[FindingCategory.MESSAGE_ADDITION] = "add message `{subject}`."
-_templates[FindingCategory.MESSAGE_REMOVAL] = (
-    "remove message `{subject}`."
-)
+_templates[FindingCategory.MESSAGE_REMOVAL] = "remove message `{subject}`."
 _templates[FindingCategory.MESSAGE_MOVED_TO_ANOTHER_FILE] = (
     "rename message `{oldcontext}.{subject}` to `{context}.{subject}`."
 )
@@ -103,9 +97,7 @@ _templates[FindingCategory.RESOURCE_PATTERN_ADDITION] = (
     "add resource pattern value `{type}` to resource definition `{subject}`."
 )
 _templates[FindingCategory.SERVICE_ADDITION] = "add service `{subject}`."
-_templates[FindingCategory.SERVICE_REMOVAL] = (
-    "remove service `{subject}`."
-)
+_templates[FindingCategory.SERVICE_REMOVAL] = "remove service `{subject}`."
 _templates[FindingCategory.SERVICE_HOST_ADDITION] = (
     "add default host `{subject}` to service `{context}`."
 )
@@ -130,12 +122,8 @@ _templates[FindingCategory.OAUTH_SCOPE_REMOVAL] = (
 _templates[FindingCategory.OAUTH_SCOPE_ADDITION] = (
     "add oauth_scope `{subject}` to service `{context}`."
 )
-_templates[FindingCategory.METHOD_REMOVAL] = (
-    "remove rpc method `{context}.{subject}`."
-)
-_templates[FindingCategory.METHOD_ADDITION] = (
-    "add rpc method `{context}.{subject}`."
-)
+_templates[FindingCategory.METHOD_REMOVAL] = "remove rpc method `{context}.{subject}`."
+_templates[FindingCategory.METHOD_ADDITION] = "add rpc method `{context}.{subject}`."
 _templates[FindingCategory.METHOD_INPUT_TYPE_CHANGE] = (
     "change input type of rpc method `{context}.{subject}` from `{oldtype}` to `{type}`."
 )
@@ -190,9 +178,7 @@ _templates[FindingCategory.MESSAGE_COMMENT_CHANGE] = (
 _templates[FindingCategory.FIELD_COMMENT_CHANGE] = (
     "change comment of field `{context}.{subject}`."
 )
-_templates[FindingCategory.ENUM_COMMENT_CHANGE] = (
-    "change comment of enum `{subject}`."
-)
+_templates[FindingCategory.ENUM_COMMENT_CHANGE] = "change comment of enum `{subject}`."
 _templates[FindingCategory.ENUM_VALUE_COMMENT_CHANGE] = (
     "change comment of enum value `{context}.{subject}`."
 )
