@@ -9,7 +9,7 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
+# See the License of the specific language governing permissions and
 # limitations under the License.
 
 import unittest
@@ -23,6 +23,7 @@ from io import StringIO
 
 
 class CliDetectTest(unittest.TestCase):
+    maxDiff = None
     COMMON_PROTOS_DIR = os.path.join(os.getcwd(), "api-common-protos")
     COMMON_RESOURCE = os.path.join(
         os.getcwd(), "googleapis/google/cloud/common_resources.proto"
@@ -45,7 +46,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+                "enum_v1.proto L5: remove enum `BookType`.\n",
             )
 
     def test_single_directory_enum(self):
@@ -66,7 +67,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+                "enum_v1.proto L5: remove enum `BookType`.\n",
             )
 
     def test_single_directory_enum_completely_removed(self):
@@ -85,7 +86,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+                "enum_v1.proto L5: remove enum `BookType`.\n",
             )
 
     def test_single_directory_enum_without_updated_protos(self):
@@ -105,7 +106,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+                "enum_v1.proto L5: remove enum `BookType`.\n",
             )
 
     def test_single_directory_enum_empty_updated_protos_list(self):
@@ -126,7 +127,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "enum_v1.proto L5: An existing enum `BookType` is removed.\n",
+                "enum_v1.proto L5: remove enum `BookType`.\n",
             )
 
     def test_single_directory_service_empty(self):
@@ -147,11 +148,11 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L6: An existing service `Example` is removed.\n"
-                + "service_v1.proto L18: An existing message `FooRequest` is removed.\n"
-                + "service_v1.proto L20: An existing message `FooResponse` is removed.\n"
-                + "service_v1.proto L22: An existing message `BarRequest` is removed.\n"
-                + "service_v1.proto L27: An existing message `BarResponse` is removed.\n",
+                "service_v1.proto L6: remove service `Example`.\n"
+                + "service_v1.proto L18: remove message `FooRequest`.\n"
+                + "service_v1.proto L20: remove message `FooResponse`.\n"
+                + "service_v1.proto L22: remove message `BarRequest`.\n"
+                + "service_v1.proto L27: remove message `BarResponse`.\n",
             )
 
     def test_single_directory_change_to_optional(self):
@@ -172,7 +173,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "optional.proto L6: Changed proto3 optional flag of an existing field `enabled` in message `.example.v1.Test`.\n",
+                "optional.proto L6: change proto3 optional flag of field `.example.v1.Test.enabled`.\n",
             )
 
     def test_single_directory_enum_alias(self):
@@ -233,14 +234,14 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1.proto L6: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L24: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L26: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
-                + "message_v1.proto L37: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1beta1.proto L12: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L14: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L29: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L30: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
+                "message_v1.proto L6: move message `Person` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L24: move message `PhoneNumber` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L26: remove field `.tutorial.v1.Person.type`.\n"
+                + "message_v1.proto L37: move message `AddressBook` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1beta1.proto L12: change type of field `.tutorial.v1.Person.id` from `int32` to `string`.\n"
+                + "message_v1beta1.proto L14: rename field `.tutorial.v1.Person.email` to `.tutorial.v1.Person.email_address`.\n"
+                + "message_v1beta1.proto L29: change repeated flag of field `.tutorial.v1.Person.phones`.\n"
+                + "message_v1beta1.proto L30: move field `.tutorial.v1.Person.single` out of oneof.\n",
             )
 
     def test_single_directory_message_all_changes(self):
@@ -260,20 +261,20 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "message_v1.proto L6: An existing message `Person` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L24: An existing message `PhoneNumber` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1.proto L26: An existing field `type` is removed from message `.tutorial.v1.Person`.\n"
-                + "message_v1.proto L37: An existing message `AddressBook` is moved from `message_v1.proto` to `message_v1beta1.proto`.\n"
-                + "message_v1beta1.proto L6: A comment for message `Person` is changed.\n"
-                + "message_v1beta1.proto L8: A comment for field `name` in message `.tutorial.v1.Person` is changed.\n"
-                + "message_v1beta1.proto L12: A comment for field `id` in message `.tutorial.v1.Person` is changed.\n"
-                + "message_v1beta1.proto L12: The type of an existing field `id` is changed from `int32` to `string` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L14: An existing field `email` is renamed to `email_address` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L17: A comment for enum `PhoneType` is changed.\n"
-                + "message_v1beta1.proto L19: A comment for enum value `MOBILE` in enum `PhoneType` is changed.\n"
-                + "message_v1beta1.proto L22: A new value `SCHOOL` is added to enum `PhoneType`.\n"
-                + "message_v1beta1.proto L29: Changed repeated flag of an existing field `phones` in message `.tutorial.v1.Person`.\n"
-                + "message_v1beta1.proto L30: An existing field `single` is moved out of oneof in message `.tutorial.v1.Person`.\n",
+                "message_v1.proto L6: move message `Person` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L24: move message `PhoneNumber` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1.proto L26: remove field `.tutorial.v1.Person.type`.\n"
+                + "message_v1.proto L37: move message `AddressBook` from `message_v1.proto` to `message_v1beta1.proto`.\n"
+                + "message_v1beta1.proto L6: change comment of message `Person`.\n"
+                + "message_v1beta1.proto L8: change comment of field `.tutorial.v1.Person.name`.\n"
+                + "message_v1beta1.proto L12: change comment of field `.tutorial.v1.Person.id`.\n"
+                + "message_v1beta1.proto L12: change type of field `.tutorial.v1.Person.id` from `int32` to `string`.\n"
+                + "message_v1beta1.proto L14: rename field `.tutorial.v1.Person.email` to `.tutorial.v1.Person.email_address`.\n"
+                + "message_v1beta1.proto L17: change comment of enum `PhoneType`.\n"
+                + "message_v1beta1.proto L19: change comment of enum value `PhoneType.MOBILE`.\n"
+                + "message_v1beta1.proto L22: add enum value `PhoneType.SCHOOL`.\n"
+                + "message_v1beta1.proto L29: change repeated flag of field `.tutorial.v1.Person.phones`.\n"
+                + "message_v1beta1.proto L30: move field `.tutorial.v1.Person.single` out of oneof.\n",
             )
 
     def test_single_directory_service(self):
@@ -292,20 +293,20 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L13: An existing method `ShouldRemove` is removed from service `Example`.\n"
-                + "service_v1.proto L18: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L20: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L22: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L23: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L24: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L27: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L28: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1.proto L29: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1beta1.proto L9: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L9: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Client streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Server streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L13: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n",
+                "service_v1.proto L13: remove rpc method `Example.ShouldRemove`.\n"
+                + "service_v1.proto L18: move message `FooRequest` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L20: move message `FooResponse` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L22: move message `BarRequest` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L23: remove field `.example.v1.BarRequest.page_size`.\n"
+                + "service_v1.proto L24: remove field `.example.v1.BarRequest.page_token`.\n"
+                + "service_v1.proto L27: move message `BarResponse` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L28: remove field `.example.v1.BarResponse.content`.\n"
+                + "service_v1.proto L29: remove field `.example.v1.BarResponse.next_page_token`.\n"
+                + "service_v1beta1.proto L9: change input type of rpc method `Example.Foo` from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate`.\n"
+                + "service_v1beta1.proto L9: change response type of rpc method `Example.Foo` from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate`.\n"
+                + "service_v1beta1.proto L11: change client streaming flag of rpc method `Example.Bar`.\n"
+                + "service_v1beta1.proto L11: change server streaming flag of rpc method `Example.Bar`.\n"
+                + "service_v1beta1.proto L13: change pagination feature of rpc method `Example.PaginatedMethod`.\n",
             )
 
     def test_single_directory_service_all_changes(self):
@@ -325,24 +326,24 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_v1.proto L13: An existing method `ShouldRemove` is removed from service `Example`.\n"
-                + "service_v1.proto L18: An existing message `FooRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L20: An existing message `FooResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L22: An existing message `BarRequest` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L23: An existing field `page_size` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L24: An existing field `page_token` is removed from message `.example.v1.BarRequest`.\n"
-                + "service_v1.proto L27: An existing message `BarResponse` is moved from `service_v1.proto` to `service_v1beta1.proto`.\n"
-                + "service_v1.proto L28: An existing field `content` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1.proto L29: An existing field `next_page_token` is removed from message `.example.v1.BarResponse`.\n"
-                + "service_v1beta1.proto L6: A comment for service `Example` is changed.\n"
-                + "service_v1beta1.proto L9: A comment for method `Foo` in service `Example` is changed.\n"
-                + "service_v1beta1.proto L9: Input type of method `Foo` is changed from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L9: Response type of method `Foo` is changed from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Client streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L11: Server streaming flag is changed for method `Bar` in service `Example`.\n"
-                + "service_v1beta1.proto L13: Pagination feature is changed for method `PaginatedMethod` in service `Example`.\n"
-                + "service_v1beta1.proto L20: A new message `FooRequestUpdate` is added.\n"
-                + "service_v1beta1.proto L22: A new message `FooResponseUpdate` is added.\n",
+                "service_v1.proto L13: remove rpc method `Example.ShouldRemove`.\n"
+                + "service_v1.proto L18: move message `FooRequest` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L20: move message `FooResponse` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L22: move message `BarRequest` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L23: remove field `.example.v1.BarRequest.page_size`.\n"
+                + "service_v1.proto L24: remove field `.example.v1.BarRequest.page_token`.\n"
+                + "service_v1.proto L27: move message `BarResponse` from `service_v1.proto` to `service_v1beta1.proto`.\n"
+                + "service_v1.proto L28: remove field `.example.v1.BarResponse.content`.\n"
+                + "service_v1.proto L29: remove field `.example.v1.BarResponse.next_page_token`.\n"
+                + "service_v1beta1.proto L6: change comment of service `Example`.\n"
+                + "service_v1beta1.proto L9: change comment of rpc method `Example.Foo`.\n"
+                + "service_v1beta1.proto L9: change input type of rpc method `Example.Foo` from `.example.v1.FooRequest` to `.example.v1beta1.FooRequestUpdate`.\n"
+                + "service_v1beta1.proto L9: change response type of rpc method `Example.Foo` from `.example.v1.FooResponse` to `.example.v1beta1.FooResponseUpdate`.\n"
+                + "service_v1beta1.proto L11: change client streaming flag of rpc method `Example.Bar`.\n"
+                + "service_v1beta1.proto L11: change server streaming flag of rpc method `Example.Bar`.\n"
+                + "service_v1beta1.proto L13: change pagination feature of rpc method `Example.PaginatedMethod`.\n"
+                + "service_v1beta1.proto L20: add message `FooRequestUpdate`.\n"
+                + "service_v1beta1.proto L22: add message `FooResponseUpdate`.\n",
             )
 
     def test_single_directory_service_annotation(self):
@@ -361,13 +362,13 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "service_annotation_v1.proto L18: An existing method_signature `content,error` is removed from method `Foo` in service `Example`.\n"
-                + "service_annotation_v1.proto L33: An existing message `FooRequest` is moved from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
-                + "service_annotation_v1.proto L38: An existing message `FooResponse` is moved from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
-                + "service_annotation_v1.proto L40: An existing message `FooMetadata` is removed.\n"
-                + "service_annotation_v1beta1.proto L14: An existing google.api.http annotation `http_method` is changed for method `Foo` in service `Example`.\n"
-                + "service_annotation_v1beta1.proto L22: An existing google.api.http annotation `http_body` is changed for method `Bar` in service `Example`.\n"
-                + "service_annotation_v1beta1.proto L26: Long running operation metadata type is changed from `FooMetadata` to `FooMetadataUpdate` for method `Bar` in service `Example`.\n",
+                "service_annotation_v1.proto L18: remove method_signature `content,error` from rpc method `Example.Foo`.\n"
+                + "service_annotation_v1.proto L33: move message `FooRequest` from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
+                + "service_annotation_v1.proto L38: move message `FooResponse` from `service_annotation_v1.proto` to `service_annotation_v1beta1.proto`.\n"
+                + "service_annotation_v1.proto L40: remove message `FooMetadata`.\n"
+                + "service_annotation_v1beta1.proto L14: change google.api.http annotation `http_method` of rpc method `Example.Foo`.\n"
+                + "service_annotation_v1beta1.proto L22: change google.api.http annotation `http_body` of rpc method `Example.Bar`.\n"
+                + "service_annotation_v1beta1.proto L26: change long running operation metadata type of rpc method `Example.Bar` from `FooMetadata` to `FooMetadataUpdate`.\n",
             )
 
     def test_single_directory_method_signature_order(self):
@@ -386,10 +387,10 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "signature_order_v1.proto L16: An existing method_signature `id,content` has changed its position in method `Foo` in service `Example`.\n"
-                + "signature_order_v1.proto L16: An existing method_signature `id,uri` has changed its position in method `Foo` in service `Example`.\n"
-                + "signature_order_v1.proto L21: An existing message `FooRequest` is moved from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n"
-                + "signature_order_v1.proto L29: An existing message `FooResponse` is moved from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n",
+                "signature_order_v1.proto L16: change position of method_signature `id,content` of rpc method `Example.Foo`.\n"
+                + "signature_order_v1.proto L16: change position of method_signature `id,uri` of rpc method `Example.Foo`.\n"
+                + "signature_order_v1.proto L21: move message `FooRequest` from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n"
+                + "signature_order_v1.proto L29: move message `FooResponse` from `signature_order_v1.proto` to `signature_order_v1beta1.proto`.\n",
             )
 
     def test_oslogin_proto_alpha(self):
@@ -408,26 +409,26 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/oslogin/v1/oslogin.proto L34: An existing packaging option `Google::Cloud::OsLogin::V1` for `ruby_package` is removed.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L41: An existing default host `oslogin.googleapis.com` is removed from service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/cloud-platform` is removed from service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L42: An existing oauth_scope `https://www.googleapis.com/auth/compute` is removed from service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L51: An existing method_signature `name` is removed from method `DeletePosixAccount` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L59: An existing method_signature `name` is removed from method `DeleteSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L68: An existing method_signature `name` is removed from method `GetLoginProfile` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L76: An existing method_signature `name` is removed from method `GetSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent,ssh_public_key` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L87: An existing method_signature `parent,ssh_public_key,project_id` is removed from method `ImportSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name,ssh_public_key` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L98: An existing method_signature `name,ssh_public_key,update_mask` is removed from method `UpdateSshPublicKey` in service `OsLoginService`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L123: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeletePosixAccountRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L136: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.DeleteSshPublicKeyRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L147: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L153: An existing field `project_id` is removed from message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L156: An existing field `system_id` is removed from message `.google.cloud.oslogin.v1.GetLoginProfileRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L166: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.GetSshPublicKeyRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L177: An existing resource_reference option of the field `parent` is removed in message `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest`.\n"
-                + "google/cloud/oslogin/v1/oslogin.proto L202: An existing resource_reference option of the field `name` is removed in message `.google.cloud.oslogin.v1.UpdateSshPublicKeyRequest`.\n",
+                "google/cloud/oslogin/v1/oslogin.proto L34: remove packaging option `Google::Cloud::OsLogin::V1` from `ruby_package`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L41: remove default host `oslogin.googleapis.com` from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: remove oauth_scope `https://www.googleapis.com/auth/cloud-platform` from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L42: remove oauth_scope `https://www.googleapis.com/auth/compute` from service `OsLoginService`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L51: remove method_signature `name` from rpc method `OsLoginService.DeletePosixAccount`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L59: remove method_signature `name` from rpc method `OsLoginService.DeleteSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L68: remove method_signature `name` from rpc method `OsLoginService.GetLoginProfile`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L76: remove method_signature `name` from rpc method `OsLoginService.GetSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: remove method_signature `parent,ssh_public_key` from rpc method `OsLoginService.ImportSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L87: remove method_signature `parent,ssh_public_key,project_id` from rpc method `OsLoginService.ImportSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: remove method_signature `name,ssh_public_key` from rpc method `OsLoginService.UpdateSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L98: remove method_signature `name,ssh_public_key,update_mask` from rpc method `OsLoginService.UpdateSshPublicKey`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L123: remove resource_reference option from field `.google.cloud.oslogin.v1.DeletePosixAccountRequest.name`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L136: remove resource_reference option from field `.google.cloud.oslogin.v1.DeleteSshPublicKeyRequest.name`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L147: remove resource_reference option from field `.google.cloud.oslogin.v1.GetLoginProfileRequest.name`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L153: remove field `.google.cloud.oslogin.v1.GetLoginProfileRequest.project_id`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L156: remove field `.google.cloud.oslogin.v1.GetLoginProfileRequest.system_id`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L166: remove resource_reference option from field `.google.cloud.oslogin.v1.GetSshPublicKeyRequest.name`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L177: remove resource_reference option from field `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest.parent`.\n"
+                + "google/cloud/oslogin/v1/oslogin.proto L202: remove resource_reference option from field `.google.cloud.oslogin.v1.UpdateSshPublicKeyRequest.name`.\n",
             )
 
     def test_oslogin_proto_beta(self):
@@ -446,7 +447,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/oslogin/v1beta/oslogin.proto L179: Changed field behavior for an existing field `ssh_public_key` in message `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest`.\n",
+                "google/cloud/oslogin/v1beta/oslogin.proto L179: change field behavior of field `.google.cloud.oslogin.v1.ImportSshPublicKeyRequest.ssh_public_key`.\n",
             )
 
     def test_pubsub_proto(self):
@@ -469,28 +470,28 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/pubsub/v1/pubsub.proto L160: Changed field behavior for an existing field `name` in message `.google.pubsub.v1beta2.Topic`.\n"
-                + "google/pubsub/v1/pubsub.proto L221: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.GetTopicRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L245: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.PublishRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L250: Changed field behavior for an existing field `messages` in message `.google.pubsub.v1beta2.PublishRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L266: Changed field behavior for an existing field `project` in message `.google.pubsub.v1beta2.ListTopicsRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L296: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.ListTopicSubscriptionsRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L356: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.DeleteTopicRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L617: Changed field behavior for an existing field `name` in message `.google.pubsub.v1beta2.Subscription`.\n"
-                + "google/pubsub/v1/pubsub.proto L623: Changed field behavior for an existing field `topic` in message `.google.pubsub.v1beta2.Subscription`.\n"
-                + "google/pubsub/v1/pubsub.proto L880: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.GetSubscriptionRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L903: Changed field behavior for an existing field `project` in message `.google.pubsub.v1beta2.ListSubscriptionsRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L934: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.DeleteSubscriptionRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L946: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.ModifyPushConfigRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L958: Changed field behavior for an existing field `push_config` in message `.google.pubsub.v1beta2.ModifyPushConfigRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L966: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.PullRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L985: Changed field behavior for an existing field `max_messages` in message `.google.pubsub.v1beta2.PullRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L1002: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L1009: New REQUIRED field `ack_ids` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L1019: Changed field behavior for an existing field `ack_deadline_seconds` in message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L1027: Changed field behavior for an existing field `subscription` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
-                + "google/pubsub/v1/pubsub.proto L1036: Changed field behavior for an existing field `ack_ids` in message `.google.pubsub.v1beta2.AcknowledgeRequest`.\n"
-                + "google/pubsub/v1beta2/pubsub.proto L369: An existing field `ack_id` is removed from message `.google.pubsub.v1beta2.ModifyAckDeadlineRequest`.\n",
+                "google/pubsub/v1/pubsub.proto L160: change field behavior of field `.google.pubsub.v1beta2.Topic.name`.\n"
+                + "google/pubsub/v1/pubsub.proto L221: change field behavior of field `.google.pubsub.v1beta2.GetTopicRequest.topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L245: change field behavior of field `.google.pubsub.v1beta2.PublishRequest.topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L250: change field behavior of field `.google.pubsub.v1beta2.PublishRequest.messages`.\n"
+                + "google/pubsub/v1/pubsub.proto L266: change field behavior of field `.google.pubsub.v1beta2.ListTopicsRequest.project`.\n"
+                + "google/pubsub/v1/pubsub.proto L296: change field behavior of field `.google.pubsub.v1beta2.ListTopicSubscriptionsRequest.topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L356: change field behavior of field `.google.pubsub.v1beta2.DeleteTopicRequest.topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L617: change field behavior of field `.google.pubsub.v1beta2.Subscription.name`.\n"
+                + "google/pubsub/v1/pubsub.proto L623: change field behavior of field `.google.pubsub.v1beta2.Subscription.topic`.\n"
+                + "google/pubsub/v1/pubsub.proto L880: change field behavior of field `.google.pubsub.v1beta2.GetSubscriptionRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L903: change field behavior of field `.google.pubsub.v1beta2.ListSubscriptionsRequest.project`.\n"
+                + "google/pubsub/v1/pubsub.proto L934: change field behavior of field `.google.pubsub.v1beta2.DeleteSubscriptionRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L946: change field behavior of field `.google.pubsub.v1beta2.ModifyPushConfigRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L958: change field behavior of field `.google.pubsub.v1beta2.ModifyPushConfigRequest.push_config`.\n"
+                + "google/pubsub/v1/pubsub.proto L966: change field behavior of field `.google.pubsub.v1beta2.PullRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L985: change field behavior of field `.google.pubsub.v1beta2.PullRequest.max_messages`.\n"
+                + "google/pubsub/v1/pubsub.proto L1002: change field behavior of field `.google.pubsub.v1beta2.ModifyAckDeadlineRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L1009: add REQUIRED field `.google.pubsub.v1beta2.ModifyAckDeadlineRequest.ack_ids`.\n"
+                + "google/pubsub/v1/pubsub.proto L1019: change field behavior of field `.google.pubsub.v1beta2.ModifyAckDeadlineRequest.ack_deadline_seconds`.\n"
+                + "google/pubsub/v1/pubsub.proto L1027: change field behavior of field `.google.pubsub.v1beta2.AcknowledgeRequest.subscription`.\n"
+                + "google/pubsub/v1/pubsub.proto L1036: change field behavior of field `.google.pubsub.v1beta2.AcknowledgeRequest.ack_ids`.\n"
+                + "google/pubsub/v1beta2/pubsub.proto L369: remove field `.google.pubsub.v1beta2.ModifyAckDeadlineRequest.ack_id`.\n",
             )
 
     def test_tts_proto(self):
@@ -509,13 +510,13 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/texttospeech/v1beta1/cloud_tts.proto L103: An existing value `MP3_64_KBPS` is removed from enum `AudioEncoding`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L113: An existing value `MULAW` is removed from enum `AudioEncoding`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L142: An existing enum `TimepointType` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L160: An existing field `enable_time_pointing` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L275: An existing field `timepoints` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L278: An existing field `audio_config` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L283: An existing message `Timepoint` is removed.\n",
+                "google/cloud/texttospeech/v1beta1/cloud_tts.proto L103: remove enum value `AudioEncoding.MP3_64_KBPS`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L113: remove enum value `AudioEncoding.MULAW`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L142: remove enum `TimepointType`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L160: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest.enable_time_pointing`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L275: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse.timepoints`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L278: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse.audio_config`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto L283: remove message `Timepoint`.\n",
             )
 
     def test_tts_proto_no_line_numbers(self):
@@ -535,13 +536,13 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing value `MP3_64_KBPS` is removed from enum `AudioEncoding`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing value `MULAW` is removed from enum `AudioEncoding`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing enum `TimepointType` is removed.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `enable_time_pointing` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `timepoints` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing field `audio_config` is removed from message `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse`.\n"
-                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: An existing message `Timepoint` is removed.\n",
+                "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove enum value `AudioEncoding.MP3_64_KBPS`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove enum value `AudioEncoding.MULAW`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove enum `TimepointType`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechRequest.enable_time_pointing`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse.timepoints`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove field `.google.cloud.texttospeech.v1beta1.SynthesizeSpeechResponse.audio_config`.\n"
+                + "google/cloud/texttospeech/v1beta1/cloud_tts.proto: remove message `Timepoint`.\n",
             )
 
     def test_nonbreaking_changes_not_reported(self):
@@ -577,7 +578,7 @@ class CliDetectTest(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertEqual(
                 result.output,
-                "file.proto L7: A new field `added` is added to message `.test_non_breaking.Message`.\n",
+                "file.proto L7: add field `.test_non_breaking.Message.added`.\n",
             )
 
 

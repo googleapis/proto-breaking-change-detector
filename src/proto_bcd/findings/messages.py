@@ -18,7 +18,7 @@ from types import MappingProxyType
 from proto_bcd.findings.finding_category import FindingCategory
 
 _templates = defaultdict(lambda: "Unknown change type")
-_templates[FindingCategory.ENUM_VALUE_ADDITION] = "add enum value `{context}.{subject}."
+_templates[FindingCategory.ENUM_VALUE_ADDITION] = "add enum value `{context}.{subject}`."
 _templates[FindingCategory.ENUM_VALUE_REMOVAL] = (
     "remove enum value `{context}.{subject}`."
 )
@@ -26,7 +26,7 @@ _templates[FindingCategory.ENUM_VALUE_NAME_CHANGE] = (
     "rename enum value `{context}.{oldsubject}` to `{context}.{subject}`."
 )
 _templates[FindingCategory.ENUM_VALUE_NUMBER_CHANGE] = (
-    "rename enum value `{context}.{oldsubject}` to `{context}.{subject}`."
+    "change enum value `{context}.{oldsubject}` to `{context}.{subject}`."
 )
 _templates[FindingCategory.ENUM_ADDITION] = "add enum `{subject}`."
 _templates[FindingCategory.ENUM_REMOVAL] = "remove enum `{subject}`."
@@ -60,7 +60,7 @@ _templates[FindingCategory.FIELD_FORMAT_CHANGE] = (
     "change field format of field `{context}.{subject}`."
 )
 _templates[FindingCategory.RESOURCE_REFERENCE_REMOVAL] = (
-    "remove resource_reference option of field `{context}.{subject}`."
+    "remove resource_reference option from field `{context}.{subject}`."
 )
 _templates[FindingCategory.RESOURCE_REFERENCE_ADDITION] = (
     "add resource_reference option to field `{context}.{subject}`."
@@ -77,7 +77,7 @@ _templates[FindingCategory.RESOURCE_REFERENCE_CHANGE_CHILD_TYPE] = (
 _templates[FindingCategory.MESSAGE_ADDITION] = "add message `{subject}`."
 _templates[FindingCategory.MESSAGE_REMOVAL] = "remove message `{subject}`."
 _templates[FindingCategory.MESSAGE_MOVED_TO_ANOTHER_FILE] = (
-    "rename message `{oldcontext}.{subject}` to `{context}.{subject}`."
+    "move message `{subject}` from `{oldcontext}` to `{context}`."
 )
 _templates[FindingCategory.RESOURCE_DEFINITION_ADDITION] = (
     "add resource_definition `{subject}`."
@@ -168,7 +168,7 @@ _templates[FindingCategory.SERVICE_COMMENT_CHANGE] = (
     "change comment of service `{subject}`."
 )
 _templates[FindingCategory.METHOD_COMMENT_CHANGE] = (
-    "change comment of method `{context}.{subject}`."
+    "change comment of rpc method `{context}.{subject}`."
 )
 _templates[FindingCategory.MESSAGE_COMMENT_CHANGE] = (
     "change comment of message `{subject}`."
