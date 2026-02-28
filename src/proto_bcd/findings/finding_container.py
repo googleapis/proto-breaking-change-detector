@@ -124,3 +124,24 @@ class FindingContainer:
                         f"{file_name} L{finding.location.source_code_line}: {message}\n"
                     )
         return output_message
+
+    def to_suggested_commit_messages(self, all_changes=False):
+        output_message = ""
+        file_to_findings = defaultdict(list)
+        if all_changes:
+            findings = self.get_all_findings()
+        else:
+            findings = self.get_actionable_findings()
+        for finding in findings:
+            # Create a map to summarize the findings based on proto file name.
+            file_to_findings[finding.location.proto_file_name].append(finding)
+        # Add each suggested commit to the output message.
+        for file_name, findings in file_to_findings.items():
+            # Customize sort key function to output the findings in the same
+            # file based on the source code line number.
+            # Sort message alphabetically if the line number is same.
+            sorted_findings = sorted_filtered_findings(findings, lambda f: True)
+            for finding in sorted_findings:
+                suggested_commit_message = finding.get_suggested_commit_message()
+                output_message += f"{file_name}: {suggested_commit_message}\n"
+        return output_message

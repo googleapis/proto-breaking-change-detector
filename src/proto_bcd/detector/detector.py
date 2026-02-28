@@ -61,6 +61,12 @@ class Detector:
                     all_changes=self.opts.all_changes,
                 )
             )
+        if self.opts and self.opts.suggested_commit_messages:
+            sys.stdout.write(
+                self.finding_container.to_suggested_commit_messages(
+                    all_changes=self.opts.all_changes,
+                )
+            )
 
     def detect_breaking_changes(self):
         self._compare()

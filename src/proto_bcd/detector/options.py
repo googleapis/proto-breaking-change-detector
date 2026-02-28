@@ -34,6 +34,8 @@ class Options:
                       `$root/detected_breaking_changes.json`.
     line_numbers: Show line numbers from the human readable output. True by default.
     all_changes: Show all changes, not only breaking changes. False by default.
+    suggested_commit_messages: Optional flag. Enable printing the suggested commit
+                               messages if true. Default value if false.
     """
 
     def __init__(
@@ -48,6 +50,7 @@ class Options:
         output_json_path: Optional[str] = None,
         line_numbers: bool = True,
         all_changes: bool = False,
+        suggested_commit_messages: bool = False,
     ):
         self.original_api_definition_dirs = self._get_arg_arr(
             original_api_definition_dirs
@@ -66,6 +69,7 @@ class Options:
         self.output_json_path = self._get_output_json_path(output_json_path)
         self.line_numbers = line_numbers
         self.all_changes = all_changes
+        self.suggested_commit_messages = suggested_commit_messages
 
     def use_proto_dirs(self) -> bool:
         # User pass in the directories of proto definition files as input.

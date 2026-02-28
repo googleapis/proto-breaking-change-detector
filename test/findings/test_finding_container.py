@@ -19,6 +19,9 @@ from proto_bcd.findings.finding_category import (
     ChangeType,
     ConventionalCommitTag,
 )
+from proto_bcd.findings.suggested_commit_messages import (
+    templates as suggested_commit_message_templates,
+)
 
 
 class FindingContainerTest(unittest.TestCase):
@@ -75,6 +78,12 @@ class FindingContainerTest(unittest.TestCase):
             "my_other_proto.proto: An existing method_signature `type` is removed from method `subject` in service `context`.\n"
             + "my_proto.proto L5: An existing resource_definition `subject` is removed.\n"
             + "my_proto.proto L12: An existing method `subject` is removed from service `context`.\n",
+        )
+        self.assertEqual(
+            self.finding_container.to_suggested_commit_messages(),
+            "my_other_proto.proto: remove method_signature `type` from rpc method `context.subject`.\n"
+            + "my_proto.proto: remove resource_definition `subject`.\n"
+            + "my_proto.proto: remove rpc method `context.subject`.\n",
         )
 
     def test_change_type_major_1(self):
@@ -161,6 +170,25 @@ class FindingContainerTest(unittest.TestCase):
         message = finding_container.to_human_readable_message(all_changes=True)
         self.assertEqual(
             message, "test.proto L1: A new method `subject` is added to service ``.\n"
+        )
+
+    def test_suggested_commit_messages_for_all_findings(self):
+        finding_container = FindingContainer()
+        finding_container.add_finding(
+            category=FindingCategory.METHOD_ADDITION,
+            proto_file_name="test.proto",
+            source_code_line=1,
+            conventional_commit_tag=ConventionalCommitTag.FEAT,
+            subject="subject",
+        )
+        message = finding_container.to_suggested_commit_messages(all_changes=True)
+        self.assertEqual(message, "test.proto: add rpc method `.subject`.\n")
+
+    def test_suggested_commit_messages_and_findings_are_same_length(self):
+        self.assertEqual(
+            len(FindingCategory),
+            len(suggested_commit_message_templates),
+            "if you add a new FindingCategory value, you must add a suggested_commit_message as well!",
         )
 
 

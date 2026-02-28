@@ -65,6 +65,12 @@ from proto_bcd.detector.detector import Detector
     is_flag=True,
     help="Show all changes between two API definitions, not only breaking changes.",
 )
+@click.option(
+    "--suggested_commit_messages",
+    default=False,
+    is_flag=True,
+    help="Enable the suggested commit messages output if set to True. Default value is false.",
+)
 def detect(
     original_api_definition_dirs: str,
     update_api_definition_dirs: str,
@@ -76,6 +82,7 @@ def detect(
     human_readable_message: bool,
     line_numbers: bool,
     all_changes: bool,
+    suggested_commit_messages: bool,
 ):
     """Detect the breaking changes of the original and updated versions of API definition files."""
     # 1. Read the stdin options and create the Options object for all the command args.
@@ -93,6 +100,7 @@ def detect(
         output_json_path=output_json_path,
         line_numbers=line_numbers,
         all_changes=all_changes,
+        suggested_commit_messages=suggested_commit_messages,
     )
     # 3. Create protoc command (back up solution) to load the FileDescriptorSet.
     # It takes options, returns file_descriptor_set.
