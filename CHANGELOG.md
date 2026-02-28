@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.6.0...v2.6.1) (2024-11-06)
+
+
+### Bug Fixes
+
+* Support deleted 'updated' directories and proto files ([#494](https://github.com/googleapis/proto-breaking-change-detector/issues/494)) ([9038282](https://github.com/googleapis/proto-breaking-change-detector/commit/903828213e05ce0c061520868ce55e001eaab696))
+
 ## [2.6.0](https://github.com/googleapis/proto-breaking-change-detector/compare/v2.5.1...v2.6.0) (2024-08-06)
 
 
