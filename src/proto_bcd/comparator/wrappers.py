@@ -724,27 +724,50 @@ class Method:
     def http_annotation(self):
         """Return the http annotation defined for this method.
         The example return is:
-        {'http_method': 'post', 'http_uri': '/v1/example:foo', 'http_body': '*'}
+        {
+            'http_method': 'post',
+            'http_uri': '/v1/example:foo',
+            'http_body': '*',
+            'additional_bindings': (),
+        }
 
         return `None` if no http annotation exists.
         """
+        def get_http_rule(rule):
+            potential_verbs = {
+                "get": rule.get,
+                "put": rule.put,
+                "post": rule.post,
+                "delete": rule.delete,
+                "patch": rule.patch,
+                "custom": rule.custom.path,
+            }
+            return next(
+                (
+                    (verb, value, rule.body)
+                    for verb, value in potential_verbs.items()
+                    if value
+                ),
+                None,
+            )
+
         http = self.method_pb.options.Extensions[annotations_pb2.http]
-        potential_verbs = {
-            "get": http.get,
-            "put": http.put,
-            "post": http.post,
-            "delete": http.delete,
-            "patch": http.patch,
-            "custom": http.custom.path,
-        }
-        http_annotation = next(
-            (
-                {"http_method": verb, "http_uri": value, "http_body": http.body}
-                for verb, value in potential_verbs.items()
-                if value
-            ),
-            None,
-        )
+        primary_binding = get_http_rule(http)
+        http_annotation = None
+        if primary_binding:
+            http_annotation = {
+                "http_method": primary_binding[0],
+                "http_uri": primary_binding[1],
+                "http_body": primary_binding[2],
+                "additional_bindings": tuple(
+                    binding
+                    for binding in (
+                        get_http_rule(additional_binding)
+                        for additional_binding in http.additional_bindings
+                    )
+                    if binding
+                ),
+            }
         # MethodDescriptorProto.method_options has field number 4,
         # and MethodOptions.extensions[http_annotation] has field number 72295728.
         return WithLocation(

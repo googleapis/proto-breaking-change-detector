@@ -267,6 +267,7 @@ def make_method(
     http_method: str = "get",
     http_uri: str = None,
     http_body: str = None,
+    http_additional_bindings: Sequence[Tuple[str, str, str]] = (),
     messages_map: Dict[str, wrappers.Message] = {},
     proto_file_name: str = "foo",
     locations: Sequence[desc.SourceCodeInfo.Location] = [],
@@ -302,8 +303,12 @@ def make_method(
     # If there are HTTP annotations, include them.
     if http_method and http_uri and http_body:
         http_annotation = method_pb.options.Extensions[annotations_pb2.http]
-        http_annotation.get = http_uri
+        setattr(http_annotation, http_method, http_uri)
         http_annotation.body = http_body
+        for method, uri, body in http_additional_bindings:
+            additional_binding = http_annotation.additional_bindings.add()
+            setattr(additional_binding, method, uri)
+            additional_binding.body = body
 
     source_code_locations = {tuple(location.path): location for location in locations}
     # Instantiate the wrapper class.
