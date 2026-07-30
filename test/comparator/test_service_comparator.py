@@ -594,6 +594,50 @@ class ServiceComparatorTest(unittest.TestCase):
         # No breaking changes, since only minor version update in the http URI.
         self.assertFalse(findings_map)
 
+    def test_http_additional_binding_addition(self):
+        method_original = make_method(
+            name="Method",
+            http_uri="/v1/{name=projects/*}",
+            http_body="*",
+        )
+        method_update = make_method(
+            name="Method",
+            http_uri="/v1/{name=projects/*}",
+            http_body="*",
+            http_additional_bindings=(("get", "/v1/{name=organizations/*}", "*"),),
+        )
+        ServiceComparator(
+            make_service(methods=(method_original,)),
+            make_service(methods=(method_update,)),
+            self.finding_container,
+            context="ctx",
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "HTTP_ADDITIONAL_BINDING_ADDITION")
+        self.assertEqual(finding.change_type.name, "MINOR")
+
+    def test_http_additional_binding_removal(self):
+        method_original = make_method(
+            name="Method",
+            http_uri="/v1/{name=projects/*}",
+            http_body="*",
+            http_additional_bindings=(("get", "/v1/{name=organizations/*}", "*"),),
+        )
+        method_update = make_method(
+            name="Method",
+            http_uri="/v1/{name=projects/*}",
+            http_body="*",
+        )
+        ServiceComparator(
+            make_service(methods=(method_original,)),
+            make_service(methods=(method_update,)),
+            self.finding_container,
+            context="ctx",
+        ).compare()
+        finding = self.finding_container.get_all_findings()[0]
+        self.assertEqual(finding.category.name, "HTTP_ADDITIONAL_BINDING_REMOVAL")
+        self.assertEqual(finding.change_type.name, "MAJOR")
+
 
 if __name__ == "__main__":
     unittest.main()

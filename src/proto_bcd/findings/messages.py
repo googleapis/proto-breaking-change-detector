@@ -172,6 +172,12 @@ _templates[FindingCategory.HTTP_ANNOTATION_REMOVAL] = (
 _templates[FindingCategory.HTTP_ANNOTATION_ADDITION] = (
     "A new google.api.http annotation is added to method `{subject}` in service `{context}`."
 )
+_templates[FindingCategory.HTTP_ADDITIONAL_BINDING_ADDITION] = (
+    "A new google.api.http additional binding is added to method `{subject}` in service `{context}`."
+)
+_templates[FindingCategory.HTTP_ADDITIONAL_BINDING_REMOVAL] = (
+    "An existing google.api.http additional binding is removed from method `{subject}` in service `{context}`."
+)
 _templates[FindingCategory.PACKAGING_OPTION_REMOVAL] = (
     "An existing packaging option `{type}` for `{subject}` is removed."
 )

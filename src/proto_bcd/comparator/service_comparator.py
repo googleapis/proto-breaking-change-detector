@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from collections import Counter
+
 from proto_bcd.findings.finding_container import FindingContainer
 from proto_bcd.findings.finding_category import (
     FindingCategory,
@@ -393,6 +395,27 @@ class ServiceComparator:
                         http_annotation_update["http_uri"],
                     ],
                 )
+
+        original_bindings = Counter(http_annotation_original["additional_bindings"])
+        update_bindings = Counter(http_annotation_update["additional_bindings"])
+        for _ in (update_bindings - original_bindings).elements():
+            self.finding_container.add_finding(
+                category=FindingCategory.HTTP_ADDITIONAL_BINDING_ADDITION,
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=method_update.http_annotation.source_code_line,
+                subject=method_update.name,
+                context=self.context,
+                conventional_commit_tag=ConventionalCommitTag.FEAT,
+            )
+        for _ in (original_bindings - update_bindings).elements():
+            self.finding_container.add_finding(
+                category=FindingCategory.HTTP_ADDITIONAL_BINDING_REMOVAL,
+                proto_file_name=method_update.proto_file_name,
+                source_code_line=method_update.http_annotation.source_code_line,
+                subject=method_update.name,
+                context=self.context,
+                conventional_commit_tag=ConventionalCommitTag.FIX_BREAKING,
+            )
 
     def _compare_lro_annotations(self, method_original, method_update):
         lro_original = method_original.lro_annotation
